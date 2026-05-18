@@ -1,35 +1,30 @@
-'use client';
+"use client";
 
-import {
-  Button,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Button, Stack, TextField, Typography } from "@mui/material";
 
-import { useForm } from 'react-hook-form';
+import { useForm } from "react-hook-form";
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
   registerSchema,
   RegisterFormData,
-} from '../validations/registerSchema';
+} from "../validations/registerSchema";
 
-import { useRegister } from '../hooks/useRegister';
+import { useRegister } from "../hooks/useRegister";
 
 export default function LoginForm() {
-  const { mutate, isPending } = useLogin();
+  const { mutate, isPending } = useRegister();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = (data: LoginFormData) => {
+  const onSubmit = (data: RegisterFormData) => {
     mutate(data);
   };
 
@@ -39,17 +34,22 @@ export default function LoginForm() {
       sx={{
         width: 400,
         p: 4,
-        bgcolor: 'background.paper',
+        bgcolor: "background.paper",
         borderRadius: 3,
       }}
     >
-      <Typography variant="h5">
-        Login
-      </Typography>
+      <Typography variant="h5">Login</Typography>
+
+         <TextField
+        label="Full Name"
+        {...register("fullName")}
+        error={!!errors.fullName}
+        helperText={errors.fullName?.message}
+      />
 
       <TextField
         label="Email"
-        {...register('email')}
+        {...register("email")}
         error={!!errors.email}
         helperText={errors.email?.message}
       />
@@ -57,7 +57,7 @@ export default function LoginForm() {
       <TextField
         label="Password"
         type="password"
-        {...register('password')}
+        {...register("password")}
         error={!!errors.password}
         helperText={errors.password?.message}
       />
@@ -67,7 +67,7 @@ export default function LoginForm() {
         onClick={handleSubmit(onSubmit)}
         disabled={isPending}
       >
-        {isPending ? 'Loading...' : 'Login'}
+        {isPending ? "Loading..." : "Login"}
       </Button>
     </Stack>
   );

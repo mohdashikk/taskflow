@@ -1,17 +1,19 @@
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from "@/lib/supabase/client";
 
 const supabase = createClient();
 
 export const authApi = {
-  signUp: async (
-    email: string,
-    password: string
-  ) => {
-    const { data, error } =
-      await supabase.auth.signUp({
-        email,
-        password,
-      });
+  signUp: async (fullName: string, email: string, password: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+
+      options: {
+        data: {
+          full_name: fullName,
+        },
+      },
+    });
 
     if (error) {
       throw new Error(error.message);
@@ -20,15 +22,11 @@ export const authApi = {
     return data;
   },
 
-  signIn: async (
-    email: string,
-    password: string
-  ) => {
-    const { data, error } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+  signIn: async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     if (error) {
       throw new Error(error.message);
@@ -38,8 +36,7 @@ export const authApi = {
   },
 
   signOut: async () => {
-    const { error } =
-      await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
 
     if (error) {
       throw new Error(error.message);
