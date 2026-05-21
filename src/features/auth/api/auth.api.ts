@@ -7,7 +7,6 @@ export const authApi = {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-
       options: {
         data: {
           full_name: fullName,
@@ -15,13 +14,15 @@ export const authApi = {
       },
     });
 
+    console.log("DATA:", data);
+    console.log("ERROR:", error);
+
     if (error) {
       throw new Error(error.message);
     }
 
     return data;
   },
-
   signIn: async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
