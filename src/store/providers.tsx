@@ -1,15 +1,16 @@
-"use client"
+"use client";
 
+import { useState, type ReactNode } from "react";
 import { Provider } from "react-redux";
-import { store } from "./store";
-
-type Props = {
-  children: React.ReactNode;
-};
+import { makeStore } from "./store";
 
 export default function ReduxProvider({
   children,
-}: Props) {
+}: {
+  children: ReactNode;
+}) {
+  const [store] = useState(makeStore);
+
   return (
     <Provider store={store}>
       {children}
