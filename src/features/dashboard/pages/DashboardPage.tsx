@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { supabase } from "@/lib/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
   Box,
@@ -17,6 +19,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 export default function DashboardPage() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   if (isLoading) {
     return (
@@ -44,8 +47,16 @@ export default function DashboardPage() {
     "User";
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.replace("/");
+    try {
+      await supabase.auth.signOut();
+    } finally {
+      try {
+        localStorage.clear();
+      } catch {
+      }
+      queryClient.clear();
+      router.replace("/");
+    }
   };
 
   return (
