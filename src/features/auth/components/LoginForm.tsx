@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import Box from "@mui/material/Box";
@@ -16,6 +17,7 @@ import Typography from "@mui/material/Typography";
 import { useLoginMutation } from "../hooks/useLoginMutation";
 
 export default function LoginForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] =
     useState(false);
 
@@ -26,9 +28,16 @@ export default function LoginForm() {
   const {
     mutate: login,
     isSubmitting,
+    isSuccess,
     isError,
     error,
   } = useLoginMutation();
+
+  useEffect(() => {
+    if (isSuccess) {
+      router.replace("/dashboard");
+    }
+  }, [isSuccess, router]);
 
   const handleSubmit = (
     e: React.FormEvent<HTMLFormElement>
