@@ -17,10 +17,10 @@ export default function AppShell({
   const isAuthScreen = AUTH_ROUTES.includes(pathname);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
-      {!isAuthScreen && <Header />}
-      <Box sx={{ display: "flex", flexGrow: 1 }}>
-        {!isAuthScreen && <Sidebar />}
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+      {!isAuthScreen && <Sidebar />}
+      <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1, minWidth: 0 }}>
+        {!isAuthScreen && <Header />}
         <Box component="main" sx={{ flexGrow: 1, p: 3, minWidth: 0 }}>
           {children}
         </Box>

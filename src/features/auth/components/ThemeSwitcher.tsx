@@ -16,12 +16,19 @@ export default function ThemeSwitcher() {
     <Tooltip title={`Switch to ${mode === "light" ? "dark" : "light"} mode`}>
       <IconButton
         onClick={() => dispatch(toggleTheme())}
-        color="inherit"
         sx={{
-          color: "text.secondary",
-          backgroundColor: "action.hover",
+          width: 44,
+          height: 44,
+          borderRadius: "50%",
+          color: "text.primary",
+          backgroundColor: "transparent",
+          border: "1px solid",
+          borderColor: "divider",
+          transition: "all 0.2s ease",
           "&:hover": {
-            backgroundColor: "action.selected",
+            backgroundColor: "transparent",
+            borderColor: "primary.main",
+            color: "primary.main",
           },
         }}
       >
