@@ -26,6 +26,6 @@ export const getTheme = (
     },
     typography: {
       fontFamily:
-        'Arial, "Helvetica Neue", sans-serif',
+        '"Outfit", "Helvetica Neue", Arial, sans-serif',
     },
   });

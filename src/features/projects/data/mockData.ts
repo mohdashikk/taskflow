@@ -1,5 +1,11 @@
 export type ProjectStatus = "active" | "planning" | "completed" | "archived";
 
+export interface Member {
+  id: string;
+  name: string;
+  color: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -11,6 +17,8 @@ export interface Project {
   tasksDone: number;
   tasksTotal: number;
   dueDate: string;
+  category: string;
+  members: Member[];
 }
 
 const palette = [
@@ -23,6 +31,12 @@ const palette = [
   "#ec4899",
   "#8b5cf6",
 ];
+
+const MEMBER_COLORS = ["#2563eb", "#7c3aed", "#0ea5e9", "#f59e0b", "#10b981"];
+
+function member(id: string, name: string, i: number): Member {
+  return { id, name, color: MEMBER_COLORS[i % MEMBER_COLORS.length] };
+}
 
 export const STATUS_LABELS: Record<ProjectStatus, string> = {
   active: "Active",
@@ -51,6 +65,8 @@ export const PROJECTS: Project[] = [
     tasksDone: 18,
     tasksTotal: 25,
     dueDate: "Jul 30, 2026",
+    category: "Development",
+    members: [member("m1", "Ava", 0), member("m2", "Liam", 1), member("m3", "Noah", 2), member("m4", "Emma", 3)],
   },
   {
     id: "p2",
@@ -64,6 +80,8 @@ export const PROJECTS: Project[] = [
     tasksDone: 11,
     tasksTotal: 24,
     dueDate: "Aug 14, 2026",
+    category: "Development",
+    members: [member("m1", "Ava", 0), member("m2", "Liam", 1), member("m5", "Sophia", 4)],
   },
   {
     id: "p3",
@@ -77,6 +95,8 @@ export const PROJECTS: Project[] = [
     tasksDone: 6,
     tasksTotal: 20,
     dueDate: "Sep 01, 2026",
+    category: "Marketing",
+    members: [member("m2", "Liam", 1), member("m3", "Noah", 2)],
   },
   {
     id: "p4",
@@ -90,6 +110,8 @@ export const PROJECTS: Project[] = [
     tasksDone: 3,
     tasksTotal: 28,
     dueDate: "Oct 10, 2026",
+    category: "Design",
+    members: [member("m4", "Emma", 3), member("m6", "Mason", 0)],
   },
   {
     id: "p5",
@@ -103,6 +125,8 @@ export const PROJECTS: Project[] = [
     tasksDone: 14,
     tasksTotal: 24,
     dueDate: "Aug 05, 2026",
+    category: "Development",
+    members: [member("m1", "Ava", 0), member("m6", "Mason", 4), member("m2", "Liam", 1), member("m5", "Sophia", 2)],
   },
   {
     id: "p6",
@@ -116,6 +140,8 @@ export const PROJECTS: Project[] = [
     tasksDone: 22,
     tasksTotal: 22,
     dueDate: "Jun 30, 2026",
+    category: "Design",
+    members: [member("m2", "Liam", 1), member("m5", "Sophia", 4)],
   },
   {
     id: "p7",
@@ -129,5 +155,7 @@ export const PROJECTS: Project[] = [
     tasksDone: 30,
     tasksTotal: 30,
     dueDate: "May 15, 2026",
+    category: "Development",
+    members: [member("m1", "Ava", 0), member("m6", "Mason", 4)],
   },
 ];

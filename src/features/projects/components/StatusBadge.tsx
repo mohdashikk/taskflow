@@ -1,6 +1,5 @@
 import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import { RADIUS } from "../theme";
 import {
   STATUS_COLORS,
   STATUS_LABELS,
@@ -8,7 +7,7 @@ import {
 } from "../data/mockData";
 
 export function StatusBadge({ status }: { status: ProjectStatus }) {
-  const color = STATUS_COLORS[status];
+  const color = status === "active" ? "#10b981" : STATUS_COLORS[status];
   return (
     <Box
       sx={{
