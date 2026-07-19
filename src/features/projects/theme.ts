@@ -1,6 +1,6 @@
 import { alpha, type Theme } from "@mui/material/styles";
 
-export const RADIUS = 16;
+export const RADIUS = 8;
 
 export const cardBase = {
   borderRadius: RADIUS,

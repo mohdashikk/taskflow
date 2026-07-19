@@ -1,14 +1,20 @@
 "use client";
 
-import { alpha } from "@mui/material/styles";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
-import LinearProgress from "@mui/material/LinearProgress";
-import Button from "@mui/material/Button";
-import ArrowOutwardOutlinedIcon from "@mui/icons-material/ArrowOutwardOutlined";
+import IconButton from "@mui/material/IconButton";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import EventOutlinedIcon from "@mui/icons-material/EventOutlined";
+import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 
-import { cardBase, hoverElevation } from "../theme";
 import { StatusBadge } from "./StatusBadge";
 import type { Project } from "../data/mockData";
 
@@ -17,62 +23,75 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ project }: ProjectCardProps) {
-  const remaining = Math.max(project.tasksTotal - project.tasksDone, 0);
+  const router = useRouter();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(anchorEl);
+
+  const openProject = () => router.push(`/projects/${project.id}`);
+  const handleMenu = (e: React.MouseEvent<HTMLElement>) => {
+    e.stopPropagation();
+    setAnchorEl(e.currentTarget);
+  };
+  const closeMenu = () => setAnchorEl(null);
 
   return (
     <Box
+      role="button"
+      tabIndex={0}
+      onClick={openProject}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openProject();
+        }
+      }}
       sx={{
-        ...cardBase,
-        ...hoverElevation,
+        bgcolor: "background.paper",
+        borderRadius: 2,
+        border: "1px solid",
+        borderColor: "divider",
+        boxShadow: "0 1px 3px rgba(15, 23, 42, 0.06)",
         p: 2.5,
+        cursor: "pointer",
         display: "flex",
         flexDirection: "column",
-        position: "relative",
-        overflow: "hidden",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 4,
-          bgcolor: project.color,
+        gap: 2,
+        transition: "transform 200ms ease, box-shadow 200ms ease",
+        "&:hover": {
+          transform: "translateY(-2px)",
+          boxShadow: "0 10px 24px rgba(15, 23, 42, 0.12)",
+        },
+        "&:focus-visible": {
+          outline: "2px solid",
+          outlineColor: "primary.main",
+          outlineOffset: 2,
         },
       }}
     >
-      {/* Top row: icon, status badge */}
+      {/* Header: status left, three-dot right */}
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           gap: 1,
-          mb: 1.5,
         }}
       >
-        <Box
-          sx={{
-            width: 42,
-            height: 42,
-            borderRadius: 3,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            bgcolor: alpha(project.color, 0.14),
-            fontSize: 22,
-            flexShrink: 0,
-          }}
-        >
-          {project.icon}
-        </Box>
         <StatusBadge status={project.status} />
+        <IconButton
+          size="small"
+          onClick={handleMenu}
+          sx={{ color: "text.secondary", flexShrink: 0 }}
+          aria-label="Project options"
+        >
+          <MoreVertOutlinedIcon fontSize="small" />
+        </IconButton>
       </Box>
 
-      {/* Name */}
+      {/* Title */}
       <Typography
-        variant="subtitle1"
-        sx={{ fontWeight: 700, lineHeight: 1.3, mb: 0.5 }}
-        noWrap
+        component="h3"
+        sx={{ fontSize: 18, fontWeight: 600, lineHeight: 1.3 }}
       >
         {project.name}
       </Typography>
@@ -82,7 +101,6 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         variant="body2"
         color="text.secondary"
         sx={{
-          mb: 2,
           display: "-webkit-box",
           WebkitLineClamp: 2,
           WebkitBoxOrient: "vertical",
@@ -93,100 +111,63 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         {project.description}
       </Typography>
 
-      {/* Progress bar */}
-      <Box sx={{ mb: 2 }}>
-        <LinearProgress
-          variant="determinate"
-          value={project.progress}
-          sx={{
-            height: 8,
-            borderRadius: 4,
-            bgcolor: (theme) => alpha(theme.palette.divider, 0.8),
-            "& .MuiLinearProgress-bar": {
-              borderRadius: 4,
-              bgcolor: project.color,
-            },
-          }}
-        />
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ mt: 0.5, display: "block", fontWeight: 600 }}
-        >
-          {project.progress}% Complete
-        </Typography>
-      </Box>
-
-      <Divider sx={{ mb: 1.5 }} />
-
-      {/* Project information */}
       <Box
         sx={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 1.25,
-          mb: 2,
+          borderTop: "1px solid",
+          borderColor: "divider",
         }}
-      >
-        <InfoItem label="Due Date" value={project.dueDate} />
-        <InfoItem label="Total Tasks" value={`${project.tasksTotal}`} />
-        <InfoItem label="Completed" value={`${project.tasksDone}`} />
-        <InfoItem label="Remaining" value={`${remaining}`} />
-      </Box>
+      />
 
-      {/* Footer */}
+      {/* Project information row */}
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
-          gap: 1,
-          mt: "auto",
+          gap: 2,
+          color: "text.secondary",
+          flexWrap: "wrap",
         }}
       >
-        <Typography
-          variant="h6"
-          sx={{ fontWeight: 800, color: project.color, lineHeight: 1 }}
-        >
-          {project.progress}%
-        </Typography>
-        <Button
-          variant="contained"
-          endIcon={<ArrowOutwardOutlinedIcon fontSize="small" />}
-          sx={{
-            textTransform: "none",
-            fontWeight: 600,
-            borderRadius: 3,
-            px: 2,
-            py: 0.75,
-            boxShadow: "none",
-            "&:hover": { boxShadow: "none", bgcolor: "primary.dark" },
-          }}
-        >
-          Open Project
-        </Button>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <EventOutlinedIcon sx={{ fontSize: 16 }} />
+          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+            {project.dueDate}
+          </Typography>
+        </Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 16 }} />
+          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+            {project.tasksDone}/{project.tasksTotal} Tasks
+          </Typography>
+        </Box>
       </Box>
-    </Box>
-  );
-}
 
-function InfoItem({ label, value }: { label: string; value: string }) {
-  return (
-    <Box>
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        sx={{ display: "block", fontWeight: 600, mb: 0.25 }}
+      <Menu
+        anchorEl={anchorEl}
+        open={menuOpen}
+        onClose={closeMenu}
+        onClick={(e) => e.stopPropagation()}
+        slotProps={{ paper: { sx: { borderRadius: 2, minWidth: 180 } } }}
       >
-        {label}
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{ fontWeight: 700, lineHeight: 1.2 }}
-        noWrap
-      >
-        {value}
-      </Typography>
+        <MenuItem onClick={closeMenu}>
+          <ListItemIcon>
+            <EditOutlinedIcon fontSize="small" />
+          </ListItemIcon>
+          Edit Project
+        </MenuItem>
+        <MenuItem onClick={closeMenu}>
+          <ListItemIcon>
+            <ArchiveOutlinedIcon fontSize="small" />
+          </ListItemIcon>
+          Archive Project
+        </MenuItem>
+        <MenuItem onClick={closeMenu} sx={{ color: "error.main" }}>
+          <ListItemIcon sx={{ color: "error.main" }}>
+            <DeleteOutlineOutlinedIcon fontSize="small" />
+          </ListItemIcon>
+          Delete Project
+        </MenuItem>
+      </Menu>
     </Box>
   );
 }
