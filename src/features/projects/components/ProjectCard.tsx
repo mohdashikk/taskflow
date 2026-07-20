@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -16,18 +16,29 @@ import EventOutlinedIcon from "@mui/icons-material/EventOutlined";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 
 import { StatusBadge } from "./StatusBadge";
-import type { Project } from "../data/mockData";
+import type { Project, ProjectStatusRow } from "../data/mockData";
 
 interface ProjectCardProps {
   project: Project;
   onEdit?: (project: Project) => void;
   onDelete?: (id: string) => void;
+  statuses?: ProjectStatusRow[];
 }
 
-export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
+export default function ProjectCard({ project, onEdit, onDelete, statuses }: ProjectCardProps) {
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
+
+  const statusMap = useMemo(() => {
+    const map = new Map<string, ProjectStatusRow>();
+    if (statuses) {
+      for (const s of statuses) {
+        map.set(s.name, s);
+      }
+    }
+    return map;
+  }, [statuses]);
 
   const openProject = () => router.push(`/projects/${project.id}`);
   const handleMenu = (e: React.MouseEvent<HTMLElement>) => {
@@ -79,7 +90,7 @@ export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardPr
           gap: 1,
         }}
       >
-        <StatusBadge status={project.status} />
+        <StatusBadge status={project.status} statuses={statusMap} />
         <IconButton
           size="small"
           onClick={handleMenu}

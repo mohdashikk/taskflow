@@ -7,6 +7,7 @@ import {
   type CreateProjectInput,
   type UpdateProjectInput,
 } from "../services/projectsService";
+import { createDefaultStatuses } from "../services/projectStatusesService";
 import { toProject, type Project } from "../data/mockData";
 
 export const useProjects = (userId: string | undefined) => {
@@ -25,8 +26,11 @@ export const useCreateProject = (userId: string | undefined) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: Omit<CreateProjectInput, "user_id">) =>
-      createProject({ ...input, user_id: userId ?? "" }),
+    mutationFn: async (input: Omit<CreateProjectInput, "user_id">) => {
+      const project = await createProject({ ...input, user_id: userId ?? "" });
+      await createDefaultStatuses(project.id);
+      return project;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects", userId] });
     },

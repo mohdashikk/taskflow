@@ -5,9 +5,17 @@ import {
   STATUS_LABELS,
   type ProjectStatus,
 } from "../data/mockData";
+import type { ProjectStatusRow } from "../data/mockData";
 
-export function StatusBadge({ status }: { status: ProjectStatus }) {
-  const color = status === "active" ? "#10b981" : STATUS_COLORS[status];
+interface StatusBadgeProps {
+  status: ProjectStatus;
+  statuses?: Map<string, ProjectStatusRow>;
+}
+
+export function StatusBadge({ status, statuses }: StatusBadgeProps) {
+  const statusRow = statuses?.get(status);
+  const color = statusRow?.color ?? (status === "active" ? "#10b981" : STATUS_COLORS[status]);
+  const label = statusRow?.name ?? STATUS_LABELS[status];
   return (
     <Box
       sx={{
@@ -32,7 +40,7 @@ export function StatusBadge({ status }: { status: ProjectStatus }) {
           bgcolor: color,
         }}
       />
-      {STATUS_LABELS[status]}
+      {label}
     </Box>
   );
 }

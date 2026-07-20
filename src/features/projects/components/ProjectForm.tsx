@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -11,6 +11,7 @@ import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import { STATUS_LABELS, type ProjectStatus } from "../data/mockData";
+import type { ProjectStatusRow } from "../data/mockData";
 
 interface ProjectFormProps {
   open: boolean;
@@ -30,9 +31,10 @@ interface ProjectFormProps {
   onCancel: () => void;
   isPending?: boolean;
   error?: string | null;
+  statuses?: ProjectStatusRow[];
 }
 
-const STATUS_OPTIONS = Object.keys(STATUS_LABELS) as ProjectStatus[];
+const FALLBACK_OPTIONS = Object.keys(STATUS_LABELS) as ProjectStatus[];
 
 export default function ProjectForm({
   open,
@@ -42,25 +44,30 @@ export default function ProjectForm({
   onCancel,
   isPending,
   error,
+  statuses,
 }: ProjectFormProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [status, setStatus] = useState<ProjectStatus>("planning");
-  const [dueDate, setDueDate] = useState("");
+  const statusOptions = statuses && statuses.length > 0
+    ? statuses.map((s) => ({ value: s.name as ProjectStatus, label: s.name }))
+    : FALLBACK_OPTIONS.map((s) => ({ value: s, label: STATUS_LABELS[s] }));
 
-  useEffect(() => {
-    if (open && initialValues) {
-      setTitle(initialValues.title);
-      setDescription(initialValues.description);
-      setStatus(initialValues.status);
-      setDueDate(initialValues.due_date ? initialValues.due_date.slice(0, 10) : "");
-    } else if (!open) {
-      setTitle("");
-      setDescription("");
-      setStatus("planning");
-      setDueDate("");
-    }
-  }, [open, initialValues]);
+  const defaultStatus = statusOptions[0]?.value ?? "planning";
+
+  const [title, setTitle] = useState(initialValues?.title ?? "");
+  const [description, setDescription] = useState(initialValues?.description ?? "");
+  const [status, setStatus] = useState<ProjectStatus>(initialValues?.status ?? defaultStatus);
+  const [dueDate, setDueDate] = useState(initialValues?.due_date ? initialValues.due_date.slice(0, 10) : "");
+
+  const resetForm = () => {
+    setTitle(initialValues?.title ?? "");
+    setDescription(initialValues?.description ?? "");
+    setStatus(initialValues?.status ?? defaultStatus);
+    setDueDate(initialValues?.due_date ? initialValues.due_date.slice(0, 10) : "");
+  };
+
+  const handleCancel = () => {
+    resetForm();
+    onCancel();
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +91,7 @@ export default function ProjectForm({
       <DialogTitle sx={{ fontWeight: 800, fontSize: 20 }}>
         {mode === "edit" ? "Edit Project" : "Add Project"}
       </DialogTitle>
-      <Box component="form" onSubmit={handleSubmit}>
+      <Box component="form" onSubmit={handleSubmit} key={open ? "form-open" : "form-closed"}>
         <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <TextField
             label="Project Title"
@@ -117,9 +124,9 @@ export default function ProjectForm({
                 "& .MuiOutlinedInput-notchedOutline": { borderRadius: 2 },
               }}
             >
-              {STATUS_OPTIONS.map((s) => (
-                <MenuItem key={s} value={s}>
-                  {STATUS_LABELS[s]}
+              {statusOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
                 </MenuItem>
               ))}
             </TextField>
@@ -147,7 +154,7 @@ export default function ProjectForm({
         <DialogActions sx={{ px: 3, pb: 2.5, justifyContent: "flex-end" }}>
           <Button
             variant="outlined"
-            onClick={onCancel}
+            onClick={handleCancel}
             disabled={isPending}
             sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600 }}
           >

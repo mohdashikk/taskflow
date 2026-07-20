@@ -35,7 +35,7 @@ export default function LoginForm() {
 
   useEffect(() => {
     if (isSuccess) {
-      router.replace("/dashboard");
+      router.replace("/projects");
     }
   }, [isSuccess, router]);
 

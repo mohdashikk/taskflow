@@ -15,7 +15,6 @@ import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import NavigateNextRoundedIcon from "@mui/icons-material/NavigateNextRounded";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 
 import ProjectCard from "../components/ProjectCard";
 import ProjectForm from "../components/ProjectForm";
@@ -25,6 +24,7 @@ import {
   useUpdateProject,
   useDeleteProject,
 } from "../hooks/useProjects";
+import { useProjectStatuses } from "../hooks/useProjectStatuses";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import type { Project, ProjectStatus } from "../data/mockData";
 
@@ -33,6 +33,8 @@ export default function ProjectsPage() {
   const { data: projects, isLoading, isError, error, refetch } = useProjects(
     user?.id,
   );
+  const { data: statuses } = useProjectStatuses();
+
   const createProject = useCreateProject(user?.id);
   const updateProject = useUpdateProject(user?.id);
   const deleteProject = useDeleteProject(user?.id);
@@ -213,6 +215,7 @@ export default function ProjectsPage() {
             <ProjectCard
               key={p.id}
               project={p}
+              statuses={statuses}
               onEdit={(project) => setEditingProject(project)}
               onDelete={(id) => setDeletingProjectId(id)}
             />
@@ -231,6 +234,7 @@ export default function ProjectsPage() {
             ? createProject.error.message
             : null
         }
+        statuses={statuses}
       />
 
       {/* Edit Project modal */}
@@ -255,6 +259,7 @@ export default function ProjectsPage() {
             ? updateProject.error.message
             : null
         }
+        statuses={statuses}
       />
 
       {/* Delete confirmation */}
