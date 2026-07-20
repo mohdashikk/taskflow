@@ -7,16 +7,26 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Link from "@mui/material/Link";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import NavigateNextRoundedIcon from "@mui/icons-material/NavigateNextRounded";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 
 import ProjectCard from "../components/ProjectCard";
 import ProjectForm from "../components/ProjectForm";
-import { useProjects, useCreateProject } from "../hooks/useProjects";
+import {
+  useProjects,
+  useCreateProject,
+  useUpdateProject,
+  useDeleteProject,
+} from "../hooks/useProjects";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import type { ProjectStatus } from "../data/mockData";
+import type { Project, ProjectStatus } from "../data/mockData";
 
 export default function ProjectsPage() {
   const { user } = useAuth();
@@ -24,8 +34,14 @@ export default function ProjectsPage() {
     user?.id,
   );
   const createProject = useCreateProject(user?.id);
+  const updateProject = useUpdateProject(user?.id);
+  const deleteProject = useDeleteProject(user?.id);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [deletingProjectId, setDeletingProjectId] = useState<string | null>(
+    null,
+  );
 
   const handleCreate = (values: {
     title: string;
@@ -35,6 +51,34 @@ export default function ProjectsPage() {
   }) => {
     createProject.mutate(values, {
       onSuccess: () => setIsFormOpen(false),
+    });
+  };
+
+  const handleEdit = (values: {
+    title: string;
+    description: string;
+    status: ProjectStatus;
+    due_date: string | null;
+  }) => {
+    if (!editingProject) return;
+    updateProject.mutate(
+      {
+        id: editingProject.id,
+        title: values.title,
+        description: values.description,
+        status: values.status,
+        due_date: values.due_date,
+      },
+      {
+        onSuccess: () => setEditingProject(null),
+      },
+    );
+  };
+
+  const handleDelete = () => {
+    if (!deletingProjectId) return;
+    deleteProject.mutate(deletingProjectId, {
+      onSuccess: () => setDeletingProjectId(null),
     });
   };
 
@@ -166,7 +210,12 @@ export default function ProjectsPage() {
           }}
         >
           {projects?.map((p) => (
-            <ProjectCard key={p.id} project={p} />
+            <ProjectCard
+              key={p.id}
+              project={p}
+              onEdit={(project) => setEditingProject(project)}
+              onDelete={(id) => setDeletingProjectId(id)}
+            />
           ))}
         </Box>
       )}
@@ -183,6 +232,76 @@ export default function ProjectsPage() {
             : null
         }
       />
+
+      {/* Edit Project modal */}
+      <ProjectForm
+        open={Boolean(editingProject)}
+        mode="edit"
+        initialValues={
+          editingProject
+            ? {
+                title: editingProject.name,
+                description: editingProject.description,
+                status: editingProject.status,
+                due_date: editingProject.dueDate === "—" ? null : editingProject.dueDate,
+              }
+            : undefined
+        }
+        onSubmit={handleEdit}
+        onCancel={() => setEditingProject(null)}
+        isPending={updateProject.isPending}
+        error={
+          updateProject.isError && updateProject.error instanceof Error
+            ? updateProject.error.message
+            : null
+        }
+      />
+
+      {/* Delete confirmation */}
+      <Dialog
+        open={Boolean(deletingProjectId)}
+        onClose={() => setDeletingProjectId(null)}
+        slotProps={{ paper: { sx: { borderRadius: 3 } } }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, fontSize: 20 }}>
+          Delete Project
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ mb: 1 }}>
+            Are you sure you want to delete this project? This action cannot be undone.
+          </Typography>
+          {deleteProject.isError && deleteProject.error instanceof Error && (
+            <Typography variant="body2" sx={{ color: "error.main", fontWeight: 600, mt: 1 }}>
+              {deleteProject.error.message}
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5, justifyContent: "flex-end" }}>
+          <Button
+            variant="outlined"
+            onClick={() => setDeletingProjectId(null)}
+            disabled={deleteProject.isPending}
+            sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleDelete}
+            disabled={deleteProject.isPending}
+            sx={{
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: 600,
+              bgcolor: "error.main",
+              boxShadow: "none",
+              "&:hover": { bgcolor: "error.dark", boxShadow: "none" },
+            }}
+          >
+            {deleteProject.isPending ? "Deleting..." : "Delete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

@@ -20,9 +20,11 @@ import type { Project } from "../data/mockData";
 
 interface ProjectCardProps {
   project: Project;
+  onEdit?: (project: Project) => void;
+  onDelete?: (id: string) => void;
 }
 
-export default function ProjectCard({ project }: ProjectCardProps) {
+export default function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
@@ -149,7 +151,13 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         onClick={(e) => e.stopPropagation()}
         slotProps={{ paper: { sx: { borderRadius: 2, minWidth: 180 } } }}
       >
-        <MenuItem onClick={closeMenu}>
+        <MenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            closeMenu();
+            onEdit?.(project);
+          }}
+        >
           <ListItemIcon>
             <EditOutlinedIcon fontSize="small" />
           </ListItemIcon>
@@ -161,7 +169,14 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           </ListItemIcon>
           Archive Project
         </MenuItem>
-        <MenuItem onClick={closeMenu} sx={{ color: "error.main" }}>
+        <MenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            closeMenu();
+            onDelete?.(project.id);
+          }}
+          sx={{ color: "error.main" }}
+        >
           <ListItemIcon sx={{ color: "error.main" }}>
             <DeleteOutlineOutlinedIcon fontSize="small" />
           </ListItemIcon>

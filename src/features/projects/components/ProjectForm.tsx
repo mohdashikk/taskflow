@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -14,6 +14,13 @@ import { STATUS_LABELS, type ProjectStatus } from "../data/mockData";
 
 interface ProjectFormProps {
   open: boolean;
+  mode?: "create" | "edit";
+  initialValues?: {
+    title: string;
+    description: string;
+    status: ProjectStatus;
+    due_date: string | null;
+  };
   onSubmit: (values: {
     title: string;
     description: string;
@@ -29,6 +36,8 @@ const STATUS_OPTIONS = Object.keys(STATUS_LABELS) as ProjectStatus[];
 
 export default function ProjectForm({
   open,
+  mode = "create",
+  initialValues,
   onSubmit,
   onCancel,
   isPending,
@@ -38,6 +47,20 @@ export default function ProjectForm({
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<ProjectStatus>("planning");
   const [dueDate, setDueDate] = useState("");
+
+  useEffect(() => {
+    if (open && initialValues) {
+      setTitle(initialValues.title);
+      setDescription(initialValues.description);
+      setStatus(initialValues.status);
+      setDueDate(initialValues.due_date ? initialValues.due_date.slice(0, 10) : "");
+    } else if (!open) {
+      setTitle("");
+      setDescription("");
+      setStatus("planning");
+      setDueDate("");
+    }
+  }, [open, initialValues]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +82,7 @@ export default function ProjectForm({
       slotProps={{ paper: { sx: { borderRadius: 3 } } }}
     >
       <DialogTitle sx={{ fontWeight: 800, fontSize: 20 }}>
-        Add Project
+        {mode === "edit" ? "Edit Project" : "Add Project"}
       </DialogTitle>
       <Box component="form" onSubmit={handleSubmit}>
         <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
