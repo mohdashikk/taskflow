@@ -20,6 +20,7 @@ import {
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
+import { useTheme } from "@mui/material/styles";
 import { useTasks } from "../hooks/useTasks";
 import { useProjectStatuses } from "@/features/projects/hooks/useProjectStatuses";
 import { createTask, deleteTask, updateTaskStatus, updateTask } from "../services/tasksService";
@@ -43,6 +44,7 @@ interface Column {
 }
 
 export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
+  const theme = useTheme();
   const { data: tasks = [], isLoading: tasksLoading } = useTasks(projectId, userId);
   const { data: statuses = [], isLoading: statusesLoading } = useProjectStatuses(projectId);
   const queryClient = useQueryClient();
@@ -146,7 +148,7 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
   if (isLoading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-        <CircularProgress size={28} sx={{ color: "#006F99" }} />
+        <CircularProgress size={28} sx={{ color: theme.palette.primary.main }} />
       </Box>
     );
   }
@@ -236,7 +238,7 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
           <Typography
             sx={{
               fontWeight: 700,
-              color: "#111827",
+              color: theme.palette.text.primary,
               fontSize: 22,
               letterSpacing: "-0.02em",
               lineHeight: 1.2,
@@ -246,7 +248,7 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
           </Typography>
           <Typography
             sx={{
-              color: "#6B7280",
+              color: theme.palette.text.secondary,
               fontSize: 14,
               mt: 0.5,
               display: "block",
@@ -281,9 +283,9 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
               bgcolor: "transparent",
             },
             "&::-webkit-scrollbar-thumb": {
-              bgcolor: "#D1D5DB",
+              bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[600] : "#D1D5DB",
               borderRadius: 3,
-              "&:hover": { bgcolor: "#9CA3AF" },
+              "&:hover": { bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[500] : "#9CA3AF" },
             },
           }}
         >
@@ -304,7 +306,7 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
                   width: 56,
                   height: 56,
                   borderRadius: "50%",
-                  bgcolor: "#F2F4F7",
+                  bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#F2F4F7",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -316,7 +318,7 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
                   height="24"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="#6B7280"
+                  stroke={theme.palette.text.secondary}
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -330,7 +332,7 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
               <Typography
                 sx={{
                   fontWeight: 600,
-                  color: "#111827",
+                  color: theme.palette.text.primary,
                   fontSize: 15,
                   mb: 0.5,
                 }}
@@ -339,7 +341,7 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
               </Typography>
               <Typography
                 sx={{
-                  color: "#6B7280",
+                  color: theme.palette.text.secondary,
                   fontSize: 13,
                   maxWidth: 320,
                   lineHeight: 1.5,
@@ -376,7 +378,9 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
               sx={{
                 opacity: 0.95,
                 transform: "rotate(2deg)",
-                boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15)",
+                boxShadow: theme.palette.mode === "dark"
+                  ? "0 20px 40px rgba(0, 0, 0, 0.4)"
+                  : "0 20px 40px rgba(0, 0, 0, 0.15)",
                 borderRadius: "14px",
                 maxWidth: 320,
               }}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { alpha, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
@@ -75,6 +76,7 @@ function getDueDateStatus(dueDate: string | null): "overdue" | "upcoming" | "nor
 }
 
 export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, tags, assignee }: TaskCardProps) {
+  const theme = useTheme();
   const {
     attributes,
     listeners,
@@ -159,13 +161,17 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
     >
       <Box
         sx={{
-          bgcolor: "#FFFFFF",
+          bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[800] : theme.palette.background.paper,
           borderRadius: "14px",
           border: "1px solid",
-          borderColor: isDragging ? "#006F99" : "#E6E8EB",
+          borderColor: isDragging ? theme.palette.primary.main : theme.palette.mode === "dark" ? theme.palette.grey[900] : theme.palette.divider,
           boxShadow: isDragging
-            ? "0 12px 32px rgba(0, 0, 0, 0.12)"
-            : "0 1px 3px rgba(0, 0, 0, 0.04)",
+            ? theme.palette.mode === "dark"
+              ? "0 12px 32px rgba(0, 0, 0, 0.3)"
+              : "0 12px 32px rgba(0, 0, 0, 0.12)"
+            : theme.palette.mode === "dark"
+              ? "0 1px 3px rgba(0, 0, 0, 0.2)"
+              : "0 1px 3px rgba(0, 0, 0, 0.04)",
           position: "relative",
           cursor: "grab",
           transition: "box-shadow 200ms ease, border-color 200ms ease",
@@ -203,9 +209,9 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
               right: 8,
               width: 28,
               height: 28,
-              color: "#6B7280",
+              color: theme.palette.text.secondary,
               borderRadius: 2,
-              "&:hover": { bgcolor: "#F2F4F7", color: "#111827" },
+              "&:hover": { bgcolor: theme.palette.mode === "dark" ? alpha("#FFFFFF", 0.06) : "#F2F4F7", color: theme.palette.text.primary },
             }}
           >
             <MoreVertOutlinedIcon sx={{ fontSize: 16 }} />
@@ -228,7 +234,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                 setMenuAnchor(null);
                 setDeleteConfirmOpen(true);
               }}
-              sx={{ fontSize: 14, py: 1, px: 2, color: "#EF4444", borderRadius: 1, mx: 0.5 }}
+              sx={{ fontSize: 14, py: 1, px: 2, color: theme.palette.error.main, borderRadius: 1, mx: 0.5 }}
             >
               Delete
             </MenuItem>
@@ -242,16 +248,18 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
             sx={{
               "& .MuiDialog-paper": {
                 borderRadius: "20px",
-                border: "1px solid #E6E8EB",
-                boxShadow: "0 24px 64px rgba(15, 23, 42, 0.12)",
+                border: `1px solid ${theme.palette.divider}`,
+                boxShadow: theme.palette.mode === "dark"
+                  ? "0 24px 64px rgba(0, 0, 0, 0.3)"
+                  : "0 24px 64px rgba(15, 23, 42, 0.12)",
               },
             }}
           >
-            <DialogTitle sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>
+            <DialogTitle sx={{ fontSize: 18, fontWeight: 700, color: theme.palette.text.primary }}>
               Delete Task
             </DialogTitle>
             <DialogContent>
-              <Typography sx={{ fontSize: 15, color: "#6B7280", lineHeight: 1.6 }}>
+              <Typography sx={{ fontSize: 15, color: theme.palette.text.secondary, lineHeight: 1.6 }}>
                 Are you sure you want to delete <strong>&quot;{task.title}&quot;</strong>? This action cannot be undone.
               </Typography>
             </DialogContent>
@@ -259,14 +267,14 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
               <Button
                 onClick={() => setDeleteConfirmOpen(false)}
                 sx={{
-                  color: "#6B7280",
+                  color: theme.palette.text.secondary,
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: 14,
                   borderRadius: "10px",
                   py: 0.75,
                   px: 2,
-                  "&:hover": { bgcolor: "#F2F4F7", color: "#111827" },
+                  "&:hover": { bgcolor: theme.palette.mode === "dark" ? alpha("#FFFFFF", 0.06) : "#F2F4F7", color: theme.palette.text.primary },
                 }}
               >
                 Cancel
@@ -284,9 +292,9 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                   borderRadius: "10px",
                   py: 0.75,
                   px: 2,
-                  bgcolor: "#EF4444",
+                  bgcolor: theme.palette.error.main,
                   boxShadow: "none",
-                  "&:hover": { boxShadow: "none", bgcolor: "#DC2626" },
+                  "&:hover": { boxShadow: "none", bgcolor: theme.palette.error.dark },
                 }}
               >
                 Delete
@@ -316,7 +324,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "10px",
-                        bgcolor: "#F7F8FA",
+                        bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#F7F8FA",
                         fontSize: 16,
                         "& fieldset": { border: "none" },
                         "&.Mui-focused": { boxShadow: "none" },
@@ -336,15 +344,15 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                       width: 40,
                       height: 40,
                       borderRadius: "10px",
-                      border: "1px solid #E6E8EB",
+                      border: `1px solid ${theme.palette.divider}`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       cursor: "pointer",
-                      bgcolor: "#F7F8FA",
+                      bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#F7F8FA",
                       position: "relative",
                       transition: "all 120ms ease",
-                      "&:hover": { bgcolor: "#F2F4F7" },
+                      "&:hover": { bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[700] : "#F2F4F7" },
                     }}
                   >
                     <FlagOutlinedIcon sx={{ fontSize: 18, color: currentPriority.color }} />
@@ -396,15 +404,15 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                       width: 40,
                       height: 40,
                       borderRadius: "10px",
-                      border: "1px solid #E6E8EB",
+                      border: `1px solid ${theme.palette.divider}`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       cursor: "pointer",
-                      bgcolor: "#F7F8FA",
-                      color: editDueDate ? "#111827" : "#6B7280",
+                      bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#F7F8FA",
+                      color: editDueDate ? theme.palette.text.primary : theme.palette.text.secondary,
                       transition: "all 120ms ease",
-                      "&:hover": { bgcolor: "#F2F4F7" },
+                      "&:hover": { bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[700] : "#F2F4F7" },
                     }}
                   >
                     <CalendarTodayOutlinedIcon sx={{ fontSize: 18 }} />
@@ -429,14 +437,14 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                     size="small"
                     onClick={cancelEditing}
                     sx={{
-                      color: "#6B7280",
+                      color: theme.palette.text.secondary,
                       textTransform: "none",
                       fontWeight: 600,
                       fontSize: 14,
                       borderRadius: "10px",
                       py: 0.5,
                       px: 1.5,
-                      "&:hover": { bgcolor: "#F2F4F7", color: "#111827" },
+                      "&:hover": { bgcolor: theme.palette.mode === "dark" ? alpha("#FFFFFF", 0.06) : "#F2F4F7", color: theme.palette.text.primary },
                     }}
                   >
                     Cancel
@@ -452,9 +460,9 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                       borderRadius: "10px",
                       py: 0.5,
                       px: 1.5,
-                      bgcolor: "#006F99",
+                      bgcolor: theme.palette.primary.main,
                       boxShadow: "none",
-                      "&:hover": { boxShadow: "none", bgcolor: "#005670" },
+                      "&:hover": { boxShadow: "none", bgcolor: theme.palette.primary.dark },
                     }}
                   >
                     Save
@@ -475,7 +483,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                     fontWeight: 600,
                     fontSize: 14,
                     lineHeight: 1.5,
-                    color: "#111827",
+                    color: theme.palette.text.primary,
                     mb: cardTags.length > 0 ? 1.5 : (task.due_date ? 1.5 : 0),
                     pr: 5,
                     letterSpacing: "-0.01em",
@@ -521,10 +529,10 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                           fontSize: 12,
                           color:
                             dueStatus === "overdue"
-                              ? "#EF4444"
+                              ? theme.palette.error.main
                               : dueStatus === "upcoming"
-                                ? "#F59E0B"
-                                : "#9CA3AF",
+                                ? theme.palette.warning.main
+                                : theme.palette.text.disabled,
                         }}
                       />
                       <Typography
@@ -533,10 +541,10 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                           fontWeight: dueStatus === "overdue" ? 700 : 500,
                           color:
                             dueStatus === "overdue"
-                              ? "#EF4444"
+                              ? theme.palette.error.main
                               : dueStatus === "upcoming"
-                                ? "#F59E0B"
-                                : "#9CA3AF",
+                                ? theme.palette.warning.main
+                                : theme.palette.text.disabled,
                         }}
                       >
                         {new Date(task.due_date + "T00:00:00").toLocaleDateString("en-US", {
@@ -558,8 +566,8 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                           width: 24,
                           height: 24,
                           borderRadius: "50%",
-                          bgcolor: assignee.avatarUrl ? "transparent" : "#006F99",
-                          color: "#FFFFFF",
+                          bgcolor: assignee.avatarUrl ? "transparent" : theme.palette.primary.main,
+                          color: theme.palette.primary.contrastText,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -582,7 +590,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                           getInitials(assignee.name)
                         )}
                       </Box>
-                      <Typography sx={{ fontSize: 12, color: "#6B7280", fontWeight: 500 }}>
+                      <Typography sx={{ fontSize: 12, color: theme.palette.text.secondary, fontWeight: 500 }}>
                         {assignee.name}
                       </Typography>
                     </Box>
@@ -592,12 +600,12 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                       width: 28,
                       height: 28,
                       borderRadius: "8px",
-                      border: "1px solid #E6E8EB",
+                      border: `1px solid ${theme.palette.divider}`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       position: "relative",
-                      bgcolor: "#F7F8FA",
+                      bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#F7F8FA",
                       ml: "auto",
                     }}
                   >

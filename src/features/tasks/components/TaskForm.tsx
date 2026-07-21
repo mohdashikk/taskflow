@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { alpha, useTheme } from "@mui/material/styles";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -43,6 +44,7 @@ export default function TaskForm({
   isPending,
   error,
 }: TaskFormProps) {
+  const theme = useTheme();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("medium");
@@ -88,12 +90,14 @@ export default function TaskForm({
       sx={{
         "& .MuiDialog-paper": {
           borderRadius: "24px",
-          border: "1px solid #E6E8EB",
-          boxShadow: "0 24px 64px rgba(15, 23, 42, 0.1)",
+          border: `1px solid ${theme.palette.divider}`,
+          boxShadow: theme.palette.mode === "dark"
+            ? "0 24px 64px rgba(0, 0, 0, 0.3)"
+            : "0 24px 64px rgba(15, 23, 42, 0.1)",
         },
       }}
     >
-      <DialogTitle sx={{ fontWeight: 700, fontSize: 22, color: "#111827", letterSpacing: "-0.01em" }}>
+      <DialogTitle sx={{ fontWeight: 700, fontSize: 22, color: theme.palette.text.primary, letterSpacing: "-0.01em" }}>
         Add Task
       </DialogTitle>
       <Box component="form" onSubmit={handleSubmit}>
@@ -109,16 +113,16 @@ export default function TaskForm({
                 minWidth: 160,
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "14px",
-                  bgcolor: "#F7F8FA",
+                  bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#F7F8FA",
                   "& fieldset": {
-                    borderColor: "#E6E8EB",
+                    borderColor: theme.palette.divider,
                   },
                   "&:hover fieldset": {
-                    borderColor: "#006F99",
+                    borderColor: theme.palette.primary.main,
                   },
                   "&.Mui-focused fieldset": {
-                    borderColor: "#006F99",
-                    boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                    borderColor: theme.palette.primary.main,
+                    boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.08)}`,
                   },
                 },
               }}
@@ -141,7 +145,7 @@ export default function TaskForm({
               ))}
             </TextField>
           ) : (
-            <Typography variant="body2" sx={{ color: "#F59E0B", fontWeight: 500, fontSize: 14 }}>
+            <Typography variant="body2" sx={{ color: theme.palette.warning.main, fontWeight: 500, fontSize: 14 }}>
               No statuses configured for this project. Tasks will use the first available status.
             </Typography>
           )}
@@ -155,16 +159,16 @@ export default function TaskForm({
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "14px",
-                bgcolor: "#F7F8FA",
+                bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#F7F8FA",
                 "& fieldset": {
-                  borderColor: "#E6E8EB",
+                  borderColor: theme.palette.divider,
                 },
                 "&:hover fieldset": {
-                  borderColor: "#006F99",
+                  borderColor: theme.palette.primary.main,
                 },
                 "&.Mui-focused fieldset": {
-                  borderColor: "#006F99",
-                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                  borderColor: theme.palette.primary.main,
+                  boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.08)}`,
                 },
               },
             }}
@@ -180,16 +184,16 @@ export default function TaskForm({
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "14px",
-                bgcolor: "#F7F8FA",
+                bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#F7F8FA",
                 "& fieldset": {
-                  borderColor: "#E6E8EB",
+                  borderColor: theme.palette.divider,
                 },
                 "&:hover fieldset": {
-                  borderColor: "#006F99",
+                  borderColor: theme.palette.primary.main,
                 },
                 "&.Mui-focused fieldset": {
-                  borderColor: "#006F99",
-                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                  borderColor: theme.palette.primary.main,
+                  boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.08)}`,
                 },
               },
             }}
@@ -204,16 +208,16 @@ export default function TaskForm({
               minWidth: 140,
               "& .MuiOutlinedInput-root": {
                 borderRadius: "14px",
-                bgcolor: "#F7F8FA",
+                bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#F7F8FA",
                 "& fieldset": {
-                  borderColor: "#E6E8EB",
+                  borderColor: theme.palette.divider,
                 },
                 "&:hover fieldset": {
-                  borderColor: "#006F99",
+                  borderColor: theme.palette.primary.main,
                 },
                 "&.Mui-focused fieldset": {
-                  borderColor: "#006F99",
-                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                  borderColor: theme.palette.primary.main,
+                  boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.08)}`,
                 },
               },
             }}
@@ -237,16 +241,16 @@ export default function TaskForm({
                 minWidth: 160,
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "14px",
-                  bgcolor: "#F7F8FA",
+                  bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#F7F8FA",
                   "& fieldset": {
-                    borderColor: "#E6E8EB",
+                    borderColor: theme.palette.divider,
                   },
                   "&:hover fieldset": {
-                    borderColor: "#006F99",
+                    borderColor: theme.palette.primary.main,
                   },
                   "&.Mui-focused fieldset": {
-                    borderColor: "#006F99",
-                    boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                    borderColor: theme.palette.primary.main,
+                    boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.08)}`,
                   },
                 },
               }}
@@ -263,16 +267,16 @@ export default function TaskForm({
                 minWidth: 160,
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "14px",
-                  bgcolor: "#F7F8FA",
+                  bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#F7F8FA",
                   "& fieldset": {
-                    borderColor: "#E6E8EB",
+                    borderColor: theme.palette.divider,
                   },
                   "&:hover fieldset": {
-                    borderColor: "#006F99",
+                    borderColor: theme.palette.primary.main,
                   },
                   "&.Mui-focused fieldset": {
-                    borderColor: "#006F99",
-                    boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                    borderColor: theme.palette.primary.main,
+                    boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.08)}`,
                   },
                 },
               }}
@@ -280,7 +284,7 @@ export default function TaskForm({
           </Box>
 
           {error && (
-            <Typography variant="body2" sx={{ color: "#EF4444", fontWeight: 600, fontSize: 14 }}>
+            <Typography variant="body2" sx={{ color: theme.palette.error.main, fontWeight: 600, fontSize: 14 }}>
               {error}
             </Typography>
           )}
@@ -295,11 +299,11 @@ export default function TaskForm({
                 borderRadius: "14px",
                 textTransform: "none",
                 fontWeight: 600,
-                borderColor: "#E6E8EB",
-                color: "#6B7280",
+                borderColor: theme.palette.divider,
+                color: theme.palette.text.secondary,
                 "&:hover": {
-                  borderColor: "#006F99",
-                  color: "#006F99",
+                  borderColor: theme.palette.primary.main,
+                  color: theme.palette.primary.main,
                   bgcolor: "transparent",
                 },
               }}
@@ -316,9 +320,9 @@ export default function TaskForm({
                 borderRadius: "14px",
                 textTransform: "none",
                 fontWeight: 600,
-                bgcolor: "#006F99",
-                boxShadow: "0 4px 12px rgba(0, 111, 153, 0.2)",
-                "&:hover": { boxShadow: "none", bgcolor: "#005670" },
+                bgcolor: theme.palette.primary.main,
+                boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
+                "&:hover": { boxShadow: "none", bgcolor: theme.palette.primary.dark },
               }}
             >
               {isPending ? "Saving..." : "Save Task"}

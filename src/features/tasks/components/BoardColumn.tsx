@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useDroppable } from "@dnd-kit/core";
+import { alpha, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -40,8 +41,6 @@ const PRIORITY_OPTIONS = [
   { value: "low", label: "Low", color: "#64748B" },
 ] as const;
 
-const ACCENT = "#006F99";
-
 export default function BoardColumn({
   statusId,
   statusName,
@@ -54,6 +53,7 @@ export default function BoardColumn({
   onUpdateTask,
   wipLimit = 0,
 }: BoardColumnProps) {
+  const theme = useTheme();
   const [isQuickAdding, setIsQuickAdding] = useState(false);
   const [quickTitle, setQuickTitle] = useState("");
   const [showOptions, setShowOptions] = useState(false);
@@ -140,7 +140,7 @@ export default function BoardColumn({
           gap: 1,
           px: 2,
           py: 1.5,
-          bgcolor: "#006F99",
+          bgcolor: theme.palette.primary.main,
         }}
       >
         <Box
@@ -161,7 +161,7 @@ export default function BoardColumn({
         <Typography
           sx={{
             fontWeight: 600,
-            color: "#FFFFFF",
+            color: theme.palette.primary.contrastText,
             fontSize: 14,
             flex: 1,
             letterSpacing: "-0.01em",
@@ -174,7 +174,7 @@ export default function BoardColumn({
           sx={{
             bgcolor: isOverWipLimit
               ? "transparent"
-              : "rgba(255, 255, 255, 0.2)",
+              : alpha(theme.palette.primary.contrastText, 0.2),
             borderRadius: "12px",
             px: 1,
             py: 0.25,
@@ -187,7 +187,7 @@ export default function BoardColumn({
             sx={{
               fontWeight: 600,
               fontSize: 12,
-              color: "#FFFFFF",
+              color: theme.palette.primary.contrastText,
             }}
           >
             {tasks.length}{wipLimit > 0 ? ` / ${wipLimit}` : ""}
@@ -204,9 +204,9 @@ export default function BoardColumn({
           sx={{
             width: 28,
             height: 28,
-            color: "#FFFFFF",
+            color: theme.palette.primary.contrastText,
             borderRadius: 2,
-            "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
+            "&:hover": { bgcolor: alpha(theme.palette.primary.contrastText, 0.1) },
           }}
         >
           <MoreVertOutlinedIcon sx={{ fontSize: 18 }} />
@@ -223,7 +223,7 @@ export default function BoardColumn({
               setColumnMenuAnchor(null);
               onDeleteColumn?.(statusId);
             }}
-            sx={{ fontSize: 13, py: 1, px: 2, color: "#EF4444", borderRadius: 1, mx: 0.5 }}
+            sx={{ fontSize: 13, py: 1, px: 2, color: theme.palette.error.main, borderRadius: 1, mx: 0.5 }}
           >
             Delete Column
           </MenuItem>
@@ -241,7 +241,7 @@ export default function BoardColumn({
           display: "flex",
           flexDirection: "column",
           gap: 1.5,
-          bgcolor: "#F9FAFB",
+          bgcolor: theme.palette.mode === "dark" ? theme.palette.background.default : "#F9FAFB",
           borderBottomLeftRadius: "20px",
           borderBottomRightRadius: "20px",
           "&::-webkit-scrollbar": {
@@ -251,9 +251,9 @@ export default function BoardColumn({
             bgcolor: "transparent",
           },
           "&::-webkit-scrollbar-thumb": {
-            bgcolor: "#D1D5DB",
+            bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[600] : "#D1D5DB",
             borderRadius: 3,
-            "&:hover": { bgcolor: "#9CA3AF" },
+            "&:hover": { bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[500] : "#9CA3AF" },
           },
         }}
       >
@@ -300,10 +300,12 @@ export default function BoardColumn({
               sx={{
                 mx: 1.5,
                 mb: 1.5,
-                bgcolor: "#FFFFFF",
+                bgcolor: theme.palette.background.paper,
                 borderRadius: "14px",
-                border: `2px solid ${ACCENT}`,
-                boxShadow: "0 4px 16px rgba(0, 111, 153, 0.08)",
+                border: `2px solid ${theme.palette.primary.main}`,
+                boxShadow: theme.palette.mode === "dark"
+                  ? "0 4px 16px rgba(0, 0, 0, 0.3)"
+                  : "0 4px 16px rgba(0, 111, 153, 0.08)",
                 overflow: "hidden",
               }}
             >
@@ -321,7 +323,7 @@ export default function BoardColumn({
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: "10px",
-                      bgcolor: "#F7F8FA",
+                      bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#F7F8FA",
                       fontSize: 14,
                       "& fieldset": { border: "none" },
                       "&.Mui-focused": { boxShadow: "none" },
@@ -348,15 +350,15 @@ export default function BoardColumn({
                             width: 36,
                             height: 36,
                             borderRadius: "10px",
-                            border: "1px solid #E6E8EB",
+                            border: `1px solid ${theme.palette.divider}`,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             cursor: "pointer",
-                            bgcolor: "#F7F8FA",
+                            bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#F7F8FA",
                             position: "relative",
                             transition: "all 120ms ease",
-                            "&:hover": { bgcolor: "#F2F4F7" },
+                            "&:hover": { bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[700] : "#F2F4F7" },
                           }}
                         >
                           <FlagOutlinedIcon sx={{ fontSize: 16, color: currentPriority.color }} />
@@ -408,15 +410,15 @@ export default function BoardColumn({
                             width: 36,
                             height: 36,
                             borderRadius: "10px",
-                            border: "1px solid #E6E8EB",
+                            border: `1px solid ${theme.palette.divider}`,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             cursor: "pointer",
-                            bgcolor: "#F7F8FA",
-                            color: dueDate ? "#111827" : "#6B7280",
+                            bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#F7F8FA",
+                            color: dueDate ? theme.palette.text.primary : theme.palette.text.secondary,
                             transition: "all 120ms ease",
-                            "&:hover": { bgcolor: "#F2F4F7" },
+                            "&:hover": { bgcolor: theme.palette.mode === "dark" ? theme.palette.grey[700] : "#F2F4F7" },
                           }}
                         >
                           <CalendarTodayOutlinedIcon sx={{ fontSize: 16 }} />
@@ -454,14 +456,14 @@ export default function BoardColumn({
                   size="small"
                   onClick={() => setShowOptions(!showOptions)}
                   sx={{
-                    color: "#6B7280",
+                    color: theme.palette.text.secondary,
                     textTransform: "none",
                     fontWeight: 600,
                     fontSize: 12,
                     borderRadius: 2,
                     py: 0.5,
                     px: 1,
-                    "&:hover": { bgcolor: "#F2F4F7", color: "#111827" },
+                    "&:hover": { bgcolor: theme.palette.mode === "dark" ? alpha(theme.palette.primary.contrastText, 0.06) : "#F2F4F7", color: theme.palette.text.primary },
                   }}
                   startIcon={
                     showOptions ? (
@@ -480,9 +482,9 @@ export default function BoardColumn({
                     sx={{
                       width: 32,
                       height: 32,
-                      color: "#6B7280",
+                      color: theme.palette.text.secondary,
                       borderRadius: 2,
-                      "&:hover": { bgcolor: "#F2F4F7", color: "#111827" },
+                      "&:hover": { bgcolor: theme.palette.mode === "dark" ? alpha(theme.palette.primary.contrastText, 0.06) : "#F2F4F7", color: theme.palette.text.primary },
                     }}
                   >
                     <CloseOutlinedIcon sx={{ fontSize: 16 }} />
@@ -494,10 +496,10 @@ export default function BoardColumn({
                     sx={{
                       width: 32,
                       height: 32,
-                      color: "#006F99",
+                      color: theme.palette.primary.main,
                       borderRadius: 2,
-                      "&:hover": { bgcolor: "#006F99", color: "#FFFFFF" },
-                      "&.Mui-disabled": { color: "#D1D5DB" },
+                      "&:hover": { bgcolor: theme.palette.primary.main, color: theme.palette.primary.contrastText },
+                      "&.Mui-disabled": { color: theme.palette.mode === "dark" ? theme.palette.grey[600] : "#D1D5DB" },
                     }}
                   >
                     <SendOutlinedIcon sx={{ fontSize: 16 }} />
@@ -518,16 +520,16 @@ export default function BoardColumn({
             onClick={handleQuickAddClick}
             sx={{
               justifyContent: "flex-start",
-              color: "#6B7280",
+              color: theme.palette.text.secondary,
               textTransform: "none",
               fontWeight: 600,
               fontSize: 13,
               borderRadius: "10px",
               py: 1,
-              border: "1px dashed #D1D5DB",
+              border: `1px dashed ${theme.palette.mode === "dark" ? theme.palette.grey[600] : "#D1D5DB"}`,
               "&:hover": {
-                borderColor: "#006F99",
-                color: "#006F99",
+                borderColor: theme.palette.primary.main,
+                color: theme.palette.primary.main,
                 bgcolor: "transparent",
               },
               transition: "all 150ms ease",

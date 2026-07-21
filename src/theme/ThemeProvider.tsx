@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, type ReactNode } from "react";
+import { useMemo, useEffect, type ReactNode } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
@@ -15,6 +15,10 @@ export default function AppThemeProvider({
   const mode = useAppSelector((state) => state.theme.mode);
 
   const theme = useMemo(() => getTheme(mode), [mode]);
+
+  useEffect(() => {
+    document.documentElement.style.colorScheme = mode;
+  }, [mode]);
 
   return (
     <ThemeProvider theme={theme}>

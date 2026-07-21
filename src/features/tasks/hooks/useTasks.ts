@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createTask,
   fetchTasksByProject,
+  fetchTasksByUser,
   type CreateTaskInput,
 } from "../services/tasksService";
 
@@ -13,6 +14,17 @@ export const useTasks = (projectId: string | undefined, userId: string | undefin
       return fetchTasksByProject(projectId, userId);
     },
     enabled: Boolean(projectId && userId),
+  });
+};
+
+export const useAllTasks = (userId: string | undefined) => {
+  return useQuery({
+    queryKey: ["tasks", "all", userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      return fetchTasksByUser(userId);
+    },
+    enabled: Boolean(userId),
   });
 };
 

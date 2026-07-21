@@ -27,6 +27,36 @@ export interface TaskRow {
   updated_at: string;
 }
 
+export const fetchTasksByUser = async (
+  userId: string,
+): Promise<TaskRow[]> => {
+  if (!supabase) {
+    throw new Error(
+      "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local.",
+    );
+  }
+
+  const { data, error } = await supabase
+    .from("tasks")
+    .select(
+      "id, project_id, user_id, status_id, title, description, priority, start_date, due_date, completed_at, position, created_at, updated_at",
+    )
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: unknown }).message)
+          : "Failed to load tasks.";
+    throw new Error(message);
+  }
+
+  return data ?? [];
+};
+
 export const createTask = async (input: CreateTaskInput): Promise<TaskRow> => {
   if (!supabase) {
     throw new Error(

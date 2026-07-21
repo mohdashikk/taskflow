@@ -64,6 +64,7 @@ export const getTheme = (mode: ColorMode): Theme => {
       text: {
         primary: colors.textPrimary,
         secondary: colors.textSecondary,
+        disabled: colors.textSecondary,
       },
       divider: colors.border,
       success: { main: colors.success },
