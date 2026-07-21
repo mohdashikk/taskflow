@@ -26,6 +26,6 @@ export const getTheme = (
     },
     typography: {
       fontFamily:
-        '"Outfit", "Helvetica Neue", Arial, sans-serif',
+        '"Poppins", "Helvetica Neue", Arial, sans-serif',
     },
   });

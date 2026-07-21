@@ -59,16 +59,18 @@ export default function AddColumnButton({ projectId, onAdd, adding }: AddColumnB
           height: 48,
           minWidth: 48,
           borderRadius: "12px",
-          border: "1px dashed #CBD5E1",
-          color: "#64748B",
+          border: "1px dashed",
+          borderColor: "divider",
+          color: "text.secondary",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           p: 0,
           "&:hover": {
-            border: "1px dashed #94A3B8",
-            bgcolor: "#F8FAFC",
-            color: "#334155",
+            border: "1px dashed",
+            borderColor: "text.secondary",
+            bgcolor: "background.default",
+            color: "text.primary",
           },
           transition: "all 0.15s ease",
         }}
@@ -81,14 +83,14 @@ export default function AddColumnButton({ projectId, onAdd, adding }: AddColumnB
         onClose={handleClose}
         maxWidth="xs"
         fullWidth
-        PaperProps={{
-          sx: {
+        sx={{
+          "& .MuiDialog-paper": {
             borderRadius: "12px",
-            bgcolor: "#FFFFFF",
+            bgcolor: "background.paper",
           },
         }}
       >
-        <DialogTitle sx={{ fontSize: 16, fontWeight: 600, color: "#0F172A" }}>New Board</DialogTitle>
+        <DialogTitle sx={{ fontSize: 16, fontWeight: 600, color: "text.primary" }}>New Board</DialogTitle>
         <DialogContent>
           <TextField
             value={name}
@@ -109,7 +111,7 @@ export default function AddColumnButton({ projectId, onAdd, adding }: AddColumnB
               mt: 1,
               "& .MuiOutlinedInput-root": {
                 borderRadius: "8px",
-                bgcolor: "#FAFBFC",
+                bgcolor: "background.paper",
                 fontSize: 14,
                 "& fieldset": {
                   border: "none",
@@ -135,10 +137,11 @@ export default function AddColumnButton({ projectId, onAdd, adding }: AddColumnB
                   borderRadius: "6px",
                   bgcolor: c,
                   cursor: "pointer",
-                  border: color === c ? "2px solid #1E293B" : "2px solid transparent",
+                  border: color === c ? "2px solid" : "2px solid transparent",
+                  borderColor: color === c ? "text.primary" : "transparent",
                   transition: "border-color 0.1s ease",
                   "&:hover": {
-                    borderColor: color === c ? "#1E293B" : "#94A3B8",
+                    borderColor: color === c ? "text.primary" : "text.secondary",
                   },
                 }}
               />
@@ -149,14 +152,14 @@ export default function AddColumnButton({ projectId, onAdd, adding }: AddColumnB
           <Button
             onClick={handleClose}
             sx={{
-              color: "#64748B",
+              color: "text.secondary",
               textTransform: "none",
               fontWeight: 600,
               fontSize: 13,
               borderRadius: "6px",
               py: 0.5,
               px: 1.5,
-              "&:hover": { bgcolor: "#E2E8F0", color: "#334155" },
+              "&:hover": { bgcolor: "divider", color: "text.primary" },
             }}
           >
             Cancel

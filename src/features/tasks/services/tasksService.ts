@@ -235,3 +235,62 @@ export const updateTaskStatus = async (
 
   return data as TaskRow;
 };
+
+export const updateTask = async (
+  taskId: string,
+  projectId: string,
+  updates: {
+    title?: string;
+    priority?: string;
+    due_date?: string | null;
+    status_id?: string;
+  },
+): Promise<TaskRow> => {
+  if (!supabase) {
+    throw new Error(
+      "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local.",
+    );
+  }
+
+  const payload: Record<string, unknown> = {};
+
+  if (updates.title !== undefined) payload.title = updates.title;
+  if (updates.priority !== undefined) payload.priority = updates.priority;
+  if (updates.due_date !== undefined) payload.due_date = updates.due_date;
+  if (updates.status_id !== undefined) payload.status_id = updates.status_id;
+
+  const { data, error } = await supabase
+    .from("tasks")
+    .update(payload)
+    .eq("id", taskId)
+    .eq("project_id", projectId)
+    .select(
+      "id, project_id, user_id, status_id, title, description, priority, start_date, due_date, completed_at, position, created_at, updated_at",
+    )
+    .single();
+
+  if (error) {
+    console.error("[updateTask] Supabase update error:", {
+      code: (error as { code?: string }).code,
+      message: (error as { message?: string }).message,
+      details: (error as { details?: string }).details,
+      hint: (error as { hint?: string }).hint,
+      taskId,
+      projectId,
+      updates,
+    });
+    const message =
+      error instanceof Error
+        ? error.message
+        : typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message: unknown }).message)
+          : "Failed to update task.";
+    throw new Error(message);
+  }
+
+  if (!data) {
+    throw new Error("Failed to update task.");
+  }
+
+  return data as TaskRow;
+};

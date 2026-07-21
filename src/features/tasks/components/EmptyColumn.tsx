@@ -18,7 +18,7 @@ export default function EmptyColumn() {
     >
       <Typography
         variant="body2"
-        sx={{ fontWeight: 700, color: "#1E293B", fontSize: 14 }}
+        sx={{ fontWeight: 700, color: "text.primary", fontSize: 14 }}
       >
         No work items
       </Typography>

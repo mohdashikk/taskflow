@@ -25,6 +25,7 @@ interface BoardColumnProps {
   onEditTask?: (task: TaskRow) => void;
   onDeleteTask?: (taskId: string) => void;
   onDeleteColumn?: (statusId: string) => void;
+  onUpdateTask?: (taskId: string, updates: { title?: string; priority?: string; due_date?: string | null; status_id?: string }) => void;
 }
 
 const PRIORITY_OPTIONS = [
@@ -33,7 +34,7 @@ const PRIORITY_OPTIONS = [
   { value: "low", label: "Low", color: "#10B981" },
 ] as const;
 
-export default function BoardColumn({ statusId, statusName, tasks, onCreate, createPending, onEditTask, onDeleteTask, onDeleteColumn }: BoardColumnProps) {
+export default function BoardColumn({ statusId, statusName, tasks, onCreate, createPending, onEditTask, onDeleteTask, onDeleteColumn, onUpdateTask }: BoardColumnProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [priority, setPriority] = useState<string>("medium");
@@ -42,7 +43,7 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
   const [formMenuAnchor, setFormMenuAnchor] = useState<null | HTMLElement>(null);
   const [columnMenuAnchor, setColumnMenuAnchor] = useState<null | HTMLElement>(null);
 
-  const { setNodeRef: setDroppableRef } = useDroppable({ id: statusId });
+  const { setNodeRef: setDroppableRef, isOver } = useDroppable({ id: statusId });
 
   const currentPriority = PRIORITY_OPTIONS.find((p) => p.value === priority) ?? PRIORITY_OPTIONS[1];
 
@@ -96,16 +97,18 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
       sx={{
         width: 320,
         flex: "0 0 auto",
-        bgcolor: "#F1F5F9",
+        bgcolor: "background.default",
         borderRadius: "12px",
-        border: "1px solid #E2E8F0",
+        border: isOver ? "2px solid #3B82F6" : "1px solid",
+        borderColor: isOver ? "#3B82F6" : "divider",
+        boxShadow: isOver ? "0 0 0 3px rgba(59, 130, 246, 0.15)" : "none",
         display: "flex",
         flexDirection: "column",
         maxHeight: "calc(100vh - 180px)",
+        transition: "border-color 0.2s ease, box-shadow 0.2s ease",
         "&:hover": {
-          borderColor: "#CBD5E1",
+          borderColor: "divider",
         },
-        transition: "border-color 0.15s ease",
       }}
     >
       {/* Column Header */}
@@ -116,14 +119,15 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
           gap: 1,
           px: 2,
           py: 1.5,
-          borderBottom: "1px solid #E2E8F0",
+          borderBottom: "1px solid",
+          borderColor: "divider",
         }}
       >
         <Typography
           variant="body2"
           sx={{
             fontWeight: 700,
-            color: "#1E293B",
+            color: "text.primary",
             fontSize: 14,
             flex: 1,
             textTransform: "capitalize",
@@ -135,7 +139,7 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
         {/* Count Badge */}
         <Box
           sx={{
-            bgcolor: "#E2E8F0",
+            bgcolor: "divider",
             borderRadius: "12px",
             px: 1,
             py: 0.25,
@@ -145,7 +149,7 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
         >
           <Typography
             variant="caption"
-            sx={{ fontWeight: 700, fontSize: 12, color: "#475569" }}
+            sx={{ fontWeight: 700, fontSize: 12, color: "text.disabled" }}
           >
             {tasks.length}
           </Typography>
@@ -162,8 +166,8 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
           sx={{
             width: 28,
             height: 28,
-            color: "#64748B",
-            "&:hover": { bgcolor: "#E2E8F0" },
+            color: "text.secondary",
+            "&:hover": { bgcolor: "divider" },
           }}
         >
           <MoreVertOutlinedIcon sx={{ fontSize: 18 }} />
@@ -201,7 +205,7 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
         {tasks.length > 0 && (
           <>
             {tasks.map((task) => (
-              <TaskCard key={task.id} task={task} onEdit={onEditTask} onDelete={onDeleteTask} />
+              <TaskCard key={task.id} task={task} onEdit={onEditTask} onDelete={onDeleteTask} onUpdate={onUpdateTask} />
             ))}
           </>
         )}
@@ -210,9 +214,10 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
           <Box
             data-create-form
             sx={{
-              bgcolor: "#FFFFFF",
+              bgcolor: "background.paper",
               borderRadius: "10px",
-              border: "1px solid #E2E8F0",
+              border: "1px solid",
+              borderColor: "divider",
               boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
               overflow: "visible",
               position: "relative",
@@ -223,7 +228,7 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
               <Typography
                 variant="caption"
                 sx={{
-                  color: "#64748B",
+                  color: "text.secondary",
                   fontSize: 12,
                   px: 2,
                   pt: 1,
@@ -251,7 +256,7 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "8px",
-                    bgcolor: "#FAFBFC",
+                    bgcolor: "background.paper",
                     fontSize: 13,
                     "& fieldset": {
                       border: "none",
@@ -279,16 +284,17 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
                   width: 36,
                   height: 36,
                   borderRadius: "8px",
-                  border: "1px solid #E2E8F0",
+                  border: "1px solid",
+                  borderColor: "divider",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   cursor: "pointer",
-                  bgcolor: "#FAFBFC",
+                  bgcolor: "background.paper",
                   position: "relative",
                   "&:hover": {
-                    borderColor: "#CBD5E1",
-                    bgcolor: "#F8FAFC",
+                    borderColor: "divider",
+                    bgcolor: "background.default",
                   },
                 }}
               >
@@ -343,16 +349,17 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
                   width: 36,
                   height: 36,
                   borderRadius: "8px",
-                  border: "1px solid #E2E8F0",
+                  border: "1px solid",
+                  borderColor: "divider",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   cursor: "pointer",
-                  bgcolor: "#FAFBFC",
-                  color: dueDate ? "#1E293B" : "#94A3B8",
+                  bgcolor: "background.paper",
+                  color: dueDate ? "text.primary" : "text.secondary",
                   "&:hover": {
-                    borderColor: "#CBD5E1",
-                    bgcolor: "#F8FAFC",
+                    borderColor: "divider",
+                    bgcolor: "background.default",
                   },
                 }}
               >
@@ -378,14 +385,14 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
                 size="small"
                 onClick={resetForm}
                 sx={{
-                  color: "#64748B",
+                  color: "text.secondary",
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: 12,
                   borderRadius: "6px",
                   py: 0.5,
                   px: 1.5,
-                  "&:hover": { bgcolor: "#E2E8F0", color: "#334155" },
+                  "&:hover": { bgcolor: "divider", color: "text.primary" },
                 }}
               >
                 Cancel
@@ -415,7 +422,7 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
 
       {/* Create Button Area */}
       {!isOpen && (
-        <Box sx={{ p: 1.5, borderTop: "1px solid #E2E8F0" }}>
+        <Box sx={{ p: 1.5, borderTop: "1px solid", borderColor: "divider" }}>
           <Button
             fullWidth
             size="small"
@@ -423,15 +430,15 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
             onClick={handleCreateClick}
             sx={{
               justifyContent: "flex-start",
-              color: "#64748B",
+              color: "text.secondary",
               textTransform: "none",
               fontWeight: 600,
               fontSize: 13,
               borderRadius: "8px",
               py: 0.75,
               "&:hover": {
-                bgcolor: "#E2E8F0",
-                color: "#334155",
+                bgcolor: "divider",
+                color: "text.primary",
               },
             }}
           >

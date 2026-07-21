@@ -20,12 +20,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
           rel="stylesheet"
           precedence="default"
         />
       </head>
-      <body className="min-h-full flex flex-col" style={{ fontFamily: '"Outfit", sans-serif' }}>
+      <body className="min-h-full flex flex-col" style={{ fontFamily: '"Poppins", sans-serif' }}>
         <AppProviders>
           <AppShell>{children}</AppShell>
         </AppProviders>

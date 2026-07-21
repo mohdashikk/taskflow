@@ -21,7 +21,7 @@ import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useTasks } from "../hooks/useTasks";
 import { useProjectStatuses } from "@/features/projects/hooks/useProjectStatuses";
-import { createTask, deleteTask, updateTaskStatus } from "../services/tasksService";
+import { createTask, deleteTask, updateTaskStatus, updateTask } from "../services/tasksService";
 import { createProjectStatus, deleteProjectStatus } from "@/features/projects/services/projectStatusesService";
 import BoardColumn from "./BoardColumn";
 import AddColumnButton from "./AddColumnButton";
@@ -69,11 +69,33 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
     },
   });
 
+  const updateTaskMutation = useMutation({
+    mutationFn: ({ taskId, updates }: { taskId: string; updates: { title?: string; priority?: string; due_date?: string | null; status_id?: string } }) =>
+      updateTask(taskId, projectId, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks", projectId, userId] });
+    },
+  });
+
   const updateTaskStatusMutation = useMutation({
     mutationFn: ({ taskId, statusId }: { taskId: string; statusId: string }) =>
       updateTaskStatus(taskId, projectId, statusId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks", projectId, userId] });
+    onMutate: async ({ taskId, statusId }) => {
+      await queryClient.cancelQueries({ queryKey: ["tasks", projectId, userId] });
+      const previousTasks = queryClient.getQueryData<TaskRow[]>(["tasks", projectId, userId]);
+
+      queryClient.setQueryData<TaskRow[]>(["tasks", projectId, userId], (old = []) => {
+        return old.map((task) => (task.id === taskId ? { ...task, status_id: statusId } : task));
+      });
+
+      setActiveTaskId(null);
+
+      return { previousTasks };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(["tasks", projectId, userId], context.previousTasks);
+      }
     },
   });
 
@@ -98,6 +120,10 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
 
   const handleDelete = (taskId: string) => {
     deleteMutation.mutate(taskId);
+  };
+
+  const handleUpdateTask = (taskId: string, updates: { title?: string; priority?: string; due_date?: string | null; status_id?: string }) => {
+    updateTaskMutation.mutate({ taskId, updates });
   };
 
   const handleAddColumn = (name: string, color: string) => {
@@ -142,15 +168,20 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    setActiveTaskId(null);
 
-    if (!over) return;
+    if (!over) {
+      setActiveTaskId(null);
+      return;
+    }
 
     const taskId = active.id as string;
     const overId = over.id as string;
 
     const task = tasks.find((t) => t.id === taskId);
-    if (!task) return;
+    if (!task) {
+      setActiveTaskId(null);
+      return;
+    }
 
     const targetColumn = columns.find((c) => c.statusId === overId);
     if (targetColumn) {
@@ -159,6 +190,8 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
           taskId: task.id,
           statusId: targetColumn.statusId,
         });
+      } else {
+        setActiveTaskId(null);
       }
       return;
     }
@@ -169,6 +202,8 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
         taskId: task.id,
         statusId: targetTask.status_id,
       });
+    } else {
+      setActiveTaskId(null);
     }
   };
 
@@ -189,26 +224,27 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
           position: "sticky",
           top: 0,
           zIndex: 10,
-          bgcolor: "#F8FAFC",
+          bgcolor: "background.default",
           pb: 2,
-          borderBottom: "1px solid #E2E8F0",
+          borderBottom: "1px solid",
+          borderColor: "divider",
           mb: 1,
         }}
       >
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 800,
-            color: "#0F172A",
-            fontSize: 18,
-            letterSpacing: -0.3,
-          }}
-        >
-          Board
-        </Typography>
+<Typography
+  variant="h6"
+  sx={{
+    fontWeight: 800,
+    color: "#0F172A",
+    fontSize: 18,
+    letterSpacing: -0.3,
+  }}
+  >
+    Project Tasks
+  </Typography>
         <Typography
           variant="caption"
-          sx={{ color: "#64748B", fontSize: 13, mt: 0.5, display: "block" }}
+          sx={{ color: "text.secondary", fontSize: 13, mt: 0.5, display: "block" }}
         >
           {tasks.length} work items
         </Typography>
@@ -234,13 +270,13 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
               height: 8,
             },
             "&::-webkit-scrollbar-track": {
-              bgcolor: "#F1F5F9",
+              bgcolor: "background.default",
               borderRadius: 4,
             },
             "&::-webkit-scrollbar-thumb": {
-              bgcolor: "#CBD5E1",
+              bgcolor: "divider",
               borderRadius: 4,
-              "&:hover": { bgcolor: "#94A3B8" },
+              "&:hover": { bgcolor: "text.secondary" },
             },
           }}
         >
@@ -258,13 +294,13 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
               >
                 <Typography
                   variant="body2"
-                  sx={{ fontWeight: 700, color: "#1E293B", fontSize: 14, mb: 0.5 }}
+                  sx={{ fontWeight: 700, color: "text.primary", fontSize: 14, mb: 0.5 }}
                 >
                   No workflow statuses configured
                 </Typography>
                 <Typography
                   variant="caption"
-                  sx={{ color: "#64748B", fontSize: 13 }}
+                  sx={{ color: "text.secondary", fontSize: 13 }}
                 >
                   Add a status in project settings to get started.
                 </Typography>
@@ -272,17 +308,18 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
             ) : (
               <>
                 {columns.map((column) => (
-                  <BoardColumn
-                    key={column.statusId || column.statusName}
-                    statusId={column.statusId}
-                    statusName={column.statusName}
-                    tasks={column.tasks}
-                    onCreate={handleCreate}
-                    createPending={createMutation.isPending}
-                    onEditTask={handleEdit}
-                    onDeleteTask={handleDelete}
-                    onDeleteColumn={handleDeleteColumn}
-                  />
+              <BoardColumn
+                key={column.statusId || column.statusName}
+                statusId={column.statusId}
+                statusName={column.statusName}
+                tasks={column.tasks}
+                onCreate={handleCreate}
+                createPending={createMutation.isPending}
+                onEditTask={handleEdit}
+                onDeleteTask={handleDelete}
+                onDeleteColumn={handleDeleteColumn}
+                onUpdateTask={handleUpdateTask}
+              />
                 ))}
                 <AddColumnButton projectId={projectId} onAdd={handleAddColumn} adding={addStatusMutation.isPending} />
               </>
