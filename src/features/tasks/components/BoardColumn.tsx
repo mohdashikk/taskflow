@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -9,12 +9,17 @@ import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
+import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+import KeyboardArrowDownOutlinedIcon from "@mui/icons-material/KeyboardArrowDownOutlined";
+import KeyboardArrowUpOutlinedIcon from "@mui/icons-material/KeyboardArrowUpOutlined";
+import { motion, AnimatePresence } from "framer-motion";
 import type { TaskRow } from "../services/tasksService";
 import TaskCard from "./TaskCard";
+import EmptyColumn from "./EmptyColumn";
 
 interface BoardColumnProps {
   statusId: string;
@@ -26,57 +31,86 @@ interface BoardColumnProps {
   onDeleteTask?: (taskId: string) => void;
   onDeleteColumn?: (statusId: string) => void;
   onUpdateTask?: (taskId: string, updates: { title?: string; priority?: string; due_date?: string | null; status_id?: string }) => void;
+  wipLimit?: number;
 }
 
 const PRIORITY_OPTIONS = [
   { value: "high", label: "High", color: "#EF4444" },
   { value: "medium", label: "Medium", color: "#F59E0B" },
-  { value: "low", label: "Low", color: "#10B981" },
+  { value: "low", label: "Low", color: "#64748B" },
 ] as const;
 
-export default function BoardColumn({ statusId, statusName, tasks, onCreate, createPending, onEditTask, onDeleteTask, onDeleteColumn, onUpdateTask }: BoardColumnProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [title, setTitle] = useState("");
+const ACCENT = "#006F99";
+
+export default function BoardColumn({
+  statusId,
+  statusName,
+  tasks,
+  onCreate,
+  createPending,
+  onEditTask,
+  onDeleteTask,
+  onDeleteColumn,
+  onUpdateTask,
+  wipLimit = 0,
+}: BoardColumnProps) {
+  const [isQuickAdding, setIsQuickAdding] = useState(false);
+  const [quickTitle, setQuickTitle] = useState("");
+  const [showOptions, setShowOptions] = useState(false);
   const [priority, setPriority] = useState<string>("medium");
   const [dueDate, setDueDate] = useState<string>("");
   const [priorityAnchor, setPriorityAnchor] = useState<null | HTMLElement>(null);
-  const [formMenuAnchor, setFormMenuAnchor] = useState<null | HTMLElement>(null);
   const [columnMenuAnchor, setColumnMenuAnchor] = useState<null | HTMLElement>(null);
 
   const { setNodeRef: setDroppableRef, isOver } = useDroppable({ id: statusId });
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const currentPriority = PRIORITY_OPTIONS.find((p) => p.value === priority) ?? PRIORITY_OPTIONS[1];
 
-  const resetForm = () => {
-    setTitle("");
+  useEffect(() => {
+    if (isQuickAdding && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isQuickAdding]);
+
+  const handleQuickAddClick = () => {
+    setIsQuickAdding(true);
+    setQuickTitle("");
+    setShowOptions(false);
     setPriority("medium");
     setDueDate("");
-    setPriorityAnchor(null);
-    setIsOpen(false);
   };
 
-  const handleSubmit = () => {
-    const trimmed = title.trim() || "Untitled task";
+  const handleQuickAddCancel = () => {
+    setIsQuickAdding(false);
+    setQuickTitle("");
+    setShowOptions(false);
+    setPriority("medium");
+    setDueDate("");
+  };
+
+  const handleQuickAddSubmit = () => {
+    const trimmed = quickTitle.trim() || "Untitled task";
     onCreate({
       title: trimmed,
       status_id: statusId,
       priority,
       due_date: dueDate || null,
     });
-    resetForm();
+    setIsQuickAdding(false);
+    setQuickTitle("");
+    setShowOptions(false);
+    setPriority("medium");
+    setDueDate("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      handleSubmit();
+      handleQuickAddSubmit();
     } else if (e.key === "Escape") {
-      resetForm();
+      handleQuickAddCancel();
     }
-  };
-
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDueDate(e.target.value);
   };
 
   const handlePrioritySelect = (value: string) => {
@@ -84,31 +118,18 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
     setPriorityAnchor(null);
   };
 
-  const handleCreateClick = () => {
-    setIsOpen(true);
-    setTitle("");
-    setPriority("medium");
-    setDueDate("");
-  };
+  const isOverWipLimit = wipLimit > 0 && tasks.length >= wipLimit;
 
   return (
     <Box
-      ref={setDroppableRef}
       sx={{
-        width: 320,
+        width: { xs: 300, sm: 320 },
         flex: "0 0 auto",
-        bgcolor: "background.default",
-        borderRadius: "12px",
-        border: isOver ? "2px solid #3B82F6" : "1px solid",
-        borderColor: isOver ? "#3B82F6" : "divider",
-        boxShadow: isOver ? "0 0 0 3px rgba(59, 130, 246, 0.15)" : "none",
         display: "flex",
         flexDirection: "column",
-        maxHeight: "calc(100vh - 180px)",
-        transition: "border-color 0.2s ease, box-shadow 0.2s ease",
-        "&:hover": {
-          borderColor: "divider",
-        },
+        maxHeight: "calc(100vh - 200px)",
+        borderRadius: "20px",
+        overflow: "hidden",
       }}
     >
       {/* Column Header */}
@@ -119,43 +140,60 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
           gap: 1,
           px: 2,
           py: 1.5,
-          borderBottom: "1px solid",
-          borderColor: "divider",
+          bgcolor: "#006F99",
         }}
       >
-        <Typography
-          variant="body2"
+        <Box
           sx={{
-            fontWeight: 700,
-            color: "text.primary",
+            width: 10,
+            height: 10,
+            borderRadius: "50%",
+            bgcolor: statusName === "Done"
+              ? "#22C55E"
+              : statusName === "In Progress"
+                ? "#F59E0B"
+                : statusName === "Review"
+                  ? "#FFFFFF"
+                  : "#FFFFFF",
+            flexShrink: 0,
+          }}
+        />
+        <Typography
+          sx={{
+            fontWeight: 600,
+            color: "#FFFFFF",
             fontSize: 14,
             flex: 1,
-            textTransform: "capitalize",
+            letterSpacing: "-0.01em",
           }}
         >
           {statusName}
         </Typography>
 
-        {/* Count Badge */}
         <Box
           sx={{
-            bgcolor: "divider",
+            bgcolor: isOverWipLimit
+              ? "transparent"
+              : "rgba(255, 255, 255, 0.2)",
             borderRadius: "12px",
             px: 1,
             py: 0.25,
-            minWidth: 24,
+            minWidth: 28,
             textAlign: "center",
+            border: isOverWipLimit ? "1.5px solid #EF4444" : "none",
           }}
         >
           <Typography
-            variant="caption"
-            sx={{ fontWeight: 700, fontSize: 12, color: "text.disabled" }}
+            sx={{
+              fontWeight: 600,
+              fontSize: 12,
+              color: "#FFFFFF",
+            }}
           >
-            {tasks.length}
+            {tasks.length}{wipLimit > 0 ? ` / ${wipLimit}` : ""}
           </Typography>
         </Box>
 
-        {/* Menu Button */}
         <IconButton
           size="small"
           onClick={(e) => {
@@ -166,8 +204,9 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
           sx={{
             width: 28,
             height: 28,
-            color: "text.secondary",
-            "&:hover": { bgcolor: "divider" },
+            color: "#FFFFFF",
+            borderRadius: 2,
+            "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
           }}
         >
           <MoreVertOutlinedIcon sx={{ fontSize: 18 }} />
@@ -184,265 +223,317 @@ export default function BoardColumn({ statusId, statusName, tasks, onCreate, cre
               setColumnMenuAnchor(null);
               onDeleteColumn?.(statusId);
             }}
-            sx={{ fontSize: 13, py: 1, px: 2, color: "#EF4444" }}
+            sx={{ fontSize: 13, py: 1, px: 2, color: "#EF4444", borderRadius: 1, mx: 0.5 }}
           >
-            Delete Board
+            Delete Column
           </MenuItem>
         </Menu>
       </Box>
 
-      {/* Column Body */}
+      {/* Tasks - droppable scrollable area */}
       <Box
+        ref={setDroppableRef}
         sx={{
           flex: 1,
           overflowY: "auto",
-          p: 1.5,
+          px: 1.5,
+          pt: 1.5,
           display: "flex",
           flexDirection: "column",
-          gap: 1,
+          gap: 1.5,
+          bgcolor: "#F9FAFB",
+          borderBottomLeftRadius: "20px",
+          borderBottomRightRadius: "20px",
+          "&::-webkit-scrollbar": {
+            width: 6,
+          },
+          "&::-webkit-scrollbar-track": {
+            bgcolor: "transparent",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            bgcolor: "#D1D5DB",
+            borderRadius: 3,
+            "&:hover": { bgcolor: "#9CA3AF" },
+          },
         }}
       >
-        {tasks.length > 0 && (
-          <>
-            {tasks.map((task) => (
-              <TaskCard key={task.id} task={task} onEdit={onEditTask} onDelete={onDeleteTask} onUpdate={onUpdateTask} />
-            ))}
-          </>
-        )}
-
-        {isOpen && (
-          <Box
-            data-create-form
-            sx={{
-              bgcolor: "background.paper",
-              borderRadius: "10px",
-              border: "1px solid",
-              borderColor: "divider",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              overflow: "visible",
-              position: "relative",
-            }}
-          >
-            {/* Selected due date under header */}
-            {dueDate && (
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "text.secondary",
-                  fontSize: 12,
-                  px: 2,
-                  pt: 1,
-                  display: "block",
-                }}
-              >
-                📅 {new Date(dueDate + "T00:00:00").toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
-              </Typography>
-            )}
-
-            <Box sx={{ p: 1.5 }}>
-              <TextField
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Task title..."
-                size="small"
-                fullWidth
-                multiline
-                minRows={2}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "8px",
-                    bgcolor: "background.paper",
-                    fontSize: 13,
-                    "& fieldset": {
-                      border: "none",
-                    },
-                    "&.MuiOutlinedInput-root": {
-                      boxShadow: "none",
-                      "&.Mui-focused": {
-                        boxShadow: "none",
-                      },
-                    },
-                  },
-                }}
+        <AnimatePresence mode="popLayout">
+          {tasks.map((task) => (
+            <motion.div
+              key={task.id}
+              layout
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{
+                duration: 0.2,
+                ease: [0.4, 0, 0.2, 1] as const,
+                layout: { duration: 0.2, ease: [0.4, 0, 0.2, 1] as const },
+              }}
+              style={{ originX: 0.5, originY: 0 }}
+            >
+              <TaskCard
+                task={task}
+                onEdit={onEditTask}
+                onDelete={onDeleteTask}
+                onUpdate={onUpdateTask}
               />
-            </Box>
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
-            <Box sx={{ display: "flex", gap: 1, px: 1.5, pb: 1.5, alignItems: "center" }}>
-              {/* Priority Icon Button */}
-              <Box
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setPriorityAnchor(e.currentTarget);
-                }}
-                sx={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: "8px",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  bgcolor: "background.paper",
-                  position: "relative",
-                  "&:hover": {
-                    borderColor: "divider",
-                    bgcolor: "background.default",
-                  },
-                }}
-              >
-                <FlagOutlinedIcon sx={{ fontSize: 16, color: currentPriority.color }} />
-                <Box
-                  sx={{
-                    position: "absolute",
-                    bottom: -2,
-                    right: -2,
-                    width: 8,
-                    height: 8,
-                    borderRadius: "50%",
-                    bgcolor: currentPriority.color,
-                  }}
-                />
-              </Box>
-
-              {/* Priority Dropdown Menu */}
-              <Menu
-                anchorEl={priorityAnchor}
-                open={Boolean(priorityAnchor)}
-                onClose={() => setPriorityAnchor(null)}
-                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                transformOrigin={{ vertical: "top", horizontal: "left" }}
-              >
-                {PRIORITY_OPTIONS.map((option) => (
-                  <MenuItem
-                    key={option.value}
-                    selected={priority === option.value}
-                    onClick={() => handlePrioritySelect(option.value)}
-                    sx={{ gap: 1.5, py: 1, px: 2 }}
-                  >
-                    <Box
-                      sx={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        bgcolor: option.color,
-                      }}
-                    />
-                    <Typography sx={{ fontSize: 13, fontWeight: 600, textTransform: "capitalize" }}>
-                      {option.label}
-                    </Typography>
-                  </MenuItem>
-                ))}
-              </Menu>
-
-              {/* Calendar Icon Button with transparent date input overlay */}
-              <Box
-                sx={{
-                  position: "relative",
-                  width: 36,
-                  height: 36,
-                  borderRadius: "8px",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  bgcolor: "background.paper",
-                  color: dueDate ? "text.primary" : "text.secondary",
-                  "&:hover": {
-                    borderColor: "divider",
-                    bgcolor: "background.default",
-                  },
-                }}
-              >
-                <CalendarTodayOutlinedIcon sx={{ fontSize: 16 }} />
-                <input
-                  type="date"
-                  value={dueDate}
-                  onChange={handleDateChange}
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    opacity: 0,
-                    cursor: "pointer",
-                    width: "100%",
-                    height: "100%",
-                  }}
-                />
-              </Box>
-            </Box>
-
-            <Box sx={{ display: "flex", gap: 1, px: 1.5, pb: 1.5, justifyContent: "flex-end" }}>
-              <Button
-                size="small"
-                onClick={resetForm}
-                sx={{
-                  color: "text.secondary",
-                  textTransform: "none",
-                  fontWeight: 600,
-                  fontSize: 12,
-                  borderRadius: "6px",
-                  py: 0.5,
-                  px: 1.5,
-                  "&:hover": { bgcolor: "divider", color: "text.primary" },
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                size="small"
-                variant="contained"
-                onClick={handleSubmit}
-                disabled={createPending}
-                sx={{
-                  textTransform: "none",
-                  fontWeight: 600,
-                  fontSize: 12,
-                  borderRadius: "6px",
-                  py: 0.5,
-                  px: 1.5,
-                  boxShadow: "none",
-                  "&:hover": { boxShadow: "none" },
-                }}
-              >
-                Save
-              </Button>
-            </Box>
-          </Box>
+        {tasks.length === 0 && !isQuickAdding && (
+          <EmptyColumn statusName={statusName} />
         )}
       </Box>
 
-      {/* Create Button Area */}
-      {!isOpen && (
-        <Box sx={{ p: 1.5, borderTop: "1px solid", borderColor: "divider" }}>
+      {/* Quick add form */}
+      <AnimatePresence>
+        {isQuickAdding && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] as const }}
+          >
+            <Box
+              sx={{
+                mx: 1.5,
+                mb: 1.5,
+                bgcolor: "#FFFFFF",
+                borderRadius: "14px",
+                border: `2px solid ${ACCENT}`,
+                boxShadow: "0 4px 16px rgba(0, 111, 153, 0.08)",
+                overflow: "hidden",
+              }}
+            >
+              <Box sx={{ p: 2 }}>
+                <TextField
+                  inputRef={inputRef}
+                  value={quickTitle}
+                  onChange={(e) => setQuickTitle(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Type a title, press Enter..."
+                  size="small"
+                  fullWidth
+                  multiline
+                  minRows={1}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "10px",
+                      bgcolor: "#F7F8FA",
+                      fontSize: 14,
+                      "& fieldset": { border: "none" },
+                      "&.Mui-focused": { boxShadow: "none" },
+                    },
+                  }}
+                />
+
+                <AnimatePresence>
+                  {showOptions && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <Box sx={{ display: "flex", gap: 1, mt: 1.5, flexWrap: "wrap" }}>
+                        <Box
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPriorityAnchor(e.currentTarget);
+                          }}
+                          sx={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: "10px",
+                            border: "1px solid #E6E8EB",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                            bgcolor: "#F7F8FA",
+                            position: "relative",
+                            transition: "all 120ms ease",
+                            "&:hover": { bgcolor: "#F2F4F7" },
+                          }}
+                        >
+                          <FlagOutlinedIcon sx={{ fontSize: 16, color: currentPriority.color }} />
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              bottom: -2,
+                              right: -2,
+                              width: 8,
+                              height: 8,
+                              borderRadius: "50%",
+                              bgcolor: currentPriority.color,
+                            }}
+                          />
+                        </Box>
+
+                        <Menu
+                          anchorEl={priorityAnchor}
+                          open={Boolean(priorityAnchor)}
+                          onClose={() => setPriorityAnchor(null)}
+                          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                          transformOrigin={{ vertical: "top", horizontal: "left" }}
+                        >
+                          {PRIORITY_OPTIONS.map((option) => (
+                            <MenuItem
+                              key={option.value}
+                              selected={priority === option.value}
+                              onClick={() => handlePrioritySelect(option.value)}
+                              sx={{ gap: 1.5, py: 1, px: 2, borderRadius: 1, mx: 0.5 }}
+                            >
+                              <Box
+                                sx={{
+                                  width: 8,
+                                  height: 8,
+                                  borderRadius: "50%",
+                                  bgcolor: option.color,
+                                }}
+                              />
+                              <Typography sx={{ fontSize: 13, fontWeight: 600, textTransform: "capitalize" }}>
+                                {option.label}
+                              </Typography>
+                            </MenuItem>
+                          ))}
+                        </Menu>
+
+                        <Box
+                          sx={{
+                            position: "relative",
+                            width: 36,
+                            height: 36,
+                            borderRadius: "10px",
+                            border: "1px solid #E6E8EB",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                            bgcolor: "#F7F8FA",
+                            color: dueDate ? "#111827" : "#6B7280",
+                            transition: "all 120ms ease",
+                            "&:hover": { bgcolor: "#F2F4F7" },
+                          }}
+                        >
+                          <CalendarTodayOutlinedIcon sx={{ fontSize: 16 }} />
+                          <input
+                            type="date"
+                            value={dueDate}
+                            onChange={(e) => setDueDate(e.target.value)}
+                            style={{
+                              position: "absolute",
+                              inset: 0,
+                              opacity: 0,
+                              cursor: "pointer",
+                              width: "100%",
+                              height: "100%",
+                            }}
+                          />
+                        </Box>
+                      </Box>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Box>
+
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 0.5,
+                  px: 2,
+                  pb: 1.5,
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Button
+                  size="small"
+                  onClick={() => setShowOptions(!showOptions)}
+                  sx={{
+                    color: "#6B7280",
+                    textTransform: "none",
+                    fontWeight: 600,
+                    fontSize: 12,
+                    borderRadius: 2,
+                    py: 0.5,
+                    px: 1,
+                    "&:hover": { bgcolor: "#F2F4F7", color: "#111827" },
+                  }}
+                  startIcon={
+                    showOptions ? (
+                      <KeyboardArrowUpOutlinedIcon sx={{ fontSize: 16 }} />
+                    ) : (
+                      <KeyboardArrowDownOutlinedIcon sx={{ fontSize: 16 }} />
+                    )
+                  }
+                >
+                  {showOptions ? "Less" : "More"}
+                </Button>
+                <Box sx={{ display: "flex", gap: 0.5 }}>
+                  <IconButton
+                    size="small"
+                    onClick={handleQuickAddCancel}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      color: "#6B7280",
+                      borderRadius: 2,
+                      "&:hover": { bgcolor: "#F2F4F7", color: "#111827" },
+                    }}
+                  >
+                    <CloseOutlinedIcon sx={{ fontSize: 16 }} />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={handleQuickAddSubmit}
+                    disabled={createPending}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      color: "#006F99",
+                      borderRadius: 2,
+                      "&:hover": { bgcolor: "#006F99", color: "#FFFFFF" },
+                      "&.Mui-disabled": { color: "#D1D5DB" },
+                    }}
+                  >
+                    <SendOutlinedIcon sx={{ fontSize: 16 }} />
+                  </IconButton>
+                </Box>
+              </Box>
+            </Box>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Add Task Button */}
+      {!isQuickAdding && (
+        <Box sx={{ p: 1.5, mt: "auto" }}>
           <Button
             fullWidth
             size="small"
-            startIcon={<AddOutlinedIcon sx={{ fontSize: 16 }} />}
-            onClick={handleCreateClick}
+            onClick={handleQuickAddClick}
             sx={{
               justifyContent: "flex-start",
-              color: "text.secondary",
+              color: "#6B7280",
               textTransform: "none",
               fontWeight: 600,
               fontSize: 13,
-              borderRadius: "8px",
-              py: 0.75,
+              borderRadius: "10px",
+              py: 1,
+              border: "1px dashed #D1D5DB",
               "&:hover": {
-                bgcolor: "divider",
-                color: "text.primary",
+                borderColor: "#006F99",
+                color: "#006F99",
+                bgcolor: "transparent",
               },
+              transition: "all 150ms ease",
             }}
           >
-            Create
+            + Add task
           </Button>
         </Box>
       )}

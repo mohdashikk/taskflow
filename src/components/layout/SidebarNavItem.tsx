@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
 import type { NavItem } from "./Sidebar";
 
 interface SidebarNavItemProps {
@@ -60,19 +60,21 @@ export default function SidebarNavItem({
       >
         {item.icon}
       </ListItemIcon>
-      <ListItemText
-        primary={item.label}
-        primaryTypographyProps={{
+      <Typography
+        sx={{
           fontWeight: selected ? 700 : 500,
           fontSize: 14,
+          lineHeight: 1.4,
         }}
-      />
+      >
+        {item.label}
+      </Typography>
     </>
   );
 
-  if (item.onClick) {
+  if (false) {
     return (
-      <ListItemButton sx={buttonSx} onClick={item.onClick}>
+      <ListItemButton sx={buttonSx}>
         {content}
       </ListItemButton>
     );

@@ -10,6 +10,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
+import { motion } from "framer-motion";
 import type { ProjectStatusRow } from "@/features/projects/data/mockData";
 
 interface TaskFormProps {
@@ -52,13 +53,6 @@ export default function TaskForm({
   const defaultStatusId =
     statuses.find((s) => s.is_default)?.id ?? statuses[0]?.id ?? "";
 
-  console.log("[TaskForm] render:", {
-    statusesLength: statuses.length,
-    statuses: statuses.map(s => ({ id: s.id, name: s.name, is_default: s.is_default })),
-    defaultStatusId,
-    statusId,
-  });
-
   const handleCancel = () => {
     setTitle("");
     setDescription("");
@@ -74,14 +68,6 @@ export default function TaskForm({
     if (!title.trim()) return;
 
     const selectedStatusId = statusId || defaultStatusId || null;
-
-    console.log("[TaskForm] submit:", {
-      title: title.trim(),
-      statusId,
-      defaultStatusId,
-      selectedStatusId,
-      statusesLength: statuses.length,
-    });
 
     onSubmit({
       title: title.trim(),
@@ -99,13 +85,19 @@ export default function TaskForm({
       onClose={onCancel}
       fullWidth
       maxWidth="sm"
-      slotProps={{ paper: { sx: { borderRadius: 3 } } }}
+      sx={{
+        "& .MuiDialog-paper": {
+          borderRadius: "24px",
+          border: "1px solid #E6E8EB",
+          boxShadow: "0 24px 64px rgba(15, 23, 42, 0.1)",
+        },
+      }}
     >
-      <DialogTitle sx={{ fontWeight: 800, fontSize: 20 }}>
+      <DialogTitle sx={{ fontWeight: 700, fontSize: 22, color: "#111827", letterSpacing: "-0.01em" }}>
         Add Task
       </DialogTitle>
       <Box component="form" onSubmit={handleSubmit}>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
           {statuses.length > 0 ? (
             <TextField
               select
@@ -115,7 +107,20 @@ export default function TaskForm({
               size="small"
               sx={{
                 minWidth: 160,
-                "& .MuiOutlinedInput-notchedOutline": { borderRadius: 2 },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "14px",
+                  bgcolor: "#F7F8FA",
+                  "& fieldset": {
+                    borderColor: "#E6E8EB",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#006F99",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#006F99",
+                    boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                  },
+                },
               }}
             >
               {statuses.map((status) => (
@@ -136,7 +141,7 @@ export default function TaskForm({
               ))}
             </TextField>
           ) : (
-            <Typography variant="body2" color="warning.main" sx={{ fontWeight: 500 }}>
+            <Typography variant="body2" sx={{ color: "#F59E0B", fontWeight: 500, fontSize: 14 }}>
               No statuses configured for this project. Tasks will use the first available status.
             </Typography>
           )}
@@ -147,7 +152,22 @@ export default function TaskForm({
             required
             fullWidth
             size="small"
-            sx={{ "& .MuiOutlinedInput-notchedOutline": { borderRadius: 2 } }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "14px",
+                bgcolor: "#F7F8FA",
+                "& fieldset": {
+                  borderColor: "#E6E8EB",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#006F99",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#006F99",
+                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                },
+              },
+            }}
           />
           <TextField
             label="Description"
@@ -157,7 +177,22 @@ export default function TaskForm({
             size="small"
             multiline
             minRows={2}
-            sx={{ "& .MuiOutlinedInput-notchedOutline": { borderRadius: 2 } }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "14px",
+                bgcolor: "#F7F8FA",
+                "& fieldset": {
+                  borderColor: "#E6E8EB",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#006F99",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#006F99",
+                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                },
+              },
+            }}
           />
           <TextField
             select
@@ -167,7 +202,20 @@ export default function TaskForm({
             size="small"
             sx={{
               minWidth: 140,
-              "& .MuiOutlinedInput-notchedOutline": { borderRadius: 2 },
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "14px",
+                bgcolor: "#F7F8FA",
+                "& fieldset": {
+                  borderColor: "#E6E8EB",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#006F99",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#006F99",
+                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                },
+              },
             }}
           >
             {PRIORITY_OPTIONS.map((option) => (
@@ -187,7 +235,20 @@ export default function TaskForm({
               sx={{
                 flexGrow: 1,
                 minWidth: 160,
-                "& .MuiOutlinedInput-notchedOutline": { borderRadius: 2 },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "14px",
+                  bgcolor: "#F7F8FA",
+                  "& fieldset": {
+                    borderColor: "#E6E8EB",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#006F99",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#006F99",
+                    boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                  },
+                },
               }}
             />
             <TextField
@@ -200,40 +261,69 @@ export default function TaskForm({
               sx={{
                 flexGrow: 1,
                 minWidth: 160,
-                "& .MuiOutlinedInput-notchedOutline": { borderRadius: 2 },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "14px",
+                  bgcolor: "#F7F8FA",
+                  "& fieldset": {
+                    borderColor: "#E6E8EB",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#006F99",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#006F99",
+                    boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                  },
+                },
               }}
             />
           </Box>
 
           {error && (
-            <Typography variant="body2" sx={{ color: "error.main", fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ color: "#EF4444", fontWeight: 600, fontSize: 14 }}>
               {error}
             </Typography>
           )}
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2.5, justifyContent: "flex-end" }}>
-          <Button
-            variant="outlined"
-            onClick={handleCancel}
-            disabled={isPending}
-            sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600 }}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={isPending || !title.trim()}
-            sx={{
-              borderRadius: 2,
-              textTransform: "none",
-              fontWeight: 600,
-              boxShadow: "none",
-              "&:hover": { boxShadow: "none", bgcolor: "primary.dark" },
-            }}
-          >
-            {isPending ? "Saving..." : "Save Task"}
-          </Button>
+        <DialogActions sx={{ px: 3, pb: 2.5, justifyContent: "flex-end", gap: 1 }}>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
+            <Button
+              variant="outlined"
+              onClick={handleCancel}
+              disabled={isPending}
+              sx={{
+                borderRadius: "14px",
+                textTransform: "none",
+                fontWeight: 600,
+                borderColor: "#E6E8EB",
+                color: "#6B7280",
+                "&:hover": {
+                  borderColor: "#006F99",
+                  color: "#006F99",
+                  bgcolor: "transparent",
+                },
+              }}
+            >
+              Cancel
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isPending || !title.trim()}
+              sx={{
+                borderRadius: "14px",
+                textTransform: "none",
+                fontWeight: 600,
+                bgcolor: "#006F99",
+                boxShadow: "0 4px 12px rgba(0, 111, 153, 0.2)",
+                "&:hover": { boxShadow: "none", bgcolor: "#005670" },
+              }}
+            >
+              {isPending ? "Saving..." : "Save Task"}
+            </Button>
+          </motion.div>
         </DialogActions>
       </Box>
     </Dialog>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import { alpha, useTheme } from "@mui/material/styles";
 import {
   Avatar,
   Box,
@@ -22,6 +23,7 @@ import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import KeyboardArrowDownOutlinedIcon from "@mui/icons-material/KeyboardArrowDownOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import { motion } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 import ThemeSwitcher from "@/features/auth/components/ThemeSwitcher";
@@ -34,6 +36,7 @@ const PAGE_TITLES: Record<string, string> = {
 
 export default function Header() {
   const pathname = usePathname();
+  const theme = useTheme();
   const { user } = useAuth();
   const logout = useLogout();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -62,65 +65,78 @@ export default function Header() {
 
   return (
     <Box
+      component={motion.header}
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] as const }}
       sx={{
         height: 72,
-        px: { xs: 2, sm: 3 },
+        px: { xs: 2, sm: 3, md: 4 },
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        borderBottom: "1px solid",
-        borderColor: "divider",
-        bgcolor: "background.paper",
-        boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        bgcolor: theme.palette.mode === "dark" ? "#0D0F11" : "#FFFFFF",
+        position: "sticky",
+        top: 0,
+        zIndex: 10,
       }}
     >
+      {/* Page Title */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography
-          variant="h5"
           sx={{
             fontWeight: 700,
-            color: "text.primary",
-            fontSize: { xs: 20, sm: 24 },
-            whiteSpace: "nowrap",
+            color: theme.palette.text.primary,
+            fontSize: { xs: 22, sm: 26 },
+            letterSpacing: "-0.01em",
+            lineHeight: 1.2,
           }}
         >
           {pageTitle}
         </Typography>
       </Box>
 
+      {/* Right Actions */}
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: { xs: 1, sm: 1.5 },
-          flex: 2,
-          justifyContent: "center",
+          gap: { xs: 0.75, sm: 1.5 },
         }}
       >
+        {/* Search */}
         <Box
           sx={{
-            display: { xs: "none", sm: "flex" },
+            display: { xs: "none", md: "flex" },
             alignItems: "center",
             height: 40,
             px: 1.5,
-            borderRadius: 2,
-            bgcolor: "background.paper",
-            border: "1px solid",
-            borderColor: "divider",
-            transition: "border-color 0.2s ease",
+            borderRadius: 3,
+            bgcolor: theme.palette.mode === "dark"
+              ? alpha("#FFFFFF", 0.04)
+              : "#F2F4F7",
+            border: `1px solid ${theme.palette.divider}`,
+            transition: "all 180ms ease",
+            maxWidth: 280,
+            width: "100%",
             "&:hover": {
-              borderColor: "primary.main",
+              borderColor: theme.palette.primary.main,
             },
             "&:focus-within": {
-              borderColor: "primary.main",
-              boxShadow: "0 0 0 2px",
-              boxShadowColor: "primary.main",
+              borderColor: theme.palette.primary.main,
+              boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.08)}`,
             },
-            maxWidth: 360,
-            width: "100%",
           }}
         >
-          <SearchOutlinedIcon sx={{ color: "text.secondary", fontSize: 20, mr: 1 }} />
+          <SearchOutlinedIcon
+            sx={{
+              color: theme.palette.text.secondary,
+              fontSize: 18,
+              mr: 1,
+              flexShrink: 0,
+            }}
+          />
           <input
             placeholder="Search..."
             aria-label="Search"
@@ -129,57 +145,56 @@ export default function Header() {
               border: "none",
               outline: "none",
               width: "100%",
-              color: "inherit",
+              color: theme.palette.text.primary,
               fontSize: 14,
               fontFamily: "inherit",
             }}
           />
         </Box>
 
-        <Button
-          variant="contained"
-          startIcon={<AddOutlinedIcon fontSize="small" />}
-          sx={{
-            borderRadius: 2,
-            height: 40,
-            px: 2,
-            textTransform: "none",
-            fontWeight: 600,
-            fontSize: 14,
-            whiteSpace: "nowrap",
-          }}
-        >
-          Add Task
-        </Button>
-      </Box>
+        {/* Quick Add */}
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
+          <Button
+            variant="contained"
+            startIcon={<AddOutlinedIcon fontSize="small" />}
+            sx={{
+              borderRadius: 3,
+              height: 40,
+              px: 2.5,
+              textTransform: "none",
+              fontWeight: 600,
+              fontSize: 14,
+              whiteSpace: "nowrap",
+              bgcolor: theme.palette.primary.main,
+              "&:hover": {
+                bgcolor: theme.palette.primary.dark,
+              },
+            }}
+          >
+            <Box sx={{ display: { xs: "none", sm: "inline" } }}>Add Task</Box>
+          </Button>
+        </motion.div>
 
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: { xs: 0.5, sm: 1 },
-          flex: 1,
-          justifyContent: "flex-end",
-        }}
-      >
         <ThemeSwitcher />
 
-        <Tooltip title="Notifications">
+        {/* Notifications */}
+        <Tooltip title="Notifications" arrow>
           <Box sx={{ position: "relative", display: "inline-flex" }}>
             <IconButton
               sx={{
-                width: 44,
-                height: 44,
-                borderRadius: "50%",
-                bgcolor: "transparent",
-                border: "1px solid",
-                borderColor: "divider",
-                color: "text.primary",
-                transition: "all 0.2s ease",
+                width: 40,
+                height: 40,
+                borderRadius: 3,
+                bgcolor: theme.palette.mode === "dark"
+                  ? alpha("#FFFFFF", 0.04)
+                  : "#F2F4F7",
+                border: `1px solid ${theme.palette.divider}`,
+                color: theme.palette.text.primary,
+                transition: "all 180ms ease",
                 "&:hover": {
-                  bgcolor: "transparent",
-                  borderColor: "primary.main",
-                  color: "primary.main",
+                  bgcolor: alpha(theme.palette.primary.main, 0.08),
+                  borderColor: theme.palette.primary.main,
+                  color: theme.palette.primary.main,
                 },
               }}
             >
@@ -188,60 +203,89 @@ export default function Header() {
             <Box
               sx={{
                 position: "absolute",
-                top: 8,
-                right: 8,
+                top: 9,
+                right: 9,
                 width: 8,
                 height: 8,
-                borderRadius: 4,
-                bgcolor: "#22C55E",
-                border: "1.5px solid",
-                borderColor: "background.paper",
+                borderRadius: "50%",
+                bgcolor: theme.palette.success.main,
+                border: `1.5px solid ${theme.palette.background.paper}`,
               }}
             />
           </Box>
         </Tooltip>
 
+        {/* Profile */}
         <Box
           onClick={handleOpen}
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: 1,
-            px: 1.5,
-            py: 1,
-            borderRadius: 2,
-            bgcolor: "background.paper",
+            gap: 0.75,
+            px: 0.75,
+            py: 0.5,
+            borderRadius: 3,
             cursor: "pointer",
-            transition: "background 0.2s ease",
+            transition: "background 180ms ease",
             "&:hover": {
-              bgcolor: "action.hover",
+              bgcolor: theme.palette.mode === "dark"
+                ? alpha("#FFFFFF", 0.04)
+                : "#F2F4F7",
             },
           }}
         >
           <Avatar
             sx={{
-              bgcolor: "grey.300",
-              color: "text.primary",
-              width: 44,
-              height: 44,
-              fontSize: 16,
+              bgcolor: theme.palette.mode === "dark"
+                ? theme.palette.primary.main
+                : alpha(theme.palette.primary.main, 0.12),
+              color: theme.palette.mode === "dark"
+                ? theme.palette.primary.contrastText
+                : theme.palette.primary.main,
+              width: 36,
+              height: 36,
+              fontSize: 14,
               fontWeight: 700,
-              border: "1px solid",
-              borderColor: "divider",
+              border: `1px solid ${theme.palette.divider}`,
             }}
           >
             {initials}
           </Avatar>
-          <Box sx={{ display: { xs: "none", sm: "flex" }, flexDirection: "column", lineHeight: 1.2 }}>
-            <Typography sx={{ fontWeight: 600, color: "text.primary", fontSize: 14 }}>
+          <Box sx={{ display: { xs: "none", sm: "flex" }, flexDirection: "column", lineHeight: 1.3, maxWidth: 120 }}>
+            <Typography
+              sx={{
+                fontWeight: 600,
+                color: theme.palette.text.primary,
+                fontSize: 13,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
               {displayName}
+            </Typography>
+            <Typography
+              sx={{
+                color: theme.palette.text.secondary,
+                fontSize: 11,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {email}
             </Typography>
           </Box>
           <KeyboardArrowDownOutlinedIcon
-            sx={{ color: "text.secondary", fontSize: 18, ml: 0.5 }}
+            sx={{
+              color: theme.palette.text.secondary,
+              fontSize: 16,
+              display: { xs: "none", sm: "block" },
+            }}
           />
         </Box>
 
+        {/* Profile Menu */}
         <Menu
           anchorEl={anchorEl}
           open={open}
@@ -257,40 +301,98 @@ export default function Header() {
           }}
           slotProps={{
             paper: {
-              sx: { mt: 1, minWidth: 220, borderRadius: 2 },
+              sx: {
+                mt: 1,
+                minWidth: 220,
+                borderRadius: 3,
+                border: `1px solid ${theme.palette.divider}`,
+                boxShadow: `0 8px 24px ${alpha(theme.palette.text.primary, 0.08)}`,
+              },
             },
           }}
         >
-            <Box sx={{ px: 2, py: 1.5 }}>
-              <Typography component="div" sx={{ fontWeight: 700, fontSize: 14 }} noWrap>
-                {displayName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" noWrap>
-                {email}
-              </Typography>
-            </Box>
-          <Divider sx={{ my: 0.5 }} />
-          <MenuItem onClick={handleClose}>
+          <Box sx={{ px: 2, py: 1.5 }}>
+            <Typography
+              component="div"
+              sx={{ fontWeight: 600, fontSize: 14 }}
+              noWrap
+            >
+              {displayName}
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{ color: theme.palette.text.secondary, fontSize: 13 }}
+              noWrap
+            >
+              {email}
+            </Typography>
+          </Box>
+          <Divider sx={{ borderColor: theme.palette.divider, my: 0.5 }} />
+          <MenuItem
+            onClick={handleClose}
+            sx={{
+              fontSize: 14,
+              py: 1,
+              px: 2,
+              borderRadius: 1,
+              mx: 0.5,
+              my: 0.25,
+            }}
+          >
             <ListItemIcon>
               <EditOutlinedIcon fontSize="small" />
             </ListItemIcon>
             Edit profile
           </MenuItem>
-          <MenuItem onClick={handleClose}>
+          <MenuItem
+            onClick={handleClose}
+            sx={{
+              fontSize: 14,
+              py: 1,
+              px: 2,
+              borderRadius: 1,
+              mx: 0.5,
+              my: 0.25,
+            }}
+          >
             <ListItemIcon>
               <SettingsOutlinedIcon fontSize="small" />
             </ListItemIcon>
             Account settings
           </MenuItem>
-          <MenuItem onClick={handleClose}>
+          <MenuItem
+            onClick={handleClose}
+            sx={{
+              fontSize: 14,
+              py: 1,
+              px: 2,
+              borderRadius: 1,
+              mx: 0.5,
+              my: 0.25,
+            }}
+          >
             <ListItemIcon>
               <InfoOutlinedIcon fontSize="small" />
             </ListItemIcon>
             Support
           </MenuItem>
-          <Divider sx={{ my: 0.5 }} />
-          <MenuItem onClick={handleLogout}>
-            <ListItemIcon>
+          <Divider sx={{ borderColor: theme.palette.divider, my: 0.5 }} />
+          <MenuItem
+            onClick={handleLogout}
+            sx={{
+              fontSize: 14,
+              py: 1,
+              px: 2,
+              borderRadius: 1,
+              mx: 0.5,
+              my: 0.25,
+              color: theme.palette.error.main,
+              "&:hover": {
+                bgcolor: alpha(theme.palette.error.main, 0.08),
+              },
+            }}
+          >
+            <ListItemIcon sx={{ color: theme.palette.error.main }}>
               <LogoutOutlinedIcon fontSize="small" />
             </ListItemIcon>
             Sign out

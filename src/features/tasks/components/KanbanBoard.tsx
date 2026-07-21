@@ -12,6 +12,7 @@ import {
   useSensor,
   useSensors,
   closestCorners,
+  DragOverEvent,
 } from "@dnd-kit/core";
 import {
   sortableKeyboardCoordinates,
@@ -38,6 +39,7 @@ interface Column {
   statusName: string;
   color: string;
   tasks: TaskRow[];
+  wipLimit: number;
 }
 
 export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
@@ -144,7 +146,7 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
   if (isLoading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-        <CircularProgress size={28} />
+        <CircularProgress size={28} sx={{ color: "#006F99" }} />
       </Box>
     );
   }
@@ -156,13 +158,14 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
     statusName: status.name,
     color: status.color,
     tasks: tasks.filter((t) => t.status_id === status.id),
+    wipLimit: 0,
   }));
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveTaskId(event.active.id as string);
   };
 
-  const handleDragOver = () => {
+  const handleDragOver = (_event: DragOverEvent) => {
     // no-op: required by DndContext v6
   };
 
@@ -217,37 +220,42 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      {/* Sticky Board Header */}
+    <>
+      {/* Board Header */}
       <Box
         sx={{
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-          bgcolor: "background.default",
-          pb: 2,
-          borderBottom: "1px solid",
-          borderColor: "divider",
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 2,
           mb: 1,
         }}
       >
-<Typography
-  variant="h6"
-  sx={{
-    fontWeight: 800,
-    color: "#0F172A",
-    fontSize: 18,
-    letterSpacing: -0.3,
-  }}
-  >
-    Project Tasks
-  </Typography>
-        <Typography
-          variant="caption"
-          sx={{ color: "text.secondary", fontSize: 13, mt: 0.5, display: "block" }}
-        >
-          {tasks.length} work items
-        </Typography>
+        <Box>
+          <Typography
+            sx={{
+              fontWeight: 700,
+              color: "#111827",
+              fontSize: 22,
+              letterSpacing: "-0.02em",
+              lineHeight: 1.2,
+            }}
+          >
+            Project Tasks
+          </Typography>
+          <Typography
+            sx={{
+              color: "#6B7280",
+              fontSize: 14,
+              mt: 0.5,
+              display: "block",
+              lineHeight: 1.5,
+            }}
+          >
+            {tasks.length} work items across {columns.length} columns
+          </Typography>
+        </Box>
       </Box>
 
       {/* Board Columns */}
@@ -261,79 +269,116 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
         <Box
           sx={{
             display: "flex",
-            gap: 2,
+            gap: 3,
             overflowX: "auto",
             pb: 2,
             flex: 1,
             alignItems: "flex-start",
             "&::-webkit-scrollbar": {
-              height: 8,
+              height: 6,
             },
             "&::-webkit-scrollbar-track": {
-              bgcolor: "background.default",
-              borderRadius: 4,
+              bgcolor: "transparent",
             },
             "&::-webkit-scrollbar-thumb": {
-              bgcolor: "divider",
-              borderRadius: 4,
-              "&:hover": { bgcolor: "text.secondary" },
+              bgcolor: "#D1D5DB",
+              borderRadius: 3,
+              "&:hover": { bgcolor: "#9CA3AF" },
             },
           }}
         >
-            {columns.length === 0 ? (
+          {columns.length === 0 ? (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                py: 8,
+                textAlign: "center",
+                flex: 1,
+              }}
+            >
               <Box
                 sx={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: "50%",
+                  bgcolor: "#F2F4F7",
                   display: "flex",
-                  flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  py: 8,
-                  textAlign: "center",
-                  flex: 1,
+                  mb: 2,
                 }}
               >
-                <Typography
-                  variant="body2"
-                  sx={{ fontWeight: 700, color: "text.primary", fontSize: 14, mb: 0.5 }}
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#6B7280"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  No workflow statuses configured
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{ color: "text.secondary", fontSize: 13 }}
-                >
-                  Add a status in project settings to get started.
-                </Typography>
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="14" y="14" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                </svg>
               </Box>
-            ) : (
-              <>
-                {columns.map((column) => (
-              <BoardColumn
-                key={column.statusId || column.statusName}
-                statusId={column.statusId}
-                statusName={column.statusName}
-                tasks={column.tasks}
-                onCreate={handleCreate}
-                createPending={createMutation.isPending}
-                onEditTask={handleEdit}
-                onDeleteTask={handleDelete}
-                onDeleteColumn={handleDeleteColumn}
-                onUpdateTask={handleUpdateTask}
-              />
-                ))}
-                <AddColumnButton projectId={projectId} onAdd={handleAddColumn} adding={addStatusMutation.isPending} />
-              </>
-            )}
-          </Box>
+              <Typography
+                sx={{
+                  fontWeight: 600,
+                  color: "#111827",
+                  fontSize: 15,
+                  mb: 0.5,
+                }}
+              >
+                No workflow statuses configured
+              </Typography>
+              <Typography
+                sx={{
+                  color: "#6B7280",
+                  fontSize: 13,
+                  maxWidth: 320,
+                  lineHeight: 1.5,
+                }}
+              >
+                Add a status in project settings to get started.
+              </Typography>
+            </Box>
+          ) : (
+            <>
+              {columns.map((column) => (
+                <BoardColumn
+                  key={column.statusId || column.statusName}
+                  statusId={column.statusId}
+                  statusName={column.statusName}
+                  tasks={column.tasks}
+                  onCreate={handleCreate}
+                  createPending={createMutation.isPending}
+                  onEditTask={handleEdit}
+                  onDeleteTask={handleDelete}
+                  onDeleteColumn={handleDeleteColumn}
+                  onUpdateTask={handleUpdateTask}
+                  wipLimit={column.wipLimit}
+                />
+              ))}
+              <AddColumnButton projectId={projectId} onAdd={handleAddColumn} adding={addStatusMutation.isPending} />
+            </>
+          )}
+        </Box>
 
         <DragOverlay>
           {activeTask ? (
             <Box
               sx={{
-                opacity: 0.9,
-                transform: "rotate(3deg)",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-                borderRadius: "10px",
+                opacity: 0.95,
+                transform: "rotate(2deg)",
+                boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15)",
+                borderRadius: "14px",
+                maxWidth: 320,
               }}
             >
               <TaskCard task={activeTask} />
@@ -341,6 +386,6 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
           ) : null}
         </DragOverlay>
       </DndContext>
-    </Box>
+    </>
   );
 }

@@ -10,6 +10,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
+import { motion } from "framer-motion";
 import { STATUS_LABELS, type ProjectStatus } from "../data/mockData";
 import type { ProjectStatusRow } from "../data/mockData";
 
@@ -86,13 +87,19 @@ export default function ProjectForm({
       onClose={onCancel}
       fullWidth
       maxWidth="sm"
-      slotProps={{ paper: { sx: { borderRadius: 3 } } }}
+      sx={{
+        "& .MuiDialog-paper": {
+          borderRadius: "24px",
+          border: "1px solid #E6E8EB",
+          boxShadow: "0 24px 64px rgba(15, 23, 42, 0.1)",
+        },
+      }}
     >
-      <DialogTitle sx={{ fontWeight: 800, fontSize: 20 }}>
+      <DialogTitle sx={{ fontWeight: 700, fontSize: 22, color: "#111827", letterSpacing: "-0.01em" }}>
         {mode === "edit" ? "Edit Project" : "Add Project"}
       </DialogTitle>
       <Box component="form" onSubmit={handleSubmit} key={open ? "form-open" : "form-closed"}>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
           <TextField
             label="Project Title"
             value={title}
@@ -100,7 +107,18 @@ export default function ProjectForm({
             required
             fullWidth
             size="small"
-            sx={{ "& .MuiOutlinedInput-notchedOutline": { borderRadius: 2 } }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "14px",
+                bgcolor: "#F7F8FA",
+                "& fieldset": { borderColor: "#E6E8EB" },
+                "&:hover fieldset": { borderColor: "#006F99" },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#006F99",
+                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                },
+              },
+            }}
           />
           <TextField
             label="Description"
@@ -110,7 +128,18 @@ export default function ProjectForm({
             size="small"
             multiline
             minRows={2}
-            sx={{ "& .MuiOutlinedInput-notchedOutline": { borderRadius: 2 } }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "14px",
+                bgcolor: "#F7F8FA",
+                "& fieldset": { borderColor: "#E6E8EB" },
+                "&:hover fieldset": { borderColor: "#006F99" },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#006F99",
+                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                },
+              },
+            }}
           />
           <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
             <TextField
@@ -121,7 +150,16 @@ export default function ProjectForm({
               size="small"
               sx={{
                 minWidth: 150,
-                "& .MuiOutlinedInput-notchedOutline": { borderRadius: 2 },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "14px",
+                  bgcolor: "#F7F8FA",
+                  "& fieldset": { borderColor: "#E6E8EB" },
+                  "&:hover fieldset": { borderColor: "#006F99" },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#006F99",
+                    boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                  },
+                },
               }}
             >
               {statusOptions.map((option) => (
@@ -140,40 +178,61 @@ export default function ProjectForm({
               sx={{
                 flexGrow: 1,
                 minWidth: 160,
-                "& .MuiOutlinedInput-notchedOutline": { borderRadius: 2 },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "14px",
+                  bgcolor: "#F7F8FA",
+                  "& fieldset": { borderColor: "#E6E8EB" },
+                  "&:hover fieldset": { borderColor: "#006F99" },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#006F99",
+                    boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                  },
+                },
               }}
             />
           </Box>
 
           {error && (
-            <Typography variant="body2" sx={{ color: "error.main", fontWeight: 600 }}>
+            <Typography sx={{ color: "#EF4444", fontWeight: 600, fontSize: 14 }}>
               {error}
             </Typography>
           )}
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2.5, justifyContent: "flex-end" }}>
-          <Button
-            variant="outlined"
-            onClick={handleCancel}
-            disabled={isPending}
-            sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600 }}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={isPending || !title.trim()}
-            sx={{
-              borderRadius: 2,
-              textTransform: "none",
-              fontWeight: 600,
-              boxShadow: "none",
-              "&:hover": { boxShadow: "none", bgcolor: "primary.dark" },
-            }}
-          >
-            {isPending ? "Saving..." : "Save Project"}
-          </Button>
+        <DialogActions sx={{ px: 3, pb: 2.5, justifyContent: "flex-end", gap: 1 }}>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
+            <Button
+              variant="outlined"
+              onClick={handleCancel}
+              disabled={isPending}
+              sx={{
+                borderRadius: "14px",
+                textTransform: "none",
+                fontWeight: 600,
+                borderColor: "#E6E8EB",
+                color: "#6B7280",
+                "&:hover": { borderColor: "#006F99", color: "#006F99" },
+              }}
+            >
+              Cancel
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isPending || !title.trim()}
+              sx={{
+                borderRadius: "14px",
+                textTransform: "none",
+                fontWeight: 600,
+                bgcolor: "#006F99",
+                boxShadow: "0 4px 12px rgba(0, 111, 153, 0.2)",
+                "&:hover": { boxShadow: "none", bgcolor: "#005670" },
+              }}
+            >
+              {isPending ? "Saving..." : "Save Project"}
+            </Button>
+          </motion.div>
         </DialogActions>
       </Box>
     </Dialog>

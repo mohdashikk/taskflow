@@ -13,6 +13,7 @@ import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { useRegisterMutation } from "../hooks/useRegisterMutation";
 
@@ -44,192 +45,287 @@ export default function RegisterForm() {
   };
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        width: "100%",
-        borderRadius: "16px",
-        border: "1px solid",
-        borderColor: "divider",
-        backgroundColor: "background.paper",
-        p: { xs: 3, sm: 4 },
-        boxShadow: "0 24px 64px rgba(15, 23, 42, 0.08)",
-      }}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] as const }}
     >
-      <Box sx={{ mb: 4, textAlign: "center" }}>
+      <Paper
+        elevation={0}
+        sx={{
+          width: "100%",
+          borderRadius: "24px",
+          border: "1px solid #E6E8EB",
+          backgroundColor: "#FFFFFF",
+          p: { xs: 3, sm: 4 },
+          boxShadow: "0 24px 64px rgba(15, 23, 42, 0.06)",
+        }}
+      >
+        <Box sx={{ mb: 5, textAlign: "center" }}>
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.1, duration: 0.4 }}
+          >
+            <Box
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 52,
+                height: 52,
+                borderRadius: 4,
+                bgcolor: "#006F99",
+                mb: 2.5,
+                boxShadow: "0 8px 24px rgba(0, 111, 153, 0.2)",
+              }}
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#FFFFFF"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 00-3-3.87" />
+                <path d="M16 3.13a4 4 0 010 7.75" />
+              </svg>
+            </Box>
+          </motion.div>
+          <Typography
+            component="h1"
+            sx={{
+              color: "#111827",
+              fontSize: { xs: 26, sm: 30 },
+              fontWeight: 700,
+              letterSpacing: "-0.02em",
+              lineHeight: 1.2,
+              mb: 0.75,
+            }}
+          >
+            Create your account
+          </Typography>
+          <Typography
+            sx={{
+              color: "#6B7280",
+              fontSize: 15,
+              lineHeight: 1.6,
+            }}
+          >
+            Start organizing your work and hitting your targets
+          </Typography>
+        </Box>
+
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          noValidate
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+          }}
+        >
+          <TextField
+            fullWidth
+            required
+            label="Display Name"
+            name="displayName"
+            placeholder="Jane Doe"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Box
+                      sx={{
+                        display: "grid",
+                        placeItems: "center",
+                        color: "#6B7280",
+                      }}
+                    >
+                      <PersonOutlineOutlinedIcon fontSize="small" />
+                    </Box>
+                  </InputAdornment>
+                ),
+              },
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "14px",
+                bgcolor: "#F7F8FA",
+                "& fieldset": {
+                  borderColor: "#E6E8EB",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#006F99",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#006F99",
+                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                },
+              },
+            }}
+          />
+
+          <TextField
+            fullWidth
+            required
+            label="Email"
+            name="email"
+            placeholder="you@company.com"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "14px",
+                bgcolor: "#F7F8FA",
+                "& fieldset": {
+                  borderColor: "#E6E8EB",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#006F99",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#006F99",
+                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                },
+              },
+            }}
+          />
+
+          <TextField
+            fullWidth
+            required
+            label="Password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      edge="end"
+                      onClick={() => setShowPassword((current) => !current)}
+                      sx={{
+                        borderRadius: 2,
+                        color: "#6B7280",
+                        "&:hover": {
+                          bgcolor: "#F2F4F7",
+                          color: "#111827",
+                        },
+                      }}
+                    >
+                      {showPassword ? (
+                        <VisibilityOffOutlinedIcon fontSize="small" />
+                      ) : (
+                        <VisibilityOutlinedIcon fontSize="small" />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "14px",
+                bgcolor: "#F7F8FA",
+                "& fieldset": {
+                  borderColor: "#E6E8EB",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#006F99",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#006F99",
+                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                },
+              },
+            }}
+          />
+
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Button
+              fullWidth
+              type="submit"
+              variant="contained"
+              disabled={isSubmitting}
+              sx={{
+                height: 52,
+                borderRadius: "14px",
+                bgcolor: "#006F99",
+                boxShadow: "0 8px 24px rgba(0, 111, 153, 0.2)",
+                fontSize: 16,
+                fontWeight: 600,
+                textTransform: "none",
+                letterSpacing: "-0.01em",
+                "&:hover": {
+                  bgcolor: "#005670",
+                  boxShadow: "0 12px 28px rgba(0, 111, 153, 0.24)",
+                },
+                "&.Mui-disabled": {
+                  bgcolor: "#D1D5DB",
+                  boxShadow: "none",
+                },
+              }}
+            >
+              {isSubmitting ? "Creating account..." : "Get Started"}
+            </Button>
+          </motion.div>
+        </Box>
+
+        {isError && (
+          <Typography
+            sx={{
+              mt: 3,
+              color: "#EF4444",
+              fontSize: 14,
+              textAlign: "center",
+              fontWeight: 500,
+            }}
+          >
+            {error instanceof Error ? error.message : "Unable to create account"}
+          </Typography>
+        )}
+
         <Typography
           sx={{
-            mb: 1,
-            color: "primary.main",
+            mt: 4,
+            color: "#6B7280",
             fontSize: 14,
-            fontWeight: 800,
-            letterSpacing: 0.5,
-            textTransform: "uppercase",
-          }}
-        >
-          TaskFlow
-        </Typography>
-        <Typography
-          component="h2"
-          sx={{
-            color: "text.primary",
-            fontSize: { xs: 28, sm: 32 },
-            fontWeight: 800,
-            letterSpacing: 0,
-            lineHeight: 1.2,
-          }}
-        >
-          Create your account
-        </Typography>
-        <Typography
-          sx={{
-            mt: 1.25,
-            color: "text.secondary",
-            fontSize: 15,
+            textAlign: "center",
             lineHeight: 1.6,
           }}
         >
-          Start organizing your work and hitting your delivery targets.
+          Already have an account?{" "}
+          <Link
+            href="/"
+            underline="hover"
+            sx={{
+              color: "#006F99",
+              fontWeight: 700,
+              "&:hover": {
+                color: "#005670",
+              },
+            }}
+          >
+            Sign in
+          </Link>
         </Typography>
-      </Box>
-
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        noValidate
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 2.5,
-        }}
-      >
-        <TextField
-          fullWidth
-          required
-          label="Display Name"
-          name="displayName"
-          placeholder="Jane Doe"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Box
-                    sx={{
-                      display: "grid",
-                      placeItems: "center",
-                      color: "text.secondary",
-                    }}
-                  >
-                    <PersonOutlineOutlinedIcon fontSize="small" />
-                  </Box>
-                </InputAdornment>
-              ),
-            },
-          }}
-        />
-
-        <TextField
-          fullWidth
-          required
-          label="Email"
-          name="email"
-          placeholder="you@company.com"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        <TextField
-          fullWidth
-          required
-          label="Password"
-          name="password"
-          type={showPassword ? "text" : "password"}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                    edge="end"
-                    onClick={() => setShowPassword((current) => !current)}
-                  >
-                    {showPassword ? (
-                      <VisibilityOffOutlinedIcon />
-                    ) : (
-                      <VisibilityOutlinedIcon />
-                    )}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
-        />
-
-        <Button
-          fullWidth
-          type="submit"
-          variant="contained"
-          disabled={isSubmitting}
-          sx={{
-            height: 48,
-            borderRadius: "12px",
-            backgroundColor: "primary.main",
-            boxShadow: "0 16px 32px rgba(37, 99, 235, 0.24)",
-            fontSize: 15,
-            fontWeight: 800,
-            textTransform: "none",
-            "&:hover": {
-              backgroundColor: "primary.dark",
-              boxShadow: "0 18px 36px rgba(37, 99, 235, 0.28)",
-            },
-            "&.Mui-disabled": {
-              backgroundColor: "action.disabledBackground",
-              color: "action.disabled",
-            },
-          }}
-        >
-          {isSubmitting ? "Creating account..." : "Get Started"}
-        </Button>
-      </Box>
-
-      {isError && (
-        <Typography
-          sx={{
-            mt: 2,
-            color: "error.main",
-            fontSize: 14,
-            textAlign: "center",
-          }}
-        >
-          {error instanceof Error ? error.message : "Unable to create account"}
-        </Typography>
-      )}
-
-      <Typography
-        sx={{
-          mt: 3,
-          color: "text.secondary",
-          fontSize: 14,
-          textAlign: "center",
-        }}
-      >
-        Already have an account?{" "}
-        <Link
-          href="/"
-          underline="hover"
-          sx={{
-            color: "primary.main",
-            fontWeight: 800,
-          }}
-        >
-          Sign in
-        </Link>
-      </Typography>
-    </Paper>
+      </Paper>
+    </motion.div>
   );
 }

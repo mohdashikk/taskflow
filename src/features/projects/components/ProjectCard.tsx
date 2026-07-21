@@ -14,7 +14,7 @@ import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import EventOutlinedIcon from "@mui/icons-material/EventOutlined";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
-
+import { motion } from "framer-motion";
 import { StatusBadge } from "./StatusBadge";
 import type { Project, ProjectStatusRow } from "../data/mockData";
 
@@ -47,153 +47,200 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
   };
   const closeMenu = () => setAnchorEl(null);
 
+  const completionRate = project.tasksTotal > 0
+    ? Math.round((project.tasksDone / project.tasksTotal) * 100)
+    : 0;
+
   return (
-    <Box
-      role="button"
-      tabIndex={0}
-      onClick={openProject}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          openProject();
-        }
-      }}
-      sx={{
-        bgcolor: "background.paper",
-        borderRadius: 2,
-        border: "1px solid",
-        borderColor: "divider",
-        boxShadow: "0 1px 3px rgba(15, 23, 42, 0.06)",
-        p: 2.5,
-        cursor: "pointer",
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
-        transition: "transform 200ms ease, box-shadow 200ms ease",
-        "&:hover": {
-          transform: "translateY(-2px)",
-          boxShadow: "0 10px 24px rgba(15, 23, 42, 0.12)",
-        },
-        "&:focus-visible": {
-          outline: "2px solid",
-          outlineColor: "primary.main",
-          outlineOffset: 2,
-        },
-      }}
+    <motion.div
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] as const }}
     >
-      {/* Header: status left, three-dot right */}
       <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 1,
+        role="button"
+        tabIndex={0}
+        onClick={openProject}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openProject();
+          }
         }}
-      >
-        <StatusBadge status={project.status} statuses={statusMap} />
-        <IconButton
-          size="small"
-          onClick={handleMenu}
-          sx={{ color: "text.secondary", flexShrink: 0 }}
-          aria-label="Project options"
-        >
-          <MoreVertOutlinedIcon fontSize="small" />
-        </IconButton>
-      </Box>
-
-      {/* Title */}
-      <Typography
-        component="h3"
-        sx={{ fontSize: 18, fontWeight: 600, lineHeight: 1.3 }}
-      >
-        {project.name}
-      </Typography>
-
-      {/* Description (max two lines) */}
-      <Typography
-        variant="body2"
-        color="text.secondary"
         sx={{
-          display: "-webkit-box",
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: "vertical",
+          bgcolor: "#FFFFFF",
+          borderRadius: "20px",
+          border: "1px solid #E6E8EB",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04)",
+          p: 3,
+          cursor: "pointer",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2.5,
+          transition: "all 220ms cubic-bezier(0.4, 0, 0.2, 1)",
+          position: "relative",
           overflow: "hidden",
-          minHeight: 40,
+          "&:hover": {
+            boxShadow: "0 12px 28px rgba(15, 23, 42, 0.08)",
+            borderColor: "#D1D5DB",
+          },
+          "&:focus-visible": {
+            outline: "2px solid",
+            outlineColor: "#006F99",
+            outlineOffset: 2,
+          },
         }}
       >
-        {project.description}
-      </Typography>
-
-      <Box
-        sx={{
-          borderTop: "1px solid",
-          borderColor: "divider",
-        }}
-      />
-
-      {/* Project information row */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-          color: "text.secondary",
-          flexWrap: "wrap",
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          <EventOutlinedIcon sx={{ fontSize: 16 }} />
-          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-            {project.dueDate}
-          </Typography>
+        {/* Header: status left, three-dot right */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 1,
+          }}
+        >
+          <StatusBadge status={project.status} statuses={statusMap} />
+          <IconButton
+            size="small"
+            onClick={handleMenu}
+            sx={{
+              color: "#6B7280",
+              borderRadius: 2,
+              width: 32,
+              height: 32,
+              "&:hover": { bgcolor: "#F2F4F7", color: "#111827" },
+            }}
+            aria-label="Project options"
+          >
+            <MoreVertOutlinedIcon fontSize="small" />
+          </IconButton>
         </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 16 }} />
-          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-            {project.tasksDone}/{project.tasksTotal} Tasks
-          </Typography>
+
+        {/* Title */}
+        <Typography
+          component="h3"
+          sx={{
+            fontSize: 17,
+            fontWeight: 600,
+            lineHeight: 1.4,
+            letterSpacing: "-0.01em",
+            color: "#111827",
+          }}
+        >
+          {project.name}
+        </Typography>
+
+        {/* Description (max two lines) */}
+        <Typography
+          variant="body2"
+          sx={{
+            color: "#6B7280",
+            fontSize: 14,
+            lineHeight: 1.5,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            minHeight: 40,
+          }}
+        >
+          {project.description}
+        </Typography>
+
+        {/* Progress bar */}
+        <Box
+          sx={{
+            height: 6,
+            borderRadius: 3,
+            bgcolor: "#F2F4F7",
+            overflow: "hidden",
+          }}
+        >
+          <Box
+            sx={{
+              width: `${completionRate}%`,
+              height: "100%",
+              borderRadius: 3,
+              bgcolor: "#006F99",
+              transition: "width 400ms cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
+          />
         </Box>
+
+        {/* Project information row */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            color: "#6B7280",
+            flexWrap: "wrap",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <EventOutlinedIcon sx={{ fontSize: 16 }} />
+            <Typography variant="body2" sx={{ fontWeight: 500, fontSize: 13 }}>
+              {project.dueDate}
+            </Typography>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 16 }} />
+            <Typography variant="body2" sx={{ fontWeight: 500, fontSize: 13 }}>
+              {project.tasksDone}/{project.tasksTotal} Tasks
+            </Typography>
+          </Box>
+        </Box>
+
+        <Menu
+          anchorEl={anchorEl}
+          open={menuOpen}
+          onClose={closeMenu}
+          onClick={(e) => e.stopPropagation()}
+          slotProps={{
+            paper: {
+              sx: {
+                borderRadius: 3,
+                border: "1px solid #E6E8EB",
+                boxShadow: "0 8px 24px rgba(15, 23, 42, 0.08)",
+                minWidth: 180,
+              },
+            },
+          }}
+        >
+          <MenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              closeMenu();
+              onEdit?.(project);
+            }}
+            sx={{ fontSize: 14, py: 1, px: 2, borderRadius: 1, mx: 0.5 }}
+          >
+            <ListItemIcon>
+              <EditOutlinedIcon fontSize="small" />
+            </ListItemIcon>
+            Edit Project
+          </MenuItem>
+          <MenuItem onClick={closeMenu} sx={{ fontSize: 14, py: 1, px: 2, borderRadius: 1, mx: 0.5 }}>
+            <ListItemIcon>
+              <ArchiveOutlinedIcon fontSize="small" />
+            </ListItemIcon>
+            Archive Project
+          </MenuItem>
+          <MenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              closeMenu();
+              onDelete?.(project.id);
+            }}
+            sx={{ fontSize: 14, py: 1, px: 2, color: "#EF4444", borderRadius: 1, mx: 0.5 }}
+          >
+            <ListItemIcon sx={{ color: "#EF4444" }}>
+              <DeleteOutlineOutlinedIcon fontSize="small" />
+            </ListItemIcon>
+            Delete Project
+          </MenuItem>
+        </Menu>
       </Box>
-
-      <Menu
-        anchorEl={anchorEl}
-        open={menuOpen}
-        onClose={closeMenu}
-        onClick={(e) => e.stopPropagation()}
-        slotProps={{ paper: { sx: { borderRadius: 2, minWidth: 180 } } }}
-      >
-        <MenuItem
-          onClick={(e) => {
-            e.stopPropagation();
-            closeMenu();
-            onEdit?.(project);
-          }}
-        >
-          <ListItemIcon>
-            <EditOutlinedIcon fontSize="small" />
-          </ListItemIcon>
-          Edit Project
-        </MenuItem>
-        <MenuItem onClick={closeMenu}>
-          <ListItemIcon>
-            <ArchiveOutlinedIcon fontSize="small" />
-          </ListItemIcon>
-          Archive Project
-        </MenuItem>
-        <MenuItem
-          onClick={(e) => {
-            e.stopPropagation();
-            closeMenu();
-            onDelete?.(project.id);
-          }}
-          sx={{ color: "error.main" }}
-        >
-          <ListItemIcon sx={{ color: "error.main" }}>
-            <DeleteOutlineOutlinedIcon fontSize="small" />
-          </ListItemIcon>
-          Delete Project
-        </MenuItem>
-      </Menu>
-    </Box>
+    </motion.div>
   );
 }

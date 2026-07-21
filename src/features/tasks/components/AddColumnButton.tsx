@@ -9,6 +9,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import { motion } from "framer-motion";
 
 interface AddColumnButtonProps {
   projectId: string;
@@ -18,7 +19,7 @@ interface AddColumnButtonProps {
 
 const COLORS = ["#64748B", "#EF4444", "#F59E0B", "#10B981", "#3B82F6", "#8B5CF6", "#EC4899"];
 
-export default function AddColumnButton({ projectId, onAdd, adding }: AddColumnButtonProps) {
+export default function AddColumnButton({ onAdd, adding }: AddColumnButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
   const [color, setColor] = useState(COLORS[0]);
@@ -51,32 +52,32 @@ export default function AddColumnButton({ projectId, onAdd, adding }: AddColumnB
         pt: 0,
       }}
     >
-      <Button
-        onClick={handleOpen}
-        aria-label="Add column"
-        sx={{
-          width: 48,
-          height: 48,
-          minWidth: 48,
-          borderRadius: "12px",
-          border: "1px dashed",
-          borderColor: "divider",
-          color: "text.secondary",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          p: 0,
-          "&:hover": {
-            border: "1px dashed",
-            borderColor: "text.secondary",
-            bgcolor: "background.default",
-            color: "text.primary",
-          },
-          transition: "all 0.15s ease",
-        }}
-      >
-        <AddOutlinedIcon sx={{ fontSize: 22 }} />
-      </Button>
+      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+        <Button
+          onClick={handleOpen}
+          aria-label="Add column"
+          sx={{
+            width: 48,
+            height: 48,
+            minWidth: 48,
+            borderRadius: "14px",
+            border: "1px dashed #D1D5DB",
+            color: "#6B7280",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 0,
+            transition: "all 150ms ease",
+            "&:hover": {
+              borderColor: "#006F99",
+              color: "#006F99",
+              bgcolor: "rgba(0, 111, 153, 0.04)",
+            },
+          }}
+        >
+          <AddOutlinedIcon sx={{ fontSize: 22 }} />
+        </Button>
+      </motion.div>
 
       <Dialog
         open={isOpen}
@@ -85,12 +86,15 @@ export default function AddColumnButton({ projectId, onAdd, adding }: AddColumnB
         fullWidth
         sx={{
           "& .MuiDialog-paper": {
-            borderRadius: "12px",
-            bgcolor: "background.paper",
+            borderRadius: "24px",
+            border: "1px solid #E6E8EB",
+            boxShadow: "0 24px 64px rgba(15, 23, 42, 0.12)",
           },
         }}
       >
-        <DialogTitle sx={{ fontSize: 16, fontWeight: 600, color: "text.primary" }}>New Board</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, fontSize: 22, color: "#111827", letterSpacing: "-0.01em" }}>
+          New Board
+        </DialogTitle>
         <DialogContent>
           <TextField
             value={name}
@@ -110,77 +114,74 @@ export default function AddColumnButton({ projectId, onAdd, adding }: AddColumnB
             sx={{
               mt: 1,
               "& .MuiOutlinedInput-root": {
-                borderRadius: "8px",
-                bgcolor: "background.paper",
+                borderRadius: "14px",
+                bgcolor: "#F7F8FA",
                 fontSize: 14,
-                "& fieldset": {
-                  border: "none",
-                },
-                "&.MuiOutlinedInput-root": {
-                  boxShadow: "none",
-                  "&.Mui-focused": {
-                    boxShadow: "none",
-                  },
-                },
+                "& fieldset": { border: "none" },
+                "&.Mui-focused": { boxShadow: "none" },
               },
             }}
           />
 
           <Box sx={{ display: "flex", gap: 0.75, flexWrap: "wrap", mt: 2.5 }}>
             {COLORS.map((c) => (
-              <Box
+              <motion.div
                 key={c}
-                onClick={() => setColor(c)}
-                sx={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: "6px",
-                  bgcolor: c,
-                  cursor: "pointer",
-                  border: color === c ? "2px solid" : "2px solid transparent",
-                  borderColor: color === c ? "text.primary" : "transparent",
-                  transition: "border-color 0.1s ease",
-                  "&:hover": {
-                    borderColor: color === c ? "text.primary" : "text.secondary",
-                  },
-                }}
-              />
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Box
+                  onClick={() => setColor(c)}
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: "8px",
+                    bgcolor: c,
+                    cursor: "pointer",
+                    border: color === c ? "2px solid #111827" : "2px solid transparent",
+                    transition: "border-color 100ms ease",
+                  }}
+                />
+              </motion.div>
             ))}
           </Box>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, pt: 0 }}>
+        <DialogActions sx={{ px: 3, pb: 2.5, pt: 0, justifyContent: "flex-end", gap: 1 }}>
           <Button
             onClick={handleClose}
             sx={{
-              color: "text.secondary",
+              color: "#6B7280",
               textTransform: "none",
               fontWeight: 600,
-              fontSize: 13,
-              borderRadius: "6px",
-              py: 0.5,
-              px: 1.5,
-              "&:hover": { bgcolor: "divider", color: "text.primary" },
+              fontSize: 14,
+              borderRadius: "14px",
+              py: 0.75,
+              px: 2,
+              "&:hover": { bgcolor: "#F2F4F7", color: "#111827" },
             }}
           >
             Cancel
           </Button>
-          <Button
-            variant="contained"
-            onClick={handleSubmit}
-            disabled={adding || !name.trim()}
-            sx={{
-              textTransform: "none",
-              fontWeight: 600,
-              fontSize: 13,
-              borderRadius: "6px",
-              py: 0.5,
-              px: 1.5,
-              boxShadow: "none",
-              "&:hover": { boxShadow: "none" },
-            }}
-          >
-            {adding ? "Saving..." : "Save"}
-          </Button>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
+            <Button
+              variant="contained"
+              onClick={handleSubmit}
+              disabled={adding || !name.trim()}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: 14,
+                borderRadius: "14px",
+                py: 0.75,
+                px: 2,
+                bgcolor: "#006F99",
+                boxShadow: "0 4px 12px rgba(0, 111, 153, 0.2)",
+                "&:hover": { boxShadow: "none", bgcolor: "#005670" },
+              }}
+            >
+              {adding ? "Saving..." : "Save"}
+            </Button>
+          </motion.div>
         </DialogActions>
       </Dialog>
     </Box>

@@ -5,11 +5,6 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { loginWithEmail, type LoginPayload } from "../api/auth";
 
-type Props = {
-  email: string;
-  password: string;
-};
-
 export const useLoginMutation = () => {
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
