@@ -244,6 +244,7 @@ export const updateTask = async (
     priority?: string;
     due_date?: string | null;
     status_id?: string;
+    position?: number;
   },
 ): Promise<TaskRow> => {
   if (!supabase) {
@@ -258,6 +259,7 @@ export const updateTask = async (
   if (updates.priority !== undefined) payload.priority = updates.priority;
   if (updates.due_date !== undefined) payload.due_date = updates.due_date;
   if (updates.status_id !== undefined) payload.status_id = updates.status_id;
+  if (updates.position !== undefined) payload.position = updates.position;
 
   const { data, error } = await supabase
     .from("tasks")

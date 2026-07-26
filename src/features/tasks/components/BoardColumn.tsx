@@ -273,7 +273,7 @@ export default function BoardColumn({
               const draggedIdx = isSourceColumn ? tasks.findIndex((t) => t.id === activeTaskId) : -1;
               const effectiveDragOverIndex =
                 isSourceColumn && draggedIdx !== -1 && dragOverIndex >= 0
-                  ? dragOverIndex <= draggedIdx
+                  ? dragOverIndex < draggedIdx
                     ? dragOverIndex
                     : dragOverIndex + 1
                   : dragOverIndex;
@@ -322,7 +322,7 @@ export default function BoardColumn({
             const draggedIdx = isSourceColumn ? tasks.findIndex((t) => t.id === activeTaskId) : -1;
             const effectiveDragOverIndex =
               isSourceColumn && draggedIdx !== -1 && dragOverIndex >= 0
-                ? dragOverIndex <= draggedIdx
+                ? dragOverIndex < draggedIdx
                   ? dragOverIndex
                   : dragOverIndex + 1
                 : dragOverIndex;

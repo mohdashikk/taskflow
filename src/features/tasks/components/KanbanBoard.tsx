@@ -149,7 +149,9 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
   const activeTask = tasks.find((t) => t.id === activeTaskId) ?? null;
 
   const columns = statuses.map((status) => {
-    const columnTasks = tasks.filter((t) => t.status_id === status.id);
+    const columnTasks = tasks
+      .filter((t) => t.status_id === status.id)
+      .sort((a, b) => a.position - b.position);
 
     return {
       statusId: status.id,
@@ -230,17 +232,85 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
       return;
     }
 
-    if (task.status_id === targetStatusId) {
-      setActiveTaskId(null);
-      setDragOverStatusId(null);
-      setDragOverIndex(0);
+    const sourceStatusId = task.status_id;
+    const isSameColumn = sourceStatusId === targetStatusId;
+
+    const otherTasks = tasks.filter((t) => t.id !== taskId);
+    const destTasks = otherTasks.filter((t) => t.status_id === targetStatusId);
+    const insertIndex = Math.max(0, Math.min(dragOverIndex, destTasks.length));
+
+    let newTasks: TaskRow[];
+
+    if (isSameColumn) {
+      const sourceTasks = otherTasks.filter((t) => t.status_id === sourceStatusId);
+      const otherColumnTasks = otherTasks.filter((t) => t.status_id !== sourceStatusId);
+
+      const reorderedSourceTasks = [
+        ...sourceTasks.slice(0, insertIndex),
+        { ...task, status_id: targetStatusId, position: insertIndex },
+        ...sourceTasks.slice(insertIndex),
+      ];
+
+      const updatedSourceTasks = reorderedSourceTasks.map((t, idx) => ({ ...t, position: idx }));
+
+      const statusOrder = statuses.map((s) => s.id);
+      const groupedTasks = new Map<string, TaskRow[]>();
+
+      for (const t of [...otherColumnTasks, ...updatedSourceTasks]) {
+        if (!groupedTasks.has(t.status_id)) {
+          groupedTasks.set(t.status_id, []);
+        }
+        groupedTasks.get(t.status_id)!.push(t);
+      }
+
+      newTasks = [];
+      for (const statusId of statusOrder) {
+        const columnTasks = groupedTasks.get(statusId);
+        if (columnTasks) {
+          newTasks.push(...columnTasks.sort((a, b) => a.position - b.position));
+        }
+      }
     } else {
-      updateTaskStatusMutation.mutate({ taskId: task.id, statusId: targetStatusId });
-      setActiveTaskId(null);
-      setDragOverStatusId(null);
-      setDragOverIndex(0);
+      const sourceTasks = otherTasks.filter((t) => t.status_id === sourceStatusId);
+      const otherColumnTasks = otherTasks.filter((t) => t.status_id !== sourceStatusId && t.status_id !== targetStatusId);
+
+      const renumberedSourceTasks = sourceTasks.map((t, idx) => ({ ...t, position: idx }));
+
+      const reorderedDestTasks = [
+        ...destTasks.slice(0, insertIndex),
+        { ...task, status_id: targetStatusId, position: insertIndex },
+        ...destTasks.slice(insertIndex),
+      ];
+
+      const updatedDestTasks = reorderedDestTasks.map((t, idx) => ({ ...t, position: idx }));
+
+      const statusOrder = statuses.map((s) => s.id);
+      const groupedTasks = new Map<string, TaskRow[]>();
+
+      for (const t of [...otherColumnTasks, ...updatedDestTasks, ...renumberedSourceTasks]) {
+        if (!groupedTasks.has(t.status_id)) {
+          groupedTasks.set(t.status_id, []);
+        }
+        groupedTasks.get(t.status_id)!.push(t);
+      }
+
+      newTasks = [];
+      for (const statusId of statusOrder) {
+        const columnTasks = groupedTasks.get(statusId);
+        if (columnTasks) {
+          newTasks.push(...columnTasks.sort((a, b) => a.position - b.position));
+        }
+      }
     }
-  }, [tasks, updateTaskStatusMutation, dragOverStatusId]);
+
+    queryClient.setQueryData<TaskRow[]>(["tasks", projectId, userId], newTasks);
+
+    updateTaskStatusMutation.mutate({ taskId: task.id, statusId: targetStatusId });
+
+    setActiveTaskId(null);
+    setDragOverStatusId(null);
+    setDragOverIndex(0);
+  }, [tasks, updateTaskStatusMutation, dragOverStatusId, dragOverIndex, projectId, userId, queryClient, statuses]);
 
   const handleDragCancel = useCallback(() => {
     setActiveTaskId(null);
