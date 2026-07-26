@@ -48,7 +48,7 @@ export default function AppShell({
            }}
          />
        )}
-       {!isAuthScreen && <Sidebar />}
+        {!isAuthScreen && <Sidebar />}
        <Box
          sx={{
            display: "flex",

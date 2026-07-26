@@ -18,11 +18,11 @@ import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme, alpha } from "@mui/material/styles";
 import type { TaskRow } from "../services/tasksService";
 import TaskCard from "./TaskCard";
-import EmptyColumn from "./EmptyColumn";
 
 interface BoardColumnProps {
   statusId: string;
@@ -45,6 +45,8 @@ const PRIORITY_OPTIONS = [
   { value: "medium", label: "Medium", color: "#F59E0B" },
   { value: "low", label: "Low", color: "#64748B" },
 ] as const;
+
+const COLUMN_GAP = 2;
 
 export default function BoardColumn({
   statusId,
@@ -125,10 +127,10 @@ export default function BoardColumn({
 
   const isOverWipLimit = wipLimit > 0 && tasks.length >= wipLimit;
 
-  const columnBorder = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
-  const columnShadow = isDark ? "0 8px 24px rgba(0,0,0,.18)" : "0 8px 24px rgba(0,0,0,0.04)";
+  const columnBorder = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
+  const columnShadow = isDark ? "0 8px 24px rgba(0,0,0,.25)" : "0 8px 24px rgba(0,0,0,0.06)";
   const menuBg = isDark ? "#232135" : "#FFFFFF";
-  const menuBorder = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
+  const menuBorder = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
   const mutedText = isDark ? "#B5B7C8" : "#6B7280";
 
   return (
@@ -159,7 +161,7 @@ export default function BoardColumn({
           px: 2,
           py: 1,
           height: 48,
-          mb: "15px",
+          mb: "16px",
           bgcolor: isDark ? "#12101e" : "rgba(0, 0, 0, 0.02)",
           borderRadius: "12px",
           border: `1px solid ${columnBorder}`,
@@ -250,24 +252,304 @@ export default function BoardColumn({
         </Menu>
       </Box>
 
-{/* Tasks - scrollable area */}
-        <Box
-          className="thin-scrollbar hide-scrollbar"
-          sx={{
-            flex: 1,
-            overflowY: "auto",
-            overflowX: "hidden",
-            display: "flex",
-            flexDirection: "column",
-            gap: "12px",
-            minHeight: 120,
-            px: 0,
-            pt: 0.5,
-            borderRadius: "10px",
-          }}
-        >
-        <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-          <AnimatePresence mode="popLayout">
+      {/* Tasks - scrollable area */}
+      <Box
+        className="thin-scrollbar hide-scrollbar"
+        sx={{
+          flex: 1,
+          overflowY: "auto",
+          overflowX: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          gap: `${COLUMN_GAP * 4}px`,
+          minHeight: 120,
+          px: 1,
+          pt: 0.5,
+          borderRadius: "10px",
+        }}
+      >
+        {tasks.length === 0 && !isQuickAdding ? (
+          <Box sx={{ px: 1 }}>
+            <Button
+              fullWidth
+              size="small"
+              onClick={handleQuickAddClick}
+              sx={{
+                justifyContent: "center",
+                gap: 0.75,
+                color: mutedText,
+                textTransform: "none",
+                fontWeight: 500,
+                fontSize: 13,
+                borderRadius: "10px",
+                py: 1,
+                border: `1px dashed ${columnBorder}`,
+                "&:hover": {
+                  borderColor: theme.palette.primary.main,
+                  color: theme.palette.primary.main,
+                  bgcolor: isDark ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.primary.main, 0.04),
+                },
+                transition: "all 150ms ease",
+              }}
+            >
+              <AddOutlinedIcon sx={{ fontSize: 16 }} />
+              Add a card
+            </Button>
+          </Box>
+        ) : tasks.length === 0 && isQuickAdding ? (
+          <Box sx={{ px: 1 }}>
+            <motion.div
+              key="empty-quick-add"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+              style={{ width: "100%" }}
+            >
+              <Box
+                sx={{
+                  bgcolor: isDark ? "#12101e" : "#FFFFFF",
+                  borderRadius: "12px",
+                  border: `1px solid ${columnBorder}`,
+                  boxShadow: columnShadow,
+                }}
+              >
+                <Box sx={{ p: 1.5 }}>
+                  <TextField
+                    inputRef={inputRef}
+                    value={quickTitle}
+                    onChange={(e) => setQuickTitle(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Type a title, press Enter..."
+                    size="small"
+                    fullWidth
+                    multiline
+                    minRows={1}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "10px",
+                        bgcolor: isDark ? "rgba(0,0,0,0.2)" : "#F7F8FA",
+                        color: "text.primary",
+                        fontSize: 14,
+                        "& fieldset": { border: "none" },
+                        "&.Mui-focused": { boxShadow: "none" },
+                        "&::placeholder": { color: mutedText },
+                      },
+                    }}
+                  />
+
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1 }}>
+                    <Box
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPriorityAnchor(e.currentTarget);
+                      }}
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: "8px",
+                        border: `1px solid ${columnBorder}`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        bgcolor: isDark ? "rgba(0,0,0,0.2)" : "#F7F8FA",
+                        position: "relative",
+                        transition: "all 120ms ease",
+                        "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)" },
+                      }}
+                    >
+                      <FlagOutlinedIcon sx={{ fontSize: 15, color: currentPriority.color }} />
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          bottom: -2,
+                          right: -2,
+                          width: 7,
+                          height: 7,
+                          borderRadius: "50%",
+                          bgcolor: currentPriority.color,
+                        }}
+                      />
+                    </Box>
+
+                    <Menu
+                      anchorEl={priorityAnchor}
+                      open={Boolean(priorityAnchor)}
+                      onClose={() => setPriorityAnchor(null)}
+                      anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                      transformOrigin={{ vertical: "top", horizontal: "left" }}
+                      slotProps={{
+                        paper: {
+                          sx: {
+                            bgcolor: menuBg,
+                            backdropFilter: "blur(24px)",
+                            border: `1px solid ${menuBorder}`,
+                            boxShadow: columnShadow,
+                          }
+                        }
+                      }}
+                    >
+                      {PRIORITY_OPTIONS.map((option) => (
+                        <MenuItem
+                          key={option.value}
+                          selected={priority === option.value}
+                          onClick={() => handlePrioritySelect(option.value)}
+                          sx={{ gap: 1.5, py: 1, px: 2, borderRadius: 1, mx: 0.5, color: "text.primary" }}
+                        >
+                          <Box
+                            sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: "50%",
+                              bgcolor: option.color,
+                            }}
+                          />
+                          <Typography sx={{ fontSize: 13, fontWeight: 600, textTransform: "capitalize" }}>
+                            {option.label}
+                          </Typography>
+                        </MenuItem>
+                      ))}
+                    </Menu>
+
+                    <Box
+                      sx={{
+                        position: "relative",
+                        width: 32,
+                        height: 32,
+                        borderRadius: "8px",
+                        border: `1px solid ${columnBorder}`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        bgcolor: isDark ? "rgba(0,0,0,0.2)" : "#F7F8FA",
+                        color: dueDate ? "text.primary" : mutedText,
+                        transition: "all 120ms ease",
+                        "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
+                      }}
+                    >
+                      <CalendarTodayOutlinedIcon sx={{ fontSize: 15 }} />
+                      <input
+                        type="date"
+                        value={dueDate}
+                        onChange={(e) => setDueDate(e.target.value)}
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          opacity: 0,
+                          cursor: "pointer",
+                          width: "100%",
+                          height: "100%",
+                        }}
+                      />
+                    </Box>
+
+                    <Box sx={{ flex: 1 }} />
+
+                    <IconButton
+                      size="small"
+                      onClick={handleQuickAddCancel}
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        color: mutedText,
+                        borderRadius: "8px",
+                        "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)", color: "text.primary" },
+                      }}
+                    >
+                      <CloseOutlinedIcon sx={{ fontSize: 15 }} />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={handleQuickAddSubmit}
+                      disabled={createPending}
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        color: "primary.main",
+                        borderRadius: "8px",
+                        "&:hover": { bgcolor: "primary.main", color: "primary.contrastText" },
+                        "&.Mui-disabled": { color: isDark ? "#4B5563" : "#D1D5DB" },
+                      }}
+                    >
+                      <SendOutlinedIcon sx={{ fontSize: 15 }} />
+                    </IconButton>
+                  </Box>
+                </Box>
+              </Box>
+            </motion.div>
+          </Box>
+        ) : tasks.length > 0 ? (
+          <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+            <AnimatePresence mode="popLayout">
+              {(() => {
+                const isSourceColumn = Boolean(activeTaskId && tasks.some((t) => t.id === activeTaskId));
+                const draggedIdx = isSourceColumn ? tasks.findIndex((t) => t.id === activeTaskId) : -1;
+                const effectiveDragOverIndex =
+                  isSourceColumn && draggedIdx !== -1 && dragOverIndex >= 0
+                    ? dragOverIndex < draggedIdx
+                      ? dragOverIndex
+                      : dragOverIndex + 1
+                    : dragOverIndex;
+
+                return tasks.map((task, index) => {
+                  const isDraggedTask = isSourceColumn && task.id === activeTaskId;
+                  const showPlaceholder = isDragOver && index === effectiveDragOverIndex && !isDraggedTask;
+
+                  if (isDraggedTask) {
+                    return (
+                      <Box
+                        key={task.id}
+                        sx={{
+                          height: 80,
+                          borderRadius: "12px",
+                          border: `1px dashed ${columnBorder}`,
+                          bgcolor: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.01)",
+                          transition: "all 150ms ease",
+                        }}
+                      />
+                    );
+                  }
+
+                  return (
+                    <Fragment key={task.id}>
+                      {showPlaceholder ? (
+                        <Box
+                          sx={{
+                            height: 80,
+                            borderRadius: "12px",
+                            border: `2px dashed ${theme.palette.primary.main}`,
+                            bgcolor: isDark ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.primary.main, 0.04),
+                            transition: "all 150ms ease",
+                          }}
+                        />
+                      ) : null}
+                      <motion.div
+                        layout
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{
+                          duration: 0.15,
+                          ease: "easeOut",
+                          layout: { duration: 0.15, ease: "easeOut" },
+                        }}
+                        style={{ originX: 0.5, originY: 0 }}
+                      >
+                        <TaskCard
+                          task={task}
+                          onEdit={onEditTask}
+                          onDelete={onDeleteTask}
+                          onUpdate={onUpdateTask}
+                        />
+                      </motion.div>
+                    </Fragment>
+                  );
+                });
+              })()}
+            </AnimatePresence>
             {(() => {
               const isSourceColumn = Boolean(activeTaskId && tasks.some((t) => t.id === activeTaskId));
               const draggedIdx = isSourceColumn ? tasks.findIndex((t) => t.id === activeTaskId) : -1;
@@ -278,289 +560,244 @@ export default function BoardColumn({
                     : dragOverIndex + 1
                   : dragOverIndex;
 
-              return tasks.map((task, index) => {
-                const showPlaceholder = isDragOver && index === effectiveDragOverIndex;
-                return (
-                  <Fragment key={task.id}>
-                    {showPlaceholder ? (
-                      <Box
+              const lastTask = tasks[tasks.length - 1];
+              const isLastTaskDragged = isSourceColumn && lastTask && lastTask.id === activeTaskId;
+              const showBottomPlaceholder = isDragOver && effectiveDragOverIndex >= tasks.length && !isLastTaskDragged;
+
+              return showBottomPlaceholder ? (
+                <Box
+                  sx={{
+                    height: 80,
+                    borderRadius: "12px",
+                    border: `2px dashed ${theme.palette.primary.main}`,
+                    bgcolor: isDark ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.primary.main, 0.04),
+                    transition: "all 150ms ease",
+                  }}
+                />
+              ) : null;
+            })()}
+            <AnimatePresence mode="wait">
+              {isQuickAdding ? (
+                <motion.div
+                  key="quick-add"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                >
+                  <Box
+                    sx={{
+                      bgcolor: isDark ? "#12101e" : "#FFFFFF",
+                      borderRadius: "12px",
+                      border: `1px solid ${columnBorder}`,
+                      boxShadow: columnShadow,
+                    }}
+                  >
+                    <Box sx={{ p: 1.5 }}>
+                      <TextField
+                        inputRef={inputRef}
+                        value={quickTitle}
+                        onChange={(e) => setQuickTitle(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Type a title, press Enter..."
+                        size="small"
+                        fullWidth
+                        multiline
+                        minRows={1}
                         sx={{
-                          height: 80,
-                          borderRadius: "12px",
-                          border: `2px dashed ${theme.palette.primary.main}`,
-                          bgcolor: isDark ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.primary.main, 0.04),
-                          transition: "all 150ms ease",
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "10px",
+                            bgcolor: isDark ? "rgba(0,0,0,0.2)" : "#F7F8FA",
+                            color: "text.primary",
+                            fontSize: 14,
+                            "& fieldset": { border: "none" },
+                            "&.Mui-focused": { boxShadow: "none" },
+                            "&::placeholder": { color: mutedText },
+                          },
                         }}
                       />
-                    ) : null}
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{
-                        duration: 0.15,
-                        ease: "easeOut",
-                        layout: { duration: 0.15, ease: "easeOut" },
-                      }}
-                      style={{ originX: 0.5, originY: 0 }}
-                    >
-                    <TaskCard
-                      task={task}
-                      onEdit={onEditTask}
-                      onDelete={onDeleteTask}
-                      onUpdate={onUpdateTask}
-                    />
-                    </motion.div>
-                  </Fragment>
-                );
-              });
-            })()}
-          </AnimatePresence>
-          {(() => {
-            const isSourceColumn = Boolean(activeTaskId && tasks.some((t) => t.id === activeTaskId));
-            const draggedIdx = isSourceColumn ? tasks.findIndex((t) => t.id === activeTaskId) : -1;
-            const effectiveDragOverIndex =
-              isSourceColumn && draggedIdx !== -1 && dragOverIndex >= 0
-                ? dragOverIndex < draggedIdx
-                  ? dragOverIndex
-                  : dragOverIndex + 1
-                : dragOverIndex;
 
-            return isDragOver && effectiveDragOverIndex >= tasks.length ? (
-              <Box
-                sx={{
-                  height: 80,
-                  borderRadius: "12px",
-                  border: `2px dashed ${theme.palette.primary.main}`,
-                  bgcolor: isDark ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.primary.main, 0.04),
-                  transition: "all 150ms ease",
-                }}
-              />
-            ) : null;
-          })()}
-        </SortableContext>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1 }}>
+                        <Box
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPriorityAnchor(e.currentTarget);
+                          }}
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: "8px",
+                            border: `1px solid ${columnBorder}`,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                            bgcolor: isDark ? "rgba(0,0,0,0.2)" : "#F7F8FA",
+                            position: "relative",
+                            transition: "all 120ms ease",
+                            "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)" },
+                          }}
+                        >
+                          <FlagOutlinedIcon sx={{ fontSize: 15, color: currentPriority.color }} />
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              bottom: -2,
+                              right: -2,
+                              width: 7,
+                              height: 7,
+                              borderRadius: "50%",
+                              bgcolor: currentPriority.color,
+                            }}
+                          />
+                        </Box>
 
-        {tasks.length === 0 && !isQuickAdding && (
-          <EmptyColumn statusName={statusName} isDragOver={isDragOver} />
-        )}
-      </Box>
+                        <Menu
+                          anchorEl={priorityAnchor}
+                          open={Boolean(priorityAnchor)}
+                          onClose={() => setPriorityAnchor(null)}
+                          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                          transformOrigin={{ vertical: "top", horizontal: "left" }}
+                          slotProps={{
+                            paper: {
+                              sx: {
+                                bgcolor: menuBg,
+                                backdropFilter: "blur(24px)",
+                                border: `1px solid ${menuBorder}`,
+                                boxShadow: columnShadow,
+                              }
+                            }
+                          }}
+                        >
+                          {PRIORITY_OPTIONS.map((option) => (
+                            <MenuItem
+                              key={option.value}
+                              selected={priority === option.value}
+                              onClick={() => handlePrioritySelect(option.value)}
+                              sx={{ gap: 1.5, py: 1, px: 2, borderRadius: 1, mx: 0.5, color: "text.primary" }}
+                            >
+                              <Box
+                                sx={{
+                                  width: 8,
+                                  height: 8,
+                                  borderRadius: "50%",
+                                  bgcolor: option.color,
+                                }}
+                              />
+                              <Typography sx={{ fontSize: 13, fontWeight: 600, textTransform: "capitalize" }}>
+                                {option.label}
+                              </Typography>
+                            </MenuItem>
+                          ))}
+                        </Menu>
 
-      {/* Quick add form */}
-      <AnimatePresence>
-        {isQuickAdding && (
-          <motion.div
-            style={{ marginTop: 12 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
-          >
-            <Box
-              sx={{
-                bgcolor: isDark ? "#12101e" : "#FFFFFF",
-                borderRadius: "12px",
-                border: `1px solid ${columnBorder}`,
-                boxShadow: columnShadow,
-              }}
-            >
-              <Box sx={{ p: 1.5 }}>
-                <TextField
-                  inputRef={inputRef}
-                  value={quickTitle}
-                  onChange={(e) => setQuickTitle(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Type a title, press Enter..."
-                  size="small"
-                  fullWidth
-                  multiline
-                  minRows={1}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "10px",
-                      bgcolor: isDark ? "rgba(0,0,0,0.2)" : "#F7F8FA",
-                      color: "text.primary",
-                      fontSize: 14,
-                      "& fieldset": { border: "none" },
-                      "&.Mui-focused": { boxShadow: "none" },
-                      "&::placeholder": { color: mutedText },
-                    },
-                  }}
-                  />
-
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1 }}>
-                  <Box
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setPriorityAnchor(e.currentTarget);
-                    }}
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: "8px",
-                      border: `1px solid ${columnBorder}`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      bgcolor: isDark ? "rgba(0,0,0,0.2)" : "#F7F8FA",
-                      position: "relative",
-                      transition: "all 120ms ease",
-                      "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)" },
-                    }}
-                  >
-                    <FlagOutlinedIcon sx={{ fontSize: 15, color: currentPriority.color }} />
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        bottom: -2,
-                        right: -2,
-                        width: 7,
-                        height: 7,
-                        borderRadius: "50%",
-                        bgcolor: currentPriority.color,
-                      }}
-                    />
-                  </Box>
-
-                  <Menu
-                    anchorEl={priorityAnchor}
-                    open={Boolean(priorityAnchor)}
-                    onClose={() => setPriorityAnchor(null)}
-                    anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                    transformOrigin={{ vertical: "top", horizontal: "left" }}
-                    slotProps={{
-                      paper: {
-                        sx: {
-                          bgcolor: menuBg,
-                          backdropFilter: "blur(24px)",
-                          border: `1px solid ${menuBorder}`,
-                          boxShadow: columnShadow,
-                        }
-                      }
-                    }}
-                  >
-                    {PRIORITY_OPTIONS.map((option) => (
-                      <MenuItem
-                        key={option.value}
-                        selected={priority === option.value}
-                        onClick={() => handlePrioritySelect(option.value)}
-                        sx={{ gap: 1.5, py: 1, px: 2, borderRadius: 1, mx: 0.5, color: "text.primary" }}
-                      >
                         <Box
                           sx={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: "50%",
-                            bgcolor: option.color,
+                            position: "relative",
+                            width: 32,
+                            height: 32,
+                            borderRadius: "8px",
+                            border: `1px solid ${columnBorder}`,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                            bgcolor: isDark ? "rgba(0,0,0,0.2)" : "#F7F8FA",
+                            color: dueDate ? "text.primary" : mutedText,
+                            transition: "all 120ms ease",
+                            "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
                           }}
-                        />
-                        <Typography sx={{ fontSize: 13, fontWeight: 600, textTransform: "capitalize" }}>
-                          {option.label}
-                        </Typography>
-                      </MenuItem>
-                    ))}
-                  </Menu>
+                        >
+                          <CalendarTodayOutlinedIcon sx={{ fontSize: 15 }} />
+                          <input
+                            type="date"
+                            value={dueDate}
+                            onChange={(e) => setDueDate(e.target.value)}
+                            style={{
+                              position: "absolute",
+                              inset: 0,
+                              opacity: 0,
+                              cursor: "pointer",
+                              width: "100%",
+                              height: "100%",
+                            }}
+                          />
+                        </Box>
 
-                  <Box
-                    sx={{
-                      position: "relative",
-                      width: 32,
-                      height: 32,
-                      borderRadius: "8px",
-                      border: `1px solid ${columnBorder}`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      bgcolor: isDark ? "rgba(0,0,0,0.2)" : "#F7F8FA",
-                      color: dueDate ? "text.primary" : mutedText,
-                      transition: "all 120ms ease",
-                      "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
-                    }}
-                  >
-                    <CalendarTodayOutlinedIcon sx={{ fontSize: 15 }} />
-                    <input
-                      type="date"
-                      value={dueDate}
-                      onChange={(e) => setDueDate(e.target.value)}
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        opacity: 0,
-                        cursor: "pointer",
-                        width: "100%",
-                        height: "100%",
-                      }}
-                    />
+                        <Box sx={{ flex: 1 }} />
+
+                        <IconButton
+                          size="small"
+                          onClick={handleQuickAddCancel}
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            color: mutedText,
+                            borderRadius: "8px",
+                            "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)", color: "text.primary" },
+                          }}
+                        >
+                          <CloseOutlinedIcon sx={{ fontSize: 15 }} />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={handleQuickAddSubmit}
+                          disabled={createPending}
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            color: "primary.main",
+                            borderRadius: "8px",
+                            "&:hover": { bgcolor: "primary.main", color: "primary.contrastText" },
+                            "&.Mui-disabled": { color: isDark ? "#4B5563" : "#D1D5DB" },
+                          }}
+                        >
+                          <SendOutlinedIcon sx={{ fontSize: 15 }} />
+                        </IconButton>
+                      </Box>
+                    </Box>
                   </Box>
-
-                  <Box sx={{ flex: 1 }} />
-
-                  <IconButton
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="add-button"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                >
+                  <Button
+                    fullWidth
                     size="small"
-                    onClick={handleQuickAddCancel}
+                    onClick={handleQuickAddClick}
                     sx={{
-                      width: 32,
-                      height: 32,
+                      justifyContent: "center",
+                      gap: 0.75,
                       color: mutedText,
-                      borderRadius: "8px",
-                      "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)", color: "text.primary" },
+                      textTransform: "none",
+                      fontWeight: 500,
+                      fontSize: 13,
+                      borderRadius: "10px",
+                      py: 1,
+                      border: `1px dashed ${columnBorder}`,
+                      "&:hover": {
+                        borderColor: theme.palette.primary.main,
+                        color: theme.palette.primary.main,
+                        bgcolor: isDark ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.primary.main, 0.04),
+                      },
+                      transition: "all 150ms ease",
                     }}
                   >
-                    <CloseOutlinedIcon sx={{ fontSize: 15 }} />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={handleQuickAddSubmit}
-                    disabled={createPending}
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      color: "primary.main",
-                      borderRadius: "8px",
-                      "&:hover": { bgcolor: "primary.main", color: "primary.contrastText" },
-                      "&.Mui-disabled": { color: isDark ? "#4B5563" : "#D1D5DB" },
-                    }}
-                  >
-                    <SendOutlinedIcon sx={{ fontSize: 15 }} />
-                  </IconButton>
-                </Box>
-              </Box>
-            </Box>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Add Task Button */}
-      {!isQuickAdding && (
-        <Box sx={{ px: 0.5, mt: 2 }}>
-          <Button
-            fullWidth
-            size="small"
-            onClick={handleQuickAddClick}
-            sx={{
-              justifyContent: "flex-start",
-              color: mutedText,
-              textTransform: "none",
-              fontWeight: 500,
-              fontSize: 13,
-              borderRadius: "10px",
-              py: 1,
-              border: `1px dashed ${columnBorder}`,
-              "&:hover": {
-                borderColor: theme.palette.primary.main,
-                color: theme.palette.primary.main,
-                bgcolor: isDark ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.primary.main, 0.04),
-              },
-              transition: "all 150ms ease",
-            }}
-          >
-            + Add a card
-          </Button>
-        </Box>
-      )}
+                    <AddOutlinedIcon sx={{ fontSize: 16 }} />
+                    Add a card
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </SortableContext>
+        ) : null}
+      </Box>
     </Box>
   );
 }

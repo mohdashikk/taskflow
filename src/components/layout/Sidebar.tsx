@@ -120,7 +120,11 @@ const GENERAL_ITEMS: NavItem[] = [
   },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  showWorkspace?: boolean;
+}
+
+export default function Sidebar({ showWorkspace = true }: SidebarProps = {}) {
   const pathname = usePathname();
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
