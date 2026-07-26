@@ -1,7 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Fragment } from "react";
 import { useDroppable } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -31,6 +35,9 @@ interface BoardColumnProps {
   onDeleteColumn?: (statusId: string) => void;
   onUpdateTask?: (taskId: string, updates: { title?: string; priority?: string; due_date?: string | null; status_id?: string }) => void;
   wipLimit?: number;
+  activeTaskId?: string;
+  isDragOver?: boolean;
+  dragOverIndex?: number;
 }
 
 const PRIORITY_OPTIONS = [
@@ -50,6 +57,9 @@ export default function BoardColumn({
   onDeleteColumn,
   onUpdateTask,
   wipLimit = 0,
+  activeTaskId,
+  isDragOver = false,
+  dragOverIndex = -1,
 }: BoardColumnProps) {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
@@ -60,7 +70,7 @@ export default function BoardColumn({
   const [priorityAnchor, setPriorityAnchor] = useState<null | HTMLElement>(null);
   const [columnMenuAnchor, setColumnMenuAnchor] = useState<null | HTMLElement>(null);
 
-  const { setNodeRef: setDroppableRef } = useDroppable({ id: statusId });
+  const { setNodeRef: setDroppableRef, isOver } = useDroppable({ id: statusId });
   const inputRef = useRef<HTMLInputElement>(null);
 
   const currentPriority = PRIORITY_OPTIONS.find((p) => p.value === priority) ?? PRIORITY_OPTIONS[1];
@@ -123,6 +133,7 @@ export default function BoardColumn({
 
   return (
     <Box
+      ref={setDroppableRef}
       sx={{
         width: { xs: 300, sm: 320 },
         flex: "0 0 auto",
@@ -130,6 +141,13 @@ export default function BoardColumn({
         flexDirection: "column",
         maxHeight: "calc(100vh - 200px)",
         minWidth: { xs: 300, sm: 320 },
+        borderRadius: "14px",
+        transition: "box-shadow 150ms ease, background-color 150ms ease, border-color 150ms ease",
+        border: `2px solid transparent`,
+        ...(isOver || isDragOver ? {
+          borderColor: theme.palette.primary.main,
+          bgcolor: isDark ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.primary.main, 0.04),
+        } : {}),
       }}
     >
       {/* Column Header */}
@@ -232,48 +250,99 @@ export default function BoardColumn({
         </Menu>
       </Box>
 
-      {/* Tasks - droppable scrollable area */}
-      <Box
-        ref={setDroppableRef}
-        className="thin-scrollbar hide-scrollbar"
-        sx={{
-          flex: 1,
-          overflowY: "auto",
-          overflowX: "hidden",
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-          minHeight: 0,
-          px: 0,
-        }}
-      >
-        <AnimatePresence mode="popLayout">
-          {tasks.map((task) => (
-            <motion.div
-              key={task.id}
-              layout
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              transition={{
-                duration: 0.2,
-                ease: [0.4, 0, 0.2, 1] as const,
-                layout: { duration: 0.2, ease: [0.4, 0, 0.2, 1] as const },
-              }}
-              style={{ originX: 0.5, originY: 0 }}
-            >
-              <TaskCard
-                task={task}
-                onEdit={onEditTask}
-                onDelete={onDeleteTask}
-                onUpdate={onUpdateTask}
+{/* Tasks - scrollable area */}
+        <Box
+          className="thin-scrollbar hide-scrollbar"
+          sx={{
+            flex: 1,
+            overflowY: "auto",
+            overflowX: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px",
+            minHeight: 120,
+            px: 0,
+            pt: 0.5,
+            borderRadius: "10px",
+          }}
+        >
+        <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+          <AnimatePresence mode="popLayout">
+            {(() => {
+              const isSourceColumn = Boolean(activeTaskId && tasks.some((t) => t.id === activeTaskId));
+              const draggedIdx = isSourceColumn ? tasks.findIndex((t) => t.id === activeTaskId) : -1;
+              const effectiveDragOverIndex =
+                isSourceColumn && draggedIdx !== -1 && dragOverIndex >= 0
+                  ? dragOverIndex <= draggedIdx
+                    ? dragOverIndex
+                    : dragOverIndex + 1
+                  : dragOverIndex;
+
+              return tasks.map((task, index) => {
+                const showPlaceholder = isDragOver && index === effectiveDragOverIndex;
+                return (
+                  <Fragment key={task.id}>
+                    {showPlaceholder ? (
+                      <Box
+                        sx={{
+                          height: 80,
+                          borderRadius: "12px",
+                          border: `2px dashed ${theme.palette.primary.main}`,
+                          bgcolor: isDark ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.primary.main, 0.04),
+                          transition: "all 150ms ease",
+                        }}
+                      />
+                    ) : null}
+                    <motion.div
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{
+                        duration: 0.15,
+                        ease: "easeOut",
+                        layout: { duration: 0.15, ease: "easeOut" },
+                      }}
+                      style={{ originX: 0.5, originY: 0 }}
+                    >
+                    <TaskCard
+                      task={task}
+                      onEdit={onEditTask}
+                      onDelete={onDeleteTask}
+                      onUpdate={onUpdateTask}
+                    />
+                    </motion.div>
+                  </Fragment>
+                );
+              });
+            })()}
+          </AnimatePresence>
+          {(() => {
+            const isSourceColumn = Boolean(activeTaskId && tasks.some((t) => t.id === activeTaskId));
+            const draggedIdx = isSourceColumn ? tasks.findIndex((t) => t.id === activeTaskId) : -1;
+            const effectiveDragOverIndex =
+              isSourceColumn && draggedIdx !== -1 && dragOverIndex >= 0
+                ? dragOverIndex <= draggedIdx
+                  ? dragOverIndex
+                  : dragOverIndex + 1
+                : dragOverIndex;
+
+            return isDragOver && effectiveDragOverIndex >= tasks.length ? (
+              <Box
+                sx={{
+                  height: 80,
+                  borderRadius: "12px",
+                  border: `2px dashed ${theme.palette.primary.main}`,
+                  bgcolor: isDark ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.primary.main, 0.04),
+                  transition: "all 150ms ease",
+                }}
               />
-            </motion.div>
-          ))}
-        </AnimatePresence>
+            ) : null;
+          })()}
+        </SortableContext>
 
         {tasks.length === 0 && !isQuickAdding && (
-          <EmptyColumn statusName={statusName} />
+          <EmptyColumn statusName={statusName} isDragOver={isDragOver} />
         )}
       </Box>
 
@@ -282,10 +351,10 @@ export default function BoardColumn({
         {isQuickAdding && (
           <motion.div
             style={{ marginTop: 12 }}
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] as const }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
           >
             <Box
               sx={{
@@ -293,7 +362,6 @@ export default function BoardColumn({
                 borderRadius: "12px",
                 border: `1px solid ${columnBorder}`,
                 boxShadow: columnShadow,
-                overflow: "hidden",
               }}
             >
               <Box sx={{ p: 1.5 }}>

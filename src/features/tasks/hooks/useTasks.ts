@@ -13,6 +13,7 @@ export const useTasks = (projectId: string | undefined, userId: string | undefin
       return fetchTasksByProject(projectId, userId);
     },
     enabled: Boolean(projectId && userId),
+    staleTime: 30_000,
   });
 };
 

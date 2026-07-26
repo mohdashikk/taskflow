@@ -137,7 +137,6 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
           position: "relative",
           cursor: "grab",
           transition: "box-shadow 200ms ease-in-out, border-color 200ms ease-in-out, transform 200ms ease-in-out",
-          overflow: "hidden",
           "&:active": {
             cursor: "grabbing",
           },

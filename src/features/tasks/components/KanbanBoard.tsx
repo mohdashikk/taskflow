@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   DndContext,
   DragEndEvent,
+  DragOverEvent,
   DragOverlay,
   DragStartEvent,
   PointerSensor,
@@ -12,35 +13,27 @@ import {
   useSensor,
   useSensors,
   closestCorners,
-  DragOverEvent,
+  pointerWithin,
 } from "@dnd-kit/core";
 import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
+import type { TaskRow } from "../services/tasksService";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useTheme } from "@mui/material/styles";
 import { useTasks } from "../hooks/useTasks";
 import { useProjectStatuses } from "@/features/projects/hooks/useProjectStatuses";
-import { createTask, deleteTask, updateTaskStatus, updateTask } from "../services/tasksService";
+import { createTask, deleteTask, updateTask, updateTaskStatus } from "../services/tasksService";
 import { createProjectStatus, deleteProjectStatus } from "@/features/projects/services/projectStatusesService";
 import BoardColumn from "./BoardColumn";
 import AddColumnButton from "./AddColumnButton";
 import TaskCard from "./TaskCard";
-import type { TaskRow } from "../services/tasksService";
 
 interface KanbanBoardProps {
   projectId: string;
   userId: string;
-}
-
-interface Column {
-  statusId: string;
-  statusName: string;
-  color: string;
-  tasks: TaskRow[];
-  wipLimit: number;
 }
 
 export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
@@ -51,6 +44,8 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
   const queryClient = useQueryClient();
 
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const [dragOverStatusId, setDragOverStatusId] = useState<string | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number>(0);
 
   const createMutation = useMutation({
     mutationFn: (values: { title: string; status_id: string; priority: string; due_date: string | null }) =>
@@ -85,16 +80,12 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
   const updateTaskStatusMutation = useMutation({
     mutationFn: ({ taskId, statusId }: { taskId: string; statusId: string }) =>
       updateTaskStatus(taskId, projectId, statusId),
-    onMutate: async ({ taskId, statusId }) => {
-      await queryClient.cancelQueries({ queryKey: ["tasks", projectId, userId] });
-      const previousTasks = queryClient.getQueryData<TaskRow[]>(["tasks", projectId, userId]);
-
+    onMutate: ({ taskId, statusId }) => {
+      queryClient.cancelQueries({ queryKey: ["tasks", projectId, userId] });
+      const previousTasks = queryClient.getQueryData<TaskRow[]>(["tasks", projectId, userId]) ?? [];
       queryClient.setQueryData<TaskRow[]>(["tasks", projectId, userId], (old = []) => {
         return old.map((task) => (task.id === taskId ? { ...task, status_id: statusId } : task));
       });
-
-      setActiveTaskId(null);
-
       return { previousTasks };
     },
     onError: (_err, _variables, context) => {
@@ -139,80 +130,6 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
     deleteStatusMutation.mutate(statusId);
   };
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  );
-
-  const isLoading = tasksLoading || statusesLoading;
-
-  if (isLoading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 8, flex: 1 }}>
-        <CircularProgress size={28} sx={{ color: "primary.main" }} />
-      </Box>
-    );
-  }
-
-  const activeTask = tasks.find((t) => t.id === activeTaskId) ?? null;
-
-  const columns: Column[] = statuses.map((status) => ({
-    statusId: status.id,
-    statusName: status.name,
-    color: status.color,
-    tasks: tasks.filter((t) => t.status_id === status.id),
-    wipLimit: 0,
-  }));
-
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveTaskId(event.active.id as string);
-  };
-
-  const handleDragOver = (_event: DragOverEvent) => {
-    // no-op: required by DndContext v6
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (!over) {
-      setActiveTaskId(null);
-      return;
-    }
-
-    const taskId = active.id as string;
-    const overId = over.id as string;
-
-    const task = tasks.find((t) => t.id === taskId);
-    if (!task) {
-      setActiveTaskId(null);
-      return;
-    }
-
-    const targetColumn = columns.find((c) => c.statusId === overId);
-    if (targetColumn) {
-      if (task.status_id !== targetColumn.statusId) {
-        updateTaskStatusMutation.mutate({
-          taskId: task.id,
-          statusId: targetColumn.statusId,
-        });
-      } else {
-        setActiveTaskId(null);
-      }
-      return;
-    }
-
-    const targetTask = tasks.find((t) => t.id === overId);
-    if (targetTask && task.status_id !== targetTask.status_id) {
-      updateTaskStatusMutation.mutate({
-        taskId: task.id,
-        statusId: targetTask.status_id,
-      });
-    } else {
-      setActiveTaskId(null);
-    }
-  };
-
   const handleCreate = (values: { title: string; status_id: string; priority: string; due_date: string | null }) => {
     createMutation.mutate({
       title: values.title,
@@ -221,6 +138,123 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
       due_date: values.due_date,
     });
   };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const isLoading = tasksLoading || statusesLoading;
+
+  const activeTask = tasks.find((t) => t.id === activeTaskId) ?? null;
+
+  const columns = statuses.map((status) => {
+    const columnTasks = tasks.filter((t) => t.status_id === status.id);
+
+    return {
+      statusId: status.id,
+      statusName: status.name,
+      color: status.color,
+      tasks: columnTasks,
+    };
+  });
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const id = event.active.id as string;
+    setActiveTaskId(id);
+  }, []);
+
+  const handleDragOver = useCallback((event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) {
+      setDragOverStatusId(null);
+      setDragOverIndex(0);
+      return;
+    }
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    if (activeId === overId) return;
+
+    const activeTaskItem = tasks.find((t) => t.id === activeId);
+    if (!activeTaskItem) return;
+
+    let targetStatusId: string;
+    const overStatus = statuses.find((s) => s.id === overId);
+    if (overStatus) {
+      targetStatusId = overId;
+    } else {
+      const overTask = tasks.find((t) => t.id === overId);
+      if (overTask) {
+        targetStatusId = overTask.status_id;
+      } else {
+        return;
+      }
+    }
+
+    const targetTasks = tasks.filter((t) => t.status_id === targetStatusId && t.id !== activeId);
+
+    let index = targetTasks.length;
+    const overTask = tasks.find((t) => t.id === overId);
+    if (overTask && overTask.status_id === targetStatusId) {
+      const overIndex = targetTasks.findIndex((t) => t.id === overId);
+      if (overIndex !== -1) {
+        index = overIndex;
+      }
+    }
+
+    setDragOverStatusId(targetStatusId);
+    setDragOverIndex(Math.max(0, index));
+  }, [tasks, statuses]);
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active } = event;
+
+    const taskId = active.id as string;
+    const task = tasks.find((t) => t.id === taskId);
+
+    if (!task) {
+      setActiveTaskId(null);
+      setDragOverStatusId(null);
+      setDragOverIndex(0);
+      return;
+    }
+
+    const targetStatusId = dragOverStatusId;
+
+    if (!targetStatusId) {
+      setActiveTaskId(null);
+      setDragOverStatusId(null);
+      setDragOverIndex(0);
+      return;
+    }
+
+    if (task.status_id === targetStatusId) {
+      setActiveTaskId(null);
+      setDragOverStatusId(null);
+      setDragOverIndex(0);
+    } else {
+      updateTaskStatusMutation.mutate({ taskId: task.id, statusId: targetStatusId });
+      setActiveTaskId(null);
+      setDragOverStatusId(null);
+      setDragOverIndex(0);
+    }
+  }, [tasks, updateTaskStatusMutation, dragOverStatusId]);
+
+  const handleDragCancel = useCallback(() => {
+    setActiveTaskId(null);
+    setDragOverStatusId(null);
+    setDragOverIndex(0);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8, flex: 1 }}>
+        <CircularProgress size={28} sx={{ color: "primary.main" }} />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -231,64 +265,34 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
         minHeight: "calc(100vh - 200px)",
       }}
     >
-      {/* Board Header */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 2,
-          mb: 3,
-        }}
-      >
-        <Box>
-          <Typography
-            sx={{
-              fontWeight: 700,
-              color: "text.primary",
-              fontSize: 22,
-              letterSpacing: "-0.02em",
-              lineHeight: 1.2,
-            }}
-          >
-            Project Tasks
-          </Typography>
-          <Typography
-            sx={{
-              color: "text.secondary",
-              fontSize: 14,
-              mt: 0.5,
-              display: "block",
-              lineHeight: 1.5,
-            }}
-          >
-            {tasks.length} work items across {columns.length} columns
-          </Typography>
-        </Box>
-      </Box>
-
-      {/* Board Columns */}
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCorners}
+        collisionDetection={(args) => {
+          const pointerResult = pointerWithin(args);
+          if (pointerResult.length > 0) {
+            return pointerResult;
+          }
+          return closestCorners(args);
+        }}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
       >
-         <Box
-           className="thin-scrollbar hide-scrollbar"
-           sx={{
-             display: "flex",
-             gap: 4,
-             overflowX: "auto",
-             overflowY: "hidden",
-             pb: 2,
-             flex: 1,
-             alignItems: "flex-start",
-             minHeight: 0,
-           }}
-         >
+        <Box
+          className="thin-scrollbar hide-scrollbar"
+          sx={{
+            display: "flex",
+            gap: 4,
+            overflowX: "auto",
+            overflowY: "visible",
+            pb: 2,
+            pt: 1,
+            flex: 1,
+            alignItems: "flex-start",
+            minHeight: 0,
+          }}
+        >
           {columns.length === 0 ? (
             <Box
               sx={{
@@ -330,24 +334,10 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
                   <rect x="3" y="14" width="7" height="7" />
                 </svg>
               </Box>
-              <Typography
-                sx={{
-                  fontWeight: 600,
-                  color: "text.primary",
-                  fontSize: 15,
-                  mb: 0.5,
-                }}
-              >
+              <Typography sx={{ fontWeight: 600, color: "text.primary", fontSize: 15, mb: 0.5 }}>
                 No workflow statuses configured
               </Typography>
-              <Typography
-                sx={{
-                  color: "text.secondary",
-                  fontSize: 13,
-                  maxWidth: 320,
-                  lineHeight: 1.5,
-                }}
-              >
+              <Typography sx={{ color: "text.secondary", fontSize: 13, maxWidth: 320, lineHeight: 1.5 }}>
                 Add a status in project settings to get started.
               </Typography>
             </Box>
@@ -355,7 +345,7 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
             <>
               {columns.map((column) => (
                 <BoardColumn
-                  key={column.statusId || column.statusName}
+                  key={column.statusId}
                   statusId={column.statusId}
                   statusName={column.statusName}
                   tasks={column.tasks}
@@ -365,7 +355,10 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
                   onDeleteTask={handleDelete}
                   onDeleteColumn={handleDeleteColumn}
                   onUpdateTask={handleUpdateTask}
-                  wipLimit={column.wipLimit}
+                  wipLimit={0}
+                  activeTaskId={activeTaskId ?? undefined}
+                  isDragOver={column.statusId === dragOverStatusId}
+                  dragOverIndex={column.statusId === dragOverStatusId ? dragOverIndex : -1}
                 />
               ))}
               <AddColumnButton projectId={projectId} onAdd={handleAddColumn} adding={addStatusMutation.isPending} />
