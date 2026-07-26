@@ -37,6 +37,7 @@ const PAGE_TITLES: Record<string, string> = {
 export default function Header() {
   const pathname = usePathname();
   const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const { user } = useAuth();
   const logout = useLogout();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -75,8 +76,8 @@ export default function Header() {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        bgcolor: theme.palette.mode === "dark" ? "#0D0F11" : "#FFFFFF",
+        borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : theme.palette.divider}`,
+        bgcolor: theme.palette.mode === "dark" ? "transparent" : "#FFFFFF",
         position: "sticky",
         top: 0,
         zIndex: 10,
@@ -114,9 +115,9 @@ export default function Header() {
             px: 1.5,
             borderRadius: 3,
             bgcolor: theme.palette.mode === "dark"
-              ? alpha("#FFFFFF", 0.04)
+              ? "rgba(255,255,255,0.04)"
               : "#F2F4F7",
-            border: `1px solid ${theme.palette.divider}`,
+            border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : theme.palette.divider}`,
             transition: "all 180ms ease",
             maxWidth: 280,
             width: "100%",
@@ -185,10 +186,8 @@ export default function Header() {
                 width: 40,
                 height: 40,
                 borderRadius: 3,
-                bgcolor: theme.palette.mode === "dark"
-                  ? alpha("#FFFFFF", 0.04)
-                  : "#F2F4F7",
-                border: `1px solid ${theme.palette.divider}`,
+                bgcolor: isDark ? "rgba(255,255,255,0.04)" : "#F2F4F7",
+                border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : theme.palette.divider}`,
                 color: theme.palette.text.primary,
                 transition: "all 180ms ease",
                 "&:hover": {
@@ -209,7 +208,7 @@ export default function Header() {
                 height: 8,
                 borderRadius: "50%",
                 bgcolor: theme.palette.success.main,
-                border: `1.5px solid ${theme.palette.background.paper}`,
+                border: `1.5px solid ${isDark ? "rgba(255,255,255,0.08)" : theme.palette.background.paper}`,
               }}
             />
           </Box>
@@ -228,9 +227,7 @@ export default function Header() {
             cursor: "pointer",
             transition: "background 180ms ease",
             "&:hover": {
-              bgcolor: theme.palette.mode === "dark"
-                ? alpha("#FFFFFF", 0.04)
-                : "#F2F4F7",
+              bgcolor: isDark ? "rgba(255,255,255,0.04)" : "#F2F4F7",
             },
           }}
         >
@@ -305,7 +302,7 @@ export default function Header() {
                 mt: 1,
                 minWidth: 220,
                 borderRadius: 3,
-                border: `1px solid ${theme.palette.divider}`,
+              border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : theme.palette.divider}`,
                 boxShadow: `0 8px 24px ${alpha(theme.palette.text.primary, 0.08)}`,
               },
             },

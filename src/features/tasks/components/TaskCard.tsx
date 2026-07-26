@@ -14,11 +14,11 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
+import { alpha, useTheme } from "@mui/material/styles";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
 import type { TaskRow } from "../services/tasksService";
 
 interface TaskCardProps {
@@ -42,46 +42,15 @@ const PRIORITY_COLORS: Record<string, string> = {
   low: "#64748B",
 };
 
-const TAG_STYLES: Record<string, { bg: string; fg: string }> = {
-  Bug: { bg: "#FEE2E2", fg: "#991B1B" },
-  Feature: { bg: "#DBEAFE", fg: "#1E40AF" },
-  Design: { bg: "#FCE7F3", fg: "#9D174D" },
-  Improvement: { bg: "#D1FAE5", fg: "#065F46" },
-  Docs: { bg: "#FEF3C7", fg: "#92400E" },
-};
-
-function getTagStyle(label: string): { bg: string; fg: string } {
-  return TAG_STYLES[label] || { bg: "#F1F5F9", fg: "#334155" };
-}
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-function getDueDateStatus(dueDate: string | null): "overdue" | "upcoming" | "normal" {
-  if (!dueDate) return "normal";
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const due = new Date(dueDate + "T00:00:00");
-  const diffDays = Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffDays < 0) return "overdue";
-  if (diffDays <= 2) return "upcoming";
-  return "normal";
-}
-
-export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, tags, assignee }: TaskCardProps) {
+export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, tags: _tags, assignee }: TaskCardProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition,
-    isDragging,
   } = useSortable({ id: task.id });
 
   const style = {
@@ -139,8 +108,8 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
     setPriorityAnchor(null);
   };
 
-  const dueStatus = getDueDateStatus(task.due_date);
-  const cardTags = tags && tags.length > 0 ? tags.slice(0, 2) : [];
+  const cardBg = isDark ? "#1C1929" : "#FFFFFF";
+  const cardBorder = isDark ? "#36324D" : theme.palette.divider;
 
   return (
     <motion.div
@@ -150,7 +119,6 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10, transition: { duration: 0.15 } }}
-      whileHover={{ y: -2 }}
       transition={{
         layout: { duration: 0.2, ease: [0.4, 0, 0.2, 1] as const },
       }}
@@ -159,63 +127,65 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
     >
       <Box
         sx={{
-          bgcolor: "#FFFFFF",
+          bgcolor: cardBg,
           borderRadius: "14px",
-          border: "1px solid",
-          borderColor: isDragging ? "#006F99" : "#E6E8EB",
-          boxShadow: isDragging
-            ? "0 12px 32px rgba(0, 0, 0, 0.12)"
-            : "0 1px 3px rgba(0, 0, 0, 0.04)",
+          border: `1px solid ${cardBorder}`,
           position: "relative",
           cursor: "grab",
-          transition: "box-shadow 200ms ease, border-color 200ms ease",
+          transition: "border-color 200ms ease-in-out",
           overflow: "hidden",
           "&:active": {
             cursor: "grabbing",
           },
+          "&:hover": {
+            borderColor: isDark ? "#36324D" : theme.palette.action.hover,
+          },
         }}
       >
-        {/* Priority strip */}
-        <Box
-          sx={{
-            position: "absolute",
-            left: 0,
-            top: 12,
-            bottom: 12,
-            width: 3,
-            borderRadius: 2,
-            bgcolor: priorityColor,
-            opacity: 0.7,
-          }}
-        />
-
-        <Box sx={{ p: 2.5, position: "relative" }}>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (isEditing) return;
-              setMenuAnchor(e.currentTarget);
-            }}
+        <Box sx={{ p: 1.5, position: "relative" }}>
+          <Box
             sx={{
               position: "absolute",
-              top: 8,
-              right: 8,
-              width: 28,
-              height: 28,
-              color: "#6B7280",
-              borderRadius: 2,
-              "&:hover": { bgcolor: "#F2F4F7", color: "#111827" },
+              top: 12,
+              right: 12,
             }}
           >
-            <MoreVertOutlinedIcon sx={{ fontSize: 16 }} />
-          </IconButton>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isEditing) return;
+                setMenuAnchor(e.currentTarget);
+              }}
+              aria-label="Task options"
+              sx={{
+                width: 28,
+                height: 28,
+                color: theme.palette.text.secondary,
+                borderRadius: "8px",
+                "&:hover": { bgcolor: theme.palette.action.hover, color: theme.palette.text.primary },
+              }}
+            >
+              <MoreVertOutlinedIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Box>
+
           <Menu
             anchorEl={menuAnchor}
             open={Boolean(menuAnchor)}
             onClose={() => setMenuAnchor(null)}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
+            slotProps={{
+              paper: {
+                sx: {
+                  bgcolor: isDark ? "#232135" : "#FFFFFF",
+                  backdropFilter: "blur(24px)",
+                  border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : theme.palette.divider}`,
+                  boxShadow: theme.palette.mode === "dark" ? "0 10px 30px rgba(0,0,0,.25)" : theme.shadows[4],
+                }
+              }
+            }}
           >
             <MenuItem
               onClick={startEditing}
@@ -228,7 +198,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                 setMenuAnchor(null);
                 setDeleteConfirmOpen(true);
               }}
-              sx={{ fontSize: 14, py: 1, px: 2, color: "#EF4444", borderRadius: 1, mx: 0.5 }}
+              sx={{ fontSize: 14, py: 1, px: 2, color: theme.palette.error.main, borderRadius: 1, mx: 0.5 }}
             >
               Delete
             </MenuItem>
@@ -242,16 +212,16 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
             sx={{
               "& .MuiDialog-paper": {
                 borderRadius: "20px",
-                border: "1px solid #E6E8EB",
-                boxShadow: "0 24px 64px rgba(15, 23, 42, 0.12)",
+                border: `1px solid ${theme.palette.divider}`,
+                boxShadow: theme.palette.mode === "dark" ? "0 24px 64px rgba(0,0,0,.4)" : "0 24px 64px rgba(15, 23, 42, 0.12)",
               },
             }}
           >
-            <DialogTitle sx={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>
+            <DialogTitle sx={{ fontSize: 18, fontWeight: 700, color: "text.primary" }}>
               Delete Task
             </DialogTitle>
             <DialogContent>
-              <Typography sx={{ fontSize: 15, color: "#6B7280", lineHeight: 1.6 }}>
+              <Typography sx={{ fontSize: 15, color: "text.secondary", lineHeight: 1.6 }}>
                 Are you sure you want to delete <strong>&quot;{task.title}&quot;</strong>? This action cannot be undone.
               </Typography>
             </DialogContent>
@@ -259,14 +229,14 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
               <Button
                 onClick={() => setDeleteConfirmOpen(false)}
                 sx={{
-                  color: "#6B7280",
+                  color: "text.secondary",
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: 14,
                   borderRadius: "10px",
                   py: 0.75,
                   px: 2,
-                  "&:hover": { bgcolor: "#F2F4F7", color: "#111827" },
+                  "&:hover": { bgcolor: theme.palette.action.hover, color: "text.primary" },
                 }}
               >
                 Cancel
@@ -284,9 +254,9 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                   borderRadius: "10px",
                   py: 0.75,
                   px: 2,
-                  bgcolor: "#EF4444",
+                  bgcolor: theme.palette.error.main,
                   boxShadow: "none",
-                  "&:hover": { boxShadow: "none", bgcolor: "#DC2626" },
+                  "&:hover": { boxShadow: "none", bgcolor: alpha(theme.palette.error.main, 0.9) },
                 }}
               >
                 Delete
@@ -316,8 +286,9 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "10px",
-                        bgcolor: "#F7F8FA",
+                        bgcolor: isDark ? "rgba(0,0,0,0.2)" : "#F7F8FA",
                         fontSize: 16,
+                        color: "text.primary",
                         "& fieldset": { border: "none" },
                         "&.Mui-focused": { boxShadow: "none" },
                       },
@@ -336,15 +307,15 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                       width: 40,
                       height: 40,
                       borderRadius: "10px",
-                      border: "1px solid #E6E8EB",
+                      border: `1px solid ${theme.palette.divider}`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       cursor: "pointer",
-                      bgcolor: "#F7F8FA",
+                      bgcolor: isDark ? "rgba(0,0,0,0.2)" : "#F7F8FA",
                       position: "relative",
                       transition: "all 120ms ease",
-                      "&:hover": { bgcolor: "#F2F4F7" },
+                      "&:hover": { bgcolor: theme.palette.action.hover },
                     }}
                   >
                     <FlagOutlinedIcon sx={{ fontSize: 18, color: currentPriority.color }} />
@@ -367,6 +338,16 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                     onClose={() => setPriorityAnchor(null)}
                     anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
                     transformOrigin={{ vertical: "top", horizontal: "left" }}
+                    slotProps={{
+                      paper: {
+                        sx: {
+                          bgcolor: isDark ? "#232135" : "#FFFFFF",
+                          backdropFilter: "blur(24px)",
+                          border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : theme.palette.divider}`,
+                          boxShadow: theme.palette.mode === "dark" ? "0 10px 30px rgba(0,0,0,.25)" : theme.shadows[4],
+                        }
+                      }
+                    }}
                   >
                     {PRIORITY_OPTIONS.map((option) => (
                       <MenuItem
@@ -396,15 +377,15 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                       width: 40,
                       height: 40,
                       borderRadius: "10px",
-                      border: "1px solid #E6E8EB",
+                      border: `1px solid ${theme.palette.divider}`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       cursor: "pointer",
-                      bgcolor: "#F7F8FA",
-                      color: editDueDate ? "#111827" : "#6B7280",
+                      bgcolor: isDark ? "rgba(0,0,0,0.2)" : "#F7F8FA",
+                      color: editDueDate ? "text.primary" : "text.secondary",
                       transition: "all 120ms ease",
-                      "&:hover": { bgcolor: "#F2F4F7" },
+                      "&:hover": { bgcolor: theme.palette.action.hover },
                     }}
                   >
                     <CalendarTodayOutlinedIcon sx={{ fontSize: 18 }} />
@@ -429,14 +410,14 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                     size="small"
                     onClick={cancelEditing}
                     sx={{
-                      color: "#6B7280",
+                      color: "text.secondary",
                       textTransform: "none",
                       fontWeight: 600,
                       fontSize: 14,
                       borderRadius: "10px",
                       py: 0.5,
                       px: 1.5,
-                      "&:hover": { bgcolor: "#F2F4F7", color: "#111827" },
+                      "&:hover": { bgcolor: theme.palette.action.hover, color: "text.primary" },
                     }}
                   >
                     Cancel
@@ -452,9 +433,9 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                       borderRadius: "10px",
                       py: 0.5,
                       px: 1.5,
-                      bgcolor: "#006F99",
+                      bgcolor: "primary.main",
                       boxShadow: "none",
-                      "&:hover": { boxShadow: "none", bgcolor: "#005670" },
+                      "&:hover": { boxShadow: "none", bgcolor: theme.palette.primary.dark },
                     }}
                   >
                     Save
@@ -469,150 +450,55 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
               >
-                {/* Task Title */}
-                <Typography
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: 14,
-                    lineHeight: 1.5,
-                    color: "#111827",
-                    mb: cardTags.length > 0 ? 1.5 : (task.due_date ? 1.5 : 0),
-                    pr: 5,
-                    letterSpacing: "-0.01em",
-                  }}
-                >
-                  {task.title}
-                </Typography>
-
-                {/* Tags */}
-                {cardTags.length > 0 && (
-                  <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mb: task.due_date ? 1.5 : 0 }}>
-                    {cardTags.map((tag, idx) => {
-                      const style = getTagStyle(tag.label);
-                      return (
-                        <Box
-                          key={idx}
-                          sx={{
-                            px: 1,
-                            py: 0.25,
-                            borderRadius: "8px",
-                            bgcolor: tag.color || style.bg,
-                            color: style.fg,
-                            fontSize: 11,
-                            fontWeight: 600,
-                            lineHeight: 1.4,
-                            letterSpacing: 0.2,
-                            textTransform: "capitalize",
-                          }}
-                        >
-                          {tag.label}
-                        </Box>
-                      );
-                    })}
-                  </Box>
-                )}
-
-                {/* Due Date */}
-                {task.due_date && (
-                  <Box sx={{ mb: 1 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                      <CalendarTodayOutlinedIcon
-                        sx={{
-                          fontSize: 12,
-                          color:
-                            dueStatus === "overdue"
-                              ? "#EF4444"
-                              : dueStatus === "upcoming"
-                                ? "#F59E0B"
-                                : "#9CA3AF",
-                        }}
-                      />
-                      <Typography
-                        sx={{
-                          fontSize: 12,
-                          fontWeight: dueStatus === "overdue" ? 700 : 500,
-                          color:
-                            dueStatus === "overdue"
-                              ? "#EF4444"
-                              : dueStatus === "upcoming"
-                                ? "#F59E0B"
-                                : "#9CA3AF",
-                        }}
-                      >
-                        {new Date(task.due_date + "T00:00:00").toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </Typography>
-                    </Box>
-                  </Box>
-                )}
-
-                {/* Bottom row: assignee + priority flag */}
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  {assignee && (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                      <Box
-                        sx={{
-                          width: 24,
-                          height: 24,
-                          borderRadius: "50%",
-                          bgcolor: assignee.avatarUrl ? "transparent" : "#006F99",
-                          color: "#FFFFFF",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: 10,
-                          fontWeight: 700,
-                          overflow: "hidden",
-                          flexShrink: 0,
-                          position: "relative",
-                        }}
-                      >
-                        {assignee.avatarUrl ? (
-                          <Image
-                            src={assignee.avatarUrl}
-                            alt={assignee.name}
-                            fill
-                            style={{ objectFit: "cover" }}
-                            sizes="24px"
-                          />
-                        ) : (
-                          getInitials(assignee.name)
-                        )}
-                      </Box>
-                      <Typography sx={{ fontSize: 12, color: "#6B7280", fontWeight: 500 }}>
-                        {assignee.name}
-                      </Typography>
-                    </Box>
-                  )}
-                  <Box
+                <Box sx={{ pr: 5 }}>
+                  <Typography
                     sx={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: "8px",
-                      border: "1px solid #E6E8EB",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      position: "relative",
-                      bgcolor: "#F7F8FA",
-                      ml: "auto",
+                      fontWeight: 600,
+                      fontSize: 15,
+                      lineHeight: 1.5,
+                      color: "text.primary",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
                     }}
                   >
-                    <FlagOutlinedIcon sx={{ fontSize: 14, color: priorityColor }} />
-                    <Box
+                    {task.title}
+                  </Typography>
+
+                  <Box sx={{ mt: 1.5 }}>
+                    <Typography
                       sx={{
-                        position: "absolute",
-                        bottom: -2,
-                        right: -2,
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        bgcolor: priorityColor,
+                        fontSize: 13,
+                        color: "text.secondary",
+                        fontWeight: 500,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
                       }}
-                    />
+                    >
+                      {assignee?.name || "Unassigned"}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 2 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                      <CalendarTodayOutlinedIcon sx={{ fontSize: 14, color: theme.palette.text.secondary }} />
+                      <Typography sx={{ fontSize: 13, fontWeight: 600, color: "text.primary", lineHeight: 1.3 }}>
+                        {task.due_date
+                          ? new Date(task.due_date + "T00:00:00").toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
+                          : ""}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                      <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: priorityColor }} />
+                      <Typography sx={{ fontSize: 13, fontWeight: 600, color: "text.primary", lineHeight: 1.3, textTransform: "capitalize" }}>
+                        {currentPriority.label}
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
               </motion.div>

@@ -11,18 +11,8 @@ export default function ProjectTasksPage() {
   const projectId = params.id as string;
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        bgcolor: "background.default",
-      }}
-    >
-      {/* Kanban Board */}
-      <Box sx={{ px: 3, py: 3 }}>
-        <Box sx={{ maxWidth: 1600, mx: "auto" }}>
-          <KanbanBoard projectId={projectId} userId={user?.id ?? ""} />
-        </Box>
-      </Box>
+    <Box sx={{ width: "100%" }}>
+      <KanbanBoard projectId={projectId} userId={user?.id ?? ""} />
     </Box>
   );
 }

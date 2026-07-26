@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -20,6 +21,8 @@ interface AddColumnButtonProps {
 const COLORS = ["#64748B", "#EF4444", "#F59E0B", "#10B981", "#3B82F6", "#8B5CF6", "#EC4899"];
 
 export default function AddColumnButton({ onAdd, adding }: AddColumnButtonProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
   const [color, setColor] = useState(COLORS[0]);
@@ -52,30 +55,38 @@ export default function AddColumnButton({ onAdd, adding }: AddColumnButtonProps)
         pt: 0,
       }}
     >
-      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
         <Button
           onClick={handleOpen}
           aria-label="Add column"
           sx={{
-            width: 48,
-            height: 48,
-            minWidth: 48,
-            borderRadius: "14px",
-            border: "1px dashed #D1D5DB",
-            color: "#6B7280",
+            width: 320,
+            minWidth: 320,
+            height: 120,
+            borderRadius: "18px",
+            border: `1px solid ${isDark ? "#36324D" : "rgba(0,0,0,0.06)"}`,
+            color: "text.secondary",
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
+            gap: 1,
             p: 0,
             transition: "all 150ms ease",
+            bgcolor: isDark ? "#1C1929" : "rgba(0,0,0,0.02)",
+            backdropFilter: "blur(20px)",
+            textTransform: "none",
+            fontWeight: 500,
+            fontSize: 14,
             "&:hover": {
-              borderColor: "#006F99",
-              color: "#006F99",
-              bgcolor: "rgba(0, 111, 153, 0.04)",
+              borderColor: isDark ? "#36324D" : "rgba(0,0,0,0.12)",
+              color: "text.primary",
+              bgcolor: isDark ? "#2B2942" : "rgba(0,0,0,0.03)",
             },
           }}
         >
-          <AddOutlinedIcon sx={{ fontSize: 22 }} />
+          <AddOutlinedIcon sx={{ fontSize: 24 }} />
+          Add another list
         </Button>
       </motion.div>
 
@@ -87,12 +98,12 @@ export default function AddColumnButton({ onAdd, adding }: AddColumnButtonProps)
         sx={{
           "& .MuiDialog-paper": {
             borderRadius: "24px",
-            border: "1px solid #E6E8EB",
-            boxShadow: "0 24px 64px rgba(15, 23, 42, 0.12)",
+            border: `1px solid ${isDark ? "#36324D" : theme.palette.divider}`,
+            boxShadow: isDark ? "0 24px 64px rgba(0,0,0,.4)" : "0 24px 64px rgba(15, 23, 42, 0.12)",
           },
         }}
       >
-        <DialogTitle sx={{ fontWeight: 700, fontSize: 22, color: "#111827", letterSpacing: "-0.01em" }}>
+        <DialogTitle sx={{ fontWeight: 700, fontSize: 22, color: "text.primary", letterSpacing: "-0.01em" }}>
           New Board
         </DialogTitle>
         <DialogContent>
@@ -115,8 +126,9 @@ export default function AddColumnButton({ onAdd, adding }: AddColumnButtonProps)
               mt: 1,
               "& .MuiOutlinedInput-root": {
                 borderRadius: "14px",
-                bgcolor: "#F7F8FA",
+                bgcolor: isDark ? "#2B2942" : "#F7F8FA",
                 fontSize: 14,
+                color: "text.primary",
                 "& fieldset": { border: "none" },
                 "&.Mui-focused": { boxShadow: "none" },
               },
@@ -138,7 +150,7 @@ export default function AddColumnButton({ onAdd, adding }: AddColumnButtonProps)
                     borderRadius: "8px",
                     bgcolor: c,
                     cursor: "pointer",
-                    border: color === c ? "2px solid #111827" : "2px solid transparent",
+                    border: color === c ? "2px solid text.primary" : "2px solid transparent",
                     transition: "border-color 100ms ease",
                   }}
                 />
@@ -150,14 +162,14 @@ export default function AddColumnButton({ onAdd, adding }: AddColumnButtonProps)
           <Button
             onClick={handleClose}
             sx={{
-              color: "#6B7280",
+              color: "text.secondary",
               textTransform: "none",
               fontWeight: 600,
               fontSize: 14,
               borderRadius: "14px",
               py: 0.75,
               px: 2,
-              "&:hover": { bgcolor: "#F2F4F7", color: "#111827" },
+              "&:hover": { bgcolor: theme.palette.action.hover, color: "text.primary" },
             }}
           >
             Cancel
@@ -174,9 +186,9 @@ export default function AddColumnButton({ onAdd, adding }: AddColumnButtonProps)
                 borderRadius: "14px",
                 py: 0.75,
                 px: 2,
-                bgcolor: "#006F99",
-                boxShadow: "0 4px 12px rgba(0, 111, 153, 0.2)",
-                "&:hover": { boxShadow: "none", bgcolor: "#005670" },
+                bgcolor: "primary.main",
+                boxShadow: isDark ? "0 4px 12px rgba(0,0,0,.3)" : "0 4px 12px rgba(0, 111, 153, 0.2)",
+                "&:hover": { boxShadow: "none", bgcolor: theme.palette.primary.dark },
               }}
             >
               {adding ? "Saving..." : "Save"}

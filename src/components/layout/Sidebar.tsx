@@ -168,7 +168,7 @@ export default function Sidebar() {
         bgcolor: selected
           ? theme.palette.primary.dark
           : isDark
-            ? alpha("#FFFFFF", 0.06)
+            ? "rgba(255,255,255,0.04)"
             : alpha("#000000", 0.04),
         color: selected
           ? theme.palette.primary.contrastText
@@ -234,7 +234,7 @@ export default function Sidebar() {
     color: theme.palette.text.secondary,
     "&:hover": {
       bgcolor: isDark
-        ? alpha("#FFFFFF", 0.06)
+        ? "rgba(255,255,255,0.04)"
         : alpha("#000000", 0.04),
       color: theme.palette.text.primary,
     },
@@ -253,7 +253,7 @@ export default function Sidebar() {
       color: theme.palette.text.secondary,
       "&:hover": {
         bgcolor: isDark
-          ? alpha("#FFFFFF", 0.06)
+          ? "rgba(255,255,255,0.04)"
           : alpha("#000000", 0.04),
         color: theme.palette.text.primary,
         "& .MuiListItemIcon-root": {
@@ -287,11 +287,11 @@ export default function Sidebar() {
         width: SIDEBAR_WIDTH,
         flexShrink: 0,
         height: "100vh",
-        bgcolor: theme.palette.mode === "dark" ? "#0D0F11" : "#FFFFFF",
-        borderRight: `1px solid ${theme.palette.divider}`,
-        boxShadow: theme.palette.mode === "dark"
-          ? "0 1px 2px rgba(0,0,0,0.2)"
-          : "0 1px 2px rgba(0,0,0,0.04)",
+      bgcolor: isDark ? "transparent" : "#FFFFFF",
+      borderRight: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : theme.palette.divider}`,
+      boxShadow: isDark ? "none" : theme.palette.mode === "dark"
+        ? "0 1px 2px rgba(0,0,0,0.2)"
+        : "0 1px 2px rgba(0,0,0,0.04)",
         px: 2,
         py: 3,
         overflowY: "auto",
