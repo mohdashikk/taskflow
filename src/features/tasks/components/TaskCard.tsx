@@ -108,8 +108,11 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
     setPriorityAnchor(null);
   };
 
-  const cardBg = isDark ? "#1C1929" : "#FFFFFF";
-  const cardBorder = isDark ? "#36324D" : theme.palette.divider;
+  const cardBg = isDark ? "#12101e" : "#FFFFFF";
+  const cardBorder = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
+  const cardShadow = isDark ? "0 8px 24px rgba(0,0,0,.18)" : "0 8px 24px rgba(0,0,0,0.04)";
+  const hoverBorder = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)";
+  const cardHoverShadow = isDark ? "0 8px 24px rgba(0,0,0,.18)" : "0 8px 24px rgba(0,0,0,0.08)";
 
   return (
     <motion.div
@@ -128,17 +131,20 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
       <Box
         sx={{
           bgcolor: cardBg,
-          borderRadius: "14px",
+          borderRadius: "12px",
           border: `1px solid ${cardBorder}`,
+          boxShadow: cardShadow,
           position: "relative",
           cursor: "grab",
-          transition: "border-color 200ms ease-in-out",
+          transition: "box-shadow 200ms ease-in-out, border-color 200ms ease-in-out, transform 200ms ease-in-out",
           overflow: "hidden",
           "&:active": {
             cursor: "grabbing",
           },
           "&:hover": {
-            borderColor: isDark ? "#36324D" : theme.palette.action.hover,
+            boxShadow: cardHoverShadow,
+            borderColor: hoverBorder,
+            transform: "translateY(-2px)",
           },
         }}
       >
@@ -163,7 +169,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                 height: 28,
                 color: theme.palette.text.secondary,
                 borderRadius: "8px",
-                "&:hover": { bgcolor: theme.palette.action.hover, color: theme.palette.text.primary },
+                "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)", color: theme.palette.text.primary },
               }}
             >
               <MoreVertOutlinedIcon sx={{ fontSize: 16 }} />
@@ -181,7 +187,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                 sx: {
                   bgcolor: isDark ? "#232135" : "#FFFFFF",
                   backdropFilter: "blur(24px)",
-                  border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : theme.palette.divider}`,
+                  border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : theme.palette.divider}`,
                   boxShadow: theme.palette.mode === "dark" ? "0 10px 30px rgba(0,0,0,.25)" : theme.shadows[4],
                 }
               }
@@ -211,7 +217,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
             fullWidth
             sx={{
               "& .MuiDialog-paper": {
-                borderRadius: "20px",
+                borderRadius: "12px",
                 border: `1px solid ${theme.palette.divider}`,
                 boxShadow: theme.palette.mode === "dark" ? "0 24px 64px rgba(0,0,0,.4)" : "0 24px 64px rgba(15, 23, 42, 0.12)",
               },
@@ -307,7 +313,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                       width: 40,
                       height: 40,
                       borderRadius: "10px",
-                      border: `1px solid ${theme.palette.divider}`,
+                      border: `1px solid ${cardBorder}`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -315,7 +321,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                       bgcolor: isDark ? "rgba(0,0,0,0.2)" : "#F7F8FA",
                       position: "relative",
                       transition: "all 120ms ease",
-                      "&:hover": { bgcolor: theme.palette.action.hover },
+                      "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
                     }}
                   >
                     <FlagOutlinedIcon sx={{ fontSize: 18, color: currentPriority.color }} />
@@ -343,7 +349,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                         sx: {
                           bgcolor: isDark ? "#232135" : "#FFFFFF",
                           backdropFilter: "blur(24px)",
-                          border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : theme.palette.divider}`,
+                          border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : theme.palette.divider}`,
                           boxShadow: theme.palette.mode === "dark" ? "0 10px 30px rgba(0,0,0,.25)" : theme.shadows[4],
                         }
                       }
@@ -377,7 +383,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                       width: 40,
                       height: 40,
                       borderRadius: "10px",
-                      border: `1px solid ${theme.palette.divider}`,
+                      border: `1px solid ${cardBorder}`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -385,7 +391,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                       bgcolor: isDark ? "rgba(0,0,0,0.2)" : "#F7F8FA",
                       color: editDueDate ? "text.primary" : "text.secondary",
                       transition: "all 120ms ease",
-                      "&:hover": { bgcolor: theme.palette.action.hover },
+                      "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
                     }}
                   >
                     <CalendarTodayOutlinedIcon sx={{ fontSize: 18 }} />
@@ -417,7 +423,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                       borderRadius: "10px",
                       py: 0.5,
                       px: 1.5,
-                      "&:hover": { bgcolor: theme.palette.action.hover, color: "text.primary" },
+                      "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)", color: "text.primary" },
                     }}
                   >
                     Cancel
@@ -454,7 +460,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                   <Typography
                     sx={{
                       fontWeight: 600,
-                      fontSize: 15,
+                      fontSize: 16,
                       lineHeight: 1.5,
                       color: "text.primary",
                       overflow: "hidden",
@@ -480,10 +486,10 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                     </Typography>
                   </Box>
 
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 2 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 3, mt: 2 }}>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                       <CalendarTodayOutlinedIcon sx={{ fontSize: 14, color: theme.palette.text.secondary }} />
-                      <Typography sx={{ fontSize: 13, fontWeight: 600, color: "text.primary", lineHeight: 1.3 }}>
+                      <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.secondary", lineHeight: 1.4 }}>
                         {task.due_date
                           ? new Date(task.due_date + "T00:00:00").toLocaleDateString("en-US", {
                               month: "short",
@@ -495,7 +501,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                     </Box>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                       <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: priorityColor }} />
-                      <Typography sx={{ fontSize: 13, fontWeight: 600, color: "text.primary", lineHeight: 1.3, textTransform: "capitalize" }}>
+                      <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.secondary", lineHeight: 1.4, textTransform: "capitalize" }}>
                         {currentPriority.label}
                       </Typography>
                     </Box>

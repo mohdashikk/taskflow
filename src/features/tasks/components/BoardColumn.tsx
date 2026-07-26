@@ -15,7 +15,7 @@ import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import { motion, AnimatePresence } from "framer-motion";
-import { useTheme } from "@mui/material/styles";
+import { useTheme, alpha } from "@mui/material/styles";
 import type { TaskRow } from "../services/tasksService";
 import TaskCard from "./TaskCard";
 import EmptyColumn from "./EmptyColumn";
@@ -115,10 +115,10 @@ export default function BoardColumn({
 
   const isOverWipLimit = wipLimit > 0 && tasks.length >= wipLimit;
 
-  const columnBorder = isDark ? "#36324D" : "rgba(0,0,0,0.06)";
-  const columnShadow = isDark ? "0 10px 30px rgba(0,0,0,.25)" : "0 4px 20px rgba(0,0,0,0.06)";
+  const columnBorder = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
+  const columnShadow = isDark ? "0 8px 24px rgba(0,0,0,.18)" : "0 8px 24px rgba(0,0,0,0.04)";
   const menuBg = isDark ? "#232135" : "#FFFFFF";
-  const menuBorder = isDark ? "#36324D" : "rgba(0,0,0,0.06)";
+  const menuBorder = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
   const mutedText = isDark ? "#B5B7C8" : "#6B7280";
 
   return (
@@ -139,18 +139,19 @@ export default function BoardColumn({
           alignItems: "center",
           gap: 1,
           px: 2,
-          py: 1.5,
-          mb: 2,
-          bgcolor: isDark ? "rgba(255, 255, 255, 0.04)" : "rgba(0, 0, 0, 0.02)",
+          py: 1,
+          height: 48,
+          mb: "15px",
+          bgcolor: isDark ? "#12101e" : "rgba(0, 0, 0, 0.02)",
           borderRadius: "12px",
-          border: `1px solid ${isDark ? "#36324D" : columnBorder}`,
+          border: `1px solid ${columnBorder}`,
         }}
       >
         <Typography
           sx={{
             fontWeight: 600,
             color: "text.primary",
-            fontSize: 16,
+            fontSize: 15,
             flex: 1,
             letterSpacing: "-0.01em",
             lineHeight: 1.4,
@@ -161,13 +162,16 @@ export default function BoardColumn({
 
         <Box
           sx={{
-            bgcolor: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0,0,0,0.04)",
+            bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
             borderRadius: "999px",
             px: 1.5,
-            py: 0.25,
+            py: 0.5,
             minWidth: 32,
-            textAlign: "center",
-            border: isOverWipLimit ? `1.5px solid ${theme.palette.error.main}` : `1px solid ${isDark ? "#36324D" : columnBorder}`,
+            height: 24,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: `1px solid ${columnBorder}`,
           }}
         >
           <Typography
@@ -175,6 +179,7 @@ export default function BoardColumn({
               fontWeight: 500,
               fontSize: 12,
               color: mutedText,
+              lineHeight: 1,
             }}
           >
             {tasks.length}{wipLimit > 0 ? ` / ${wipLimit}` : ""}
@@ -193,7 +198,7 @@ export default function BoardColumn({
             height: 28,
             color: mutedText,
             borderRadius: "8px",
-            "&:hover": { bgcolor: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0,0,0,0.04)", color: "text.primary" },
+            "&:hover": { bgcolor: isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0,0,0,0.04)", color: "text.primary" },
           }}
         >
           <MoreVertOutlinedIcon sx={{ fontSize: 18 }} />
@@ -237,7 +242,7 @@ export default function BoardColumn({
           overflowX: "hidden",
           display: "flex",
           flexDirection: "column",
-          gap: "8px",
+          gap: "12px",
           minHeight: 0,
           px: 0,
         }}
@@ -247,9 +252,9 @@ export default function BoardColumn({
             <motion.div
               key={task.id}
               layout
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              exit={{ opacity: 0, scale: 0.98 }}
               transition={{
                 duration: 0.2,
                 ease: [0.4, 0, 0.2, 1] as const,
@@ -276,7 +281,7 @@ export default function BoardColumn({
       <AnimatePresence>
         {isQuickAdding && (
           <motion.div
-            style={{ marginTop: 8 }}
+            style={{ marginTop: 12 }}
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
@@ -284,10 +289,10 @@ export default function BoardColumn({
           >
             <Box
               sx={{
-                bgcolor: isDark ? "#1C1929" : "#FFFFFF",
-                borderRadius: "14px",
-                border: `1px solid ${isDark ? "#36324D" : theme.palette.divider}`,
-                boxShadow: isDark ? "0 8px 20px rgba(0,0,0,.2)" : "0 2px 8px rgba(0,0,0,0.04)",
+                bgcolor: isDark ? "#12101e" : "#FFFFFF",
+                borderRadius: "12px",
+                border: `1px solid ${columnBorder}`,
+                boxShadow: columnShadow,
                 overflow: "hidden",
               }}
             >
@@ -326,7 +331,7 @@ export default function BoardColumn({
                       width: 32,
                       height: 32,
                       borderRadius: "8px",
-                      border: `1px solid ${isDark ? "#36324D" : theme.palette.divider}`,
+                      border: `1px solid ${columnBorder}`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -334,7 +339,7 @@ export default function BoardColumn({
                       bgcolor: isDark ? "rgba(0,0,0,0.2)" : "#F7F8FA",
                       position: "relative",
                       transition: "all 120ms ease",
-                      "&:hover": { bgcolor: theme.palette.action.hover },
+                      "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)" },
                     }}
                   >
                     <FlagOutlinedIcon sx={{ fontSize: 15, color: currentPriority.color }} />
@@ -396,7 +401,7 @@ export default function BoardColumn({
                       width: 32,
                       height: 32,
                       borderRadius: "8px",
-                      border: `1px solid ${theme.palette.divider}`,
+                      border: `1px solid ${columnBorder}`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -404,7 +409,7 @@ export default function BoardColumn({
                       bgcolor: isDark ? "rgba(0,0,0,0.2)" : "#F7F8FA",
                       color: dueDate ? "text.primary" : mutedText,
                       transition: "all 120ms ease",
-                      "&:hover": { bgcolor: theme.palette.action.hover },
+                      "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
                     }}
                   >
                     <CalendarTodayOutlinedIcon sx={{ fontSize: 15 }} />
@@ -433,7 +438,7 @@ export default function BoardColumn({
                       height: 32,
                       color: mutedText,
                       borderRadius: "8px",
-                      "&:hover": { bgcolor: theme.palette.action.hover, color: "text.primary" },
+                      "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)", color: "text.primary" },
                     }}
                   >
                     <CloseOutlinedIcon sx={{ fontSize: 15 }} />
@@ -462,7 +467,7 @@ export default function BoardColumn({
 
       {/* Add Task Button */}
       {!isQuickAdding && (
-        <Box sx={{ px: 0.5, mt: 1 }}>
+        <Box sx={{ px: 0.5, mt: 2 }}>
           <Button
             fullWidth
             size="small"
@@ -475,11 +480,11 @@ export default function BoardColumn({
               fontSize: 13,
               borderRadius: "10px",
               py: 1,
-              border: `1px dashed ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}`,
+              border: `1px dashed ${columnBorder}`,
               "&:hover": {
-                borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)",
-                color: "text.primary",
-                bgcolor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.01)",
+                borderColor: theme.palette.primary.main,
+                color: theme.palette.primary.main,
+                bgcolor: isDark ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.primary.main, 0.04),
               },
               transition: "all 150ms ease",
             }}

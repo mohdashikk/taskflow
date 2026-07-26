@@ -151,32 +151,40 @@ export default function Sidebar() {
 
   const navItemSx = (selected: boolean) => {
     return {
-      minHeight: 44,
-      borderRadius: 3,
-      px: 1.5,
-      py: 1,
+      minHeight: 48,
+      borderRadius: 2,
+      px: 2,
+      py: 1.25,
       gap: 1.5,
       transition: "all 180ms cubic-bezier(0.4, 0, 0.2, 1)",
       color: selected
-        ? theme.palette.primary.contrastText
+        ? theme.palette.text.primary
         : theme.palette.text.secondary,
       bgcolor: selected
-        ? theme.palette.primary.main
+        ? isDark
+          ? "rgba(255,255,255,0.06)"
+          : theme.palette.action.selected
         : "transparent",
       position: "relative",
       "&:hover": {
         bgcolor: selected
-          ? theme.palette.primary.dark
+          ? isDark
+            ? "rgba(255,255,255,0.08)"
+            : theme.palette.action.hover
           : isDark
             ? "rgba(255,255,255,0.04)"
-            : alpha("#000000", 0.04),
+            : alpha(theme.palette.primary.main, 0.04),
         color: selected
-          ? theme.palette.primary.contrastText
-          : theme.palette.text.primary,
+          ? theme.palette.text.primary
+          : isDark
+            ? theme.palette.text.primary
+            : theme.palette.primary.main,
         "& .MuiListItemIcon-root": {
           color: selected
-            ? theme.palette.primary.contrastText
-            : theme.palette.text.primary,
+            ? theme.palette.text.primary
+            : isDark
+              ? theme.palette.text.primary
+              : theme.palette.primary.main,
         },
         "&::before": {
           opacity: selected ? 0 : 1,
@@ -202,7 +210,7 @@ export default function Sidebar() {
       }),
       "& .MuiListItemIcon-root": {
         color: selected
-          ? theme.palette.primary.contrastText
+          ? theme.palette.text.primary
           : "inherit",
         minWidth: "auto",
       },
@@ -228,14 +236,14 @@ export default function Sidebar() {
   const groupHeaderSx = {
     minHeight: 36,
     borderRadius: 3,
-    px: 1.5,
-    py: 0.75,
+    px: 2,
+    py: 1,
     transition: "all 180ms cubic-bezier(0.4, 0, 0.2, 1)",
     color: theme.palette.text.secondary,
     "&:hover": {
       bgcolor: isDark
         ? "rgba(255,255,255,0.04)"
-        : alpha("#000000", 0.04),
+        : alpha(theme.palette.primary.main, 0.04),
       color: theme.palette.text.primary,
     },
   };
@@ -245,16 +253,16 @@ export default function Sidebar() {
     return {
       minHeight: 36,
       borderRadius: 3,
-      px: 1.5,
-      py: 0.5,
-      pl: 4,
+      px: 2,
+      py: 0.75,
+      pl: 4.5,
       gap: 1.5,
       transition: "all 180ms cubic-bezier(0.4, 0, 0.2, 1)",
       color: theme.palette.text.secondary,
       "&:hover": {
         bgcolor: isDark
           ? "rgba(255,255,255,0.04)"
-          : alpha("#000000", 0.04),
+          : alpha(theme.palette.primary.main, 0.04),
         color: theme.palette.text.primary,
         "& .MuiListItemIcon-root": {
           color: theme.palette.text.primary,
@@ -287,13 +295,11 @@ export default function Sidebar() {
         width: SIDEBAR_WIDTH,
         flexShrink: 0,
         height: "100vh",
-      bgcolor: isDark ? "transparent" : "#FFFFFF",
-      borderRight: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : theme.palette.divider}`,
-      boxShadow: isDark ? "none" : theme.palette.mode === "dark"
-        ? "0 1px 2px rgba(0,0,0,0.2)"
-        : "0 1px 2px rgba(0,0,0,0.04)",
-        px: 2,
-        py: 3,
+        bgcolor: "background.paper",
+        borderRight: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : theme.palette.divider}`,
+        boxShadow: isDark ? "none" : "0 1px 2px rgba(0,0,0,0.04)",
+        px: 2.5,
+        py: 3.5,
         overflowY: "auto",
         "&::-webkit-scrollbar": {
           display: "none",
@@ -313,7 +319,7 @@ export default function Sidebar() {
           alignItems: "center",
           gap: 1.5,
           px: 1,
-          mb: 5,
+          mb: 6,
         }}
       >
         <Avatar
@@ -341,7 +347,7 @@ export default function Sidebar() {
       </Box>
 
       {/* Main Menu */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 4 }}>
         <Typography
           sx={{
             fontSize: 11,
@@ -350,12 +356,12 @@ export default function Sidebar() {
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             px: 1.5,
-            mb: 1.5,
+            mb: 2,
           }}
         >
           Main Menu
         </Typography>
-        <List sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+        <List sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           {MAIN_MENU_ITEMS.map((item) => {
             const selected = isSelected(item.href);
             return (
@@ -377,8 +383,8 @@ export default function Sidebar() {
       <Divider sx={{ borderColor: theme.palette.divider, my: 1 }} />
 
       {/* Workspace */}
-      <Box sx={{ mb: 3 }}>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 1, mb: 1.5 }}>
+      <Box sx={{ mb: 4 }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 1, mb: 2 }}>
           <Typography
             sx={{
               fontSize: 11,
@@ -440,8 +446,10 @@ export default function Sidebar() {
                   {group.badge && (
                     <Box
                       sx={{
-                        bgcolor: theme.palette.primary.main,
-                        color: theme.palette.primary.contrastText,
+                        bgcolor: isDark
+                          ? alpha(theme.palette.primary.main, 0.15)
+                          : alpha(theme.palette.primary.main, 0.1),
+                        color: theme.palette.primary.main,
                         fontSize: 11,
                         fontWeight: 600,
                         px: 1.25,
@@ -503,12 +511,12 @@ export default function Sidebar() {
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             px: 1.5,
-            mb: 1.5,
+            mb: 2,
           }}
         >
           General
         </Typography>
-        <List sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+        <List sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           {GENERAL_ITEMS.map((item) => {
             const selected = isSelected(item.href);
             return (
@@ -527,10 +535,10 @@ export default function Sidebar() {
           <ListItemButton
             onClick={handleLogout}
             sx={{
-              minHeight: 44,
-              borderRadius: 3,
-              px: 1.5,
-              py: 1,
+              minHeight: 48,
+              borderRadius: 2,
+              px: 2,
+              py: 1.25,
               gap: 1.5,
               transition: "all 180ms cubic-bezier(0.4, 0, 0.2, 1)",
               color: theme.palette.text.secondary,

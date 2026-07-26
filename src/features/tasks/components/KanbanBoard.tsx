@@ -276,19 +276,19 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <Box
-          className="thin-scrollbar hide-scrollbar"
-          sx={{
-            display: "flex",
-            gap: 3,
-            overflowX: "auto",
-            overflowY: "hidden",
-            pb: 2,
-            flex: 1,
-            alignItems: "flex-start",
-            minHeight: 0,
-          }}
-        >
+         <Box
+           className="thin-scrollbar hide-scrollbar"
+           sx={{
+             display: "flex",
+             gap: 4,
+             overflowX: "auto",
+             overflowY: "hidden",
+             pb: 2,
+             flex: 1,
+             alignItems: "flex-start",
+             minHeight: 0,
+           }}
+         >
           {columns.length === 0 ? (
             <Box
               sx={{

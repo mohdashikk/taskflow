@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { alpha, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
@@ -27,6 +28,8 @@ interface ProjectCardProps {
 
 export default function ProjectCard({ project, onEdit, onDelete, statuses }: ProjectCardProps) {
   const router = useRouter();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
 
@@ -68,9 +71,9 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
         }}
         sx={{
           bgcolor: "#FFFFFF",
-          borderRadius: "20px",
-          border: "1px solid #E6E8EB",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04)",
+          borderRadius: "16px",
+          border: isDark ? "1px solid rgba(255,255,255,0.06)" : "1px solid rgba(0,0,0,0.06)",
+          boxShadow: isDark ? "0 8px 24px rgba(0,0,0,.18)" : "0 8px 24px rgba(0,0,0,0.04)",
           p: 3,
           cursor: "pointer",
           display: "flex",
@@ -80,12 +83,12 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
           position: "relative",
           overflow: "hidden",
           "&:hover": {
-            boxShadow: "0 12px 28px rgba(15, 23, 42, 0.08)",
-            borderColor: "#D1D5DB",
+            boxShadow: isDark ? "0 8px 24px rgba(0,0,0,.18)" : "0 12px 24px rgba(0,0,0,0.08)",
+            borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
           },
           "&:focus-visible": {
             outline: "2px solid",
-            outlineColor: "#006F99",
+            outlineColor: theme.palette.primary.main,
             outlineOffset: 2,
           },
         }}
@@ -104,11 +107,11 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
             size="small"
             onClick={handleMenu}
             sx={{
-              color: "#6B7280",
-              borderRadius: 2,
+              color: theme.palette.text.secondary,
+              borderRadius: "8px",
               width: 32,
               height: 32,
-              "&:hover": { bgcolor: "#F2F4F7", color: "#111827" },
+              "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)", color: theme.palette.text.primary },
             }}
             aria-label="Project options"
           >
@@ -124,7 +127,7 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
             fontWeight: 600,
             lineHeight: 1.4,
             letterSpacing: "-0.01em",
-            color: "#111827",
+            color: theme.palette.text.primary,
           }}
         >
           {project.name}
@@ -134,7 +137,7 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
         <Typography
           variant="body2"
           sx={{
-            color: "#6B7280",
+            color: theme.palette.text.secondary,
             fontSize: 14,
             lineHeight: 1.5,
             display: "-webkit-box",
@@ -152,7 +155,7 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
           sx={{
             height: 6,
             borderRadius: 3,
-            bgcolor: "#F2F4F7",
+            bgcolor: isDark ? "rgba(255,255,255,0.06)" : "#F2F4F7",
             overflow: "hidden",
           }}
         >
@@ -161,7 +164,7 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
               width: `${completionRate}%`,
               height: "100%",
               borderRadius: 3,
-              bgcolor: "#006F99",
+              bgcolor: theme.palette.primary.main,
               transition: "width 400ms cubic-bezier(0.4, 0, 0.2, 1)",
             }}
           />
@@ -173,7 +176,7 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
             display: "flex",
             alignItems: "center",
             gap: 2,
-            color: "#6B7280",
+            color: theme.palette.text.secondary,
             flexWrap: "wrap",
           }}
         >
@@ -199,9 +202,9 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
           slotProps={{
             paper: {
               sx: {
-                borderRadius: 3,
-                border: "1px solid #E6E8EB",
-                boxShadow: "0 8px 24px rgba(15, 23, 42, 0.08)",
+                borderRadius: "12px",
+                border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : theme.palette.divider}`,
+                boxShadow: isDark ? "0 10px 30px rgba(0,0,0,.25)" : "0 10px 30px rgba(0,0,0,0.08)",
                 minWidth: 180,
               },
             },
@@ -232,9 +235,9 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
               closeMenu();
               onDelete?.(project.id);
             }}
-            sx={{ fontSize: 14, py: 1, px: 2, color: "#EF4444", borderRadius: 1, mx: 0.5 }}
+            sx={{ fontSize: 14, py: 1, px: 2, color: theme.palette.error.main, borderRadius: 1, mx: 0.5 }}
           >
-            <ListItemIcon sx={{ color: "#EF4444" }}>
+            <ListItemIcon sx={{ color: theme.palette.error.main }}>
               <DeleteOutlineOutlinedIcon fontSize="small" />
             </ListItemIcon>
             Delete Project

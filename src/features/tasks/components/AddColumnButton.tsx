@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTheme } from "@mui/material/styles";
+import { useTheme, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -63,8 +63,8 @@ export default function AddColumnButton({ onAdd, adding }: AddColumnButtonProps)
             width: 320,
             minWidth: 320,
             height: 120,
-            borderRadius: "18px",
-            border: `1px solid ${isDark ? "#36324D" : "rgba(0,0,0,0.06)"}`,
+            borderRadius: "12px",
+            border: `1px dashed ${isDark ? "#36324D" : "rgba(0,0,0,0.1)"}`,
             color: "text.secondary",
             display: "flex",
             flexDirection: "column",
@@ -74,14 +74,13 @@ export default function AddColumnButton({ onAdd, adding }: AddColumnButtonProps)
             p: 0,
             transition: "all 150ms ease",
             bgcolor: isDark ? "#1C1929" : "rgba(0,0,0,0.02)",
-            backdropFilter: "blur(20px)",
             textTransform: "none",
             fontWeight: 500,
             fontSize: 14,
             "&:hover": {
-              borderColor: isDark ? "#36324D" : "rgba(0,0,0,0.12)",
-              color: "text.primary",
-              bgcolor: isDark ? "#2B2942" : "rgba(0,0,0,0.03)",
+              borderColor: theme.palette.primary.main,
+              color: theme.palette.primary.main,
+              bgcolor: isDark ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.primary.main, 0.04),
             },
           }}
         >

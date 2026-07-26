@@ -72,12 +72,12 @@ export default function Header() {
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] as const }}
       sx={{
         height: 72,
-        px: { xs: 2, sm: 3, md: 4 },
+        px: { xs: 2.5, sm: 3.5, md: 4 },
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : theme.palette.divider}`,
-        bgcolor: theme.palette.mode === "dark" ? "transparent" : "#FFFFFF",
+        borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+        bgcolor: "background.paper",
         position: "sticky",
         top: 0,
         zIndex: 10,
@@ -114,15 +114,15 @@ export default function Header() {
             height: 40,
             px: 1.5,
             borderRadius: 3,
-            bgcolor: theme.palette.mode === "dark"
+            bgcolor: isDark
               ? "rgba(255,255,255,0.04)"
               : "#F2F4F7",
-            border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : theme.palette.divider}`,
+            border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
             transition: "all 180ms ease",
             maxWidth: 280,
             width: "100%",
             "&:hover": {
-              borderColor: theme.palette.primary.main,
+              borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)",
             },
             "&:focus-within": {
               borderColor: theme.palette.primary.main,
@@ -187,7 +187,7 @@ export default function Header() {
                 height: 40,
                 borderRadius: 3,
                 bgcolor: isDark ? "rgba(255,255,255,0.04)" : "#F2F4F7",
-                border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : theme.palette.divider}`,
+                border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
                 color: theme.palette.text.primary,
                 transition: "all 180ms ease",
                 "&:hover": {
@@ -243,7 +243,7 @@ export default function Header() {
               height: 36,
               fontSize: 14,
               fontWeight: 700,
-              border: `1px solid ${theme.palette.divider}`,
+              border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
             }}
           >
             {initials}
