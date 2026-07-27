@@ -35,6 +35,7 @@ export interface Project {
   dueDate: string;
   tasksDone: number;
   tasksTotal: number;
+  created_at: string;
 }
 
 export const STATUS_LABELS: Record<ProjectStatus, string> = {
@@ -76,4 +77,5 @@ export const toProject = (row: ProjectRow): Project => ({
   dueDate: row.due_date ? formatDueDate(row.due_date) : "—",
   tasksDone: 0,
   tasksTotal: 0,
+  created_at: row.created_at,
 });

@@ -5,15 +5,13 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import Breadcrumbs from "@mui/material/Breadcrumbs";
-import Link from "@mui/material/Link";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
+import { useTheme } from "@mui/material/styles";
 import { motion, AnimatePresence } from "framer-motion";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import NavigateNextRoundedIcon from "@mui/icons-material/NavigateNextRounded";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 
@@ -30,6 +28,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import type { Project, ProjectStatus } from "../data/mockData";
 
 export default function ProjectsPage() {
+  const theme = useTheme();
   const { user } = useAuth();
   const { data: projects, isLoading, isError, error, refetch } = useProjects(
     user?.id,
@@ -88,60 +87,17 @@ export default function ProjectsPage() {
   const showEmpty = !isLoading && !isError && (!projects || projects.length === 0);
 
   return (
-    <Box sx={{ maxWidth: 1440, mx: "auto" }}>
-      {/* Breadcrumb */}
-      <Breadcrumbs
-        separator={<NavigateNextRoundedIcon fontSize="small" sx={{ color: "#D1D5DB" }} />}
-        sx={{ mb: 3, "& .MuiBreadcrumbs-li": { fontSize: 13, fontWeight: 600 } }}
-      >
-        <Link
-          underline="hover"
-          color="#6B7280"
-          href="/"
-          sx={{ cursor: "pointer", "&:hover": { color: "#006F99" } }}
-        >
-          Workspace
-        </Link>
-        <Typography color="#111827" sx={{ fontSize: 13, fontWeight: 700 }}>
-          Projects
-        </Typography>
-      </Breadcrumbs>
-
-      {/* Header */}
+    <Box>
       <Box
         sx={{
           display: "flex",
           alignItems: { xs: "flex-start", sm: "center" },
-          justifyContent: "space-between",
+          justifyContent: "flex-end",
           flexDirection: { xs: "column", sm: "row" },
           gap: 2,
           mb: 4,
         }}
       >
-        <Box>
-          <Typography
-            sx={{
-              fontSize: { xs: 26, sm: 30 },
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
-              lineHeight: 1.2,
-              color: "#111827",
-            }}
-          >
-            Projects
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              color: "#6B7280",
-              mt: 0.5,
-              fontSize: 15,
-              lineHeight: 1.5,
-            }}
-          >
-            Manage your projects and monitor overall progress.
-          </Typography>
-        </Box>
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
           <Button
             variant="contained"
@@ -154,11 +110,11 @@ export default function ProjectsPage() {
               height: 48,
               px: 3,
               flexShrink: 0,
-              bgcolor: "#006F99",
-              boxShadow: "0 4px 12px rgba(0, 111, 153, 0.2)",
+              bgcolor: theme.palette.primary.main,
+              boxShadow: `0 4px 12px ${theme.palette.primary.main}33`,
               "&:hover": {
                 boxShadow: "none",
-                bgcolor: "#005670",
+                bgcolor: theme.palette.primary.dark,
               },
             }}
           >
@@ -257,14 +213,9 @@ export default function ProjectsPage() {
         <Box
           sx={{
             display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
             gap: 3,
-            gridTemplateColumns: {
-              xs: "1fr",
-              sm: "repeat(2, 1fr)",
-              lg: "repeat(3, 1fr)",
-              xl: "repeat(4, 1fr)",
-            },
-            alignItems: "stretch",
+            width: "100%",
           }}
         >
           <AnimatePresence>

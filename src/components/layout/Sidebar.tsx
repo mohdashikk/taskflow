@@ -1,30 +1,25 @@
 "use client";
 
-import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { alpha, useTheme } from "@mui/material/styles";
-import Link from "next/link";
 import {
   Avatar,
   Box,
-  Collapse,
   Divider,
-  IconButton,
+  Drawer,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   Typography,
 } from "@mui/material";
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import Link from "next/link";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
-import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
-import KeyboardArrowDownOutlinedIcon from "@mui/icons-material/KeyboardArrowDownOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
@@ -37,13 +32,6 @@ export interface NavItem {
   label: string;
   href: string;
   icon: React.ReactNode;
-}
-
-interface WorkspaceGroup {
-  label: string;
-  items: NavItem[];
-  defaultExpanded?: boolean;
-  badge?: number;
 }
 
 const MAIN_MENU_ITEMS: NavItem[] = [
@@ -79,34 +67,6 @@ const MAIN_MENU_ITEMS: NavItem[] = [
   },
 ];
 
-const WORKSPACE_GROUPS: WorkspaceGroup[] = [
-  {
-    label: "Ongoing Projects",
-    defaultExpanded: true,
-    items: [
-      { label: "Website Revamp", href: "#", icon: <CircleOutlinedIcon fontSize="small" /> },
-      { label: "Landing Page Design", href: "#", icon: <CircleOutlinedIcon fontSize="small" /> },
-    ],
-  },
-  {
-    label: "Daily Tasks",
-    defaultExpanded: false,
-    items: [
-      { label: "Design Review", href: "#", icon: <CircleOutlinedIcon fontSize="small" /> },
-      { label: "Client Meeting", href: "#", icon: <CircleOutlinedIcon fontSize="small" /> },
-    ],
-  },
-  {
-    label: "Dribbble Shots",
-    defaultExpanded: false,
-    badge: 3,
-    items: [
-      { label: "Inspiration", href: "#", icon: <CircleOutlinedIcon fontSize="small" /> },
-      { label: "Uploads", href: "#", icon: <CircleOutlinedIcon fontSize="small" /> },
-    ],
-  },
-];
-
 const GENERAL_ITEMS: NavItem[] = [
   {
     label: "Settings",
@@ -121,28 +81,16 @@ const GENERAL_ITEMS: NavItem[] = [
 ];
 
 interface SidebarProps {
-  showWorkspace?: boolean;
+  open: boolean;
+  onClose: () => void;
+  permanent?: boolean;
 }
 
-export default function Sidebar({ showWorkspace = true }: SidebarProps = {}) {
+export default function Sidebar({ open, onClose, permanent = false }: SidebarProps) {
   const pathname = usePathname();
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const logout = useLogout();
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
-    () =>
-      WORKSPACE_GROUPS.reduce((acc, group) => {
-        acc[group.label] = group.defaultExpanded ?? false;
-        return acc;
-      }, {} as Record<string, boolean>)
-  );
-
-  const toggleGroup = (label: string) => {
-    setExpandedGroups((prev) => ({
-      ...prev,
-      [label]: !prev[label],
-    }));
-  };
 
   const handleLogout = () => {
     void logout();
@@ -237,67 +185,10 @@ export default function Sidebar({ showWorkspace = true }: SidebarProps = {}) {
     },
   });
 
-  const groupHeaderSx = {
-    minHeight: 36,
-    borderRadius: 3,
-    px: 2,
-    py: 1,
-    transition: "all 180ms cubic-bezier(0.4, 0, 0.2, 1)",
-    color: theme.palette.text.secondary,
-    "&:hover": {
-      bgcolor: isDark
-        ? "rgba(255,255,255,0.04)"
-        : alpha(theme.palette.primary.main, 0.04),
-      color: theme.palette.text.primary,
-    },
-  };
-
-  const subItemSx = () => {
-    const isDark = theme.palette.mode === "dark";
-    return {
-      minHeight: 36,
-      borderRadius: 3,
-      px: 2,
-      py: 0.75,
-      pl: 4.5,
-      gap: 1.5,
-      transition: "all 180ms cubic-bezier(0.4, 0, 0.2, 1)",
-      color: theme.palette.text.secondary,
-      "&:hover": {
-        bgcolor: isDark
-          ? "rgba(255,255,255,0.04)"
-          : alpha(theme.palette.primary.main, 0.04),
-        color: theme.palette.text.primary,
-        "& .MuiListItemIcon-root": {
-          color: theme.palette.text.primary,
-        },
-      },
-      "&.Mui-selected": {
-        bgcolor: alpha(theme.palette.primary.main, 0.12),
-        color: theme.palette.primary.main,
-        "&:hover": {
-          bgcolor: alpha(theme.palette.primary.main, 0.18),
-        },
-        "& .MuiListItemIcon-root": {
-          color: theme.palette.primary.main,
-        },
-      },
-      "& .MuiListItemIcon-root": {
-        minWidth: "auto",
-        color: "inherit",
-        "& .MuiSvgIcon-root": {
-          fontSize: 16,
-        },
-      },
-    };
-  };
-
-  return (
+  const sidebarContent = (
     <Box
-      component="nav"
       sx={{
         width: SIDEBAR_WIDTH,
-        flexShrink: 0,
         height: "100vh",
         bgcolor: "background.paper",
         borderRight: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : theme.palette.divider}`,
@@ -311,9 +202,6 @@ export default function Sidebar({ showWorkspace = true }: SidebarProps = {}) {
         scrollbarWidth: "none",
         display: "flex",
         flexDirection: "column",
-        position: "sticky",
-        top: 0,
-        zIndex: 20,
       }}
     >
       {/* Logo */}
@@ -379,125 +267,6 @@ export default function Sidebar({ showWorkspace = true }: SidebarProps = {}) {
                 <ListItemIcon sx={iconSx}>{item.icon}</ListItemIcon>
                 <ListItemText primary={item.label} sx={textSx(selected)} />
               </ListItemButton>
-            );
-          })}
-        </List>
-      </Box>
-
-      <Divider sx={{ borderColor: theme.palette.divider, my: 1 }} />
-
-      {/* Workspace */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 1, mb: 2 }}>
-          <Typography
-            sx={{
-              fontSize: 11,
-              fontWeight: 600,
-              color: theme.palette.text.secondary,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-            }}
-          >
-            Workspace
-          </Typography>
-          <IconButton
-            size="small"
-            sx={{
-              width: 28,
-              height: 28,
-              color: theme.palette.text.secondary,
-              borderRadius: 2,
-              "&:hover": {
-                bgcolor: alpha(theme.palette.primary.main, 0.08),
-                color: theme.palette.primary.main,
-              },
-            }}
-          >
-            <AddOutlinedIcon sx={{ fontSize: 18 }} />
-          </IconButton>
-        </Box>
-        <List sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-          {WORKSPACE_GROUPS.map((group) => {
-            const isExpanded = expandedGroups[group.label];
-            return (
-              <Box key={group.label}>
-                <ListItemButton
-                  onClick={() => toggleGroup(group.label)}
-                  sx={groupHeaderSx}
-                >
-                  <ListItemIcon
-                    sx={{
-                      minWidth: "auto",
-                      color: "inherit",
-                      "& .MuiSvgIcon-root": {
-                        fontSize: 18,
-                        transition: "transform 200ms cubic-bezier(0.4, 0, 0.2, 1)",
-                        transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
-                      },
-                    }}
-                  >
-                    <KeyboardArrowDownOutlinedIcon fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={group.label}
-                    sx={{
-                      "& .MuiListItemText-primary": {
-                        fontWeight: 500,
-                        fontSize: 13,
-                      },
-                    }}
-                  />
-                  {group.badge && (
-                    <Box
-                      sx={{
-                        bgcolor: isDark
-                          ? alpha(theme.palette.primary.main, 0.15)
-                          : alpha(theme.palette.primary.main, 0.1),
-                        color: theme.palette.primary.main,
-                        fontSize: 11,
-                        fontWeight: 600,
-                        px: 1.25,
-                        py: 0.25,
-                        borderRadius: 2,
-                        minWidth: 22,
-                        textAlign: "center",
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      {group.badge}
-                    </Box>
-                  )}
-                </ListItemButton>
-                <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                  <List sx={{ pl: 1.5, display: "flex", flexDirection: "column", gap: 0.25 }}>
-                    {group.items.map((item) => {
-                      const selected = isSelected(item.href);
-                      return (
-                        <ListItemButton
-                          key={item.label}
-                          component={item.href === "#" ? "div" : Link}
-                          href={item.href}
-                          selected={selected}
-                          sx={subItemSx()}
-                        >
-                          <ListItemIcon sx={{ minWidth: "auto" }}>
-                            {item.icon}
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={item.label}
-                            sx={{
-                              "& .MuiListItemText-primary": {
-                                fontWeight: selected ? 600 : 400,
-                                fontSize: 13,
-                              },
-                            }}
-                          />
-                        </ListItemButton>
-                      );
-                    })}
-                  </List>
-                </Collapse>
-              </Box>
             );
           })}
         </List>
@@ -576,5 +345,27 @@ export default function Sidebar({ showWorkspace = true }: SidebarProps = {}) {
         </List>
       </Box>
     </Box>
+  );
+
+  if (permanent) {
+    return sidebarContent;
+  }
+
+  return (
+    <Drawer
+      variant="temporary"
+      open={open}
+      onClose={onClose}
+      ModalProps={{ keepMounted: true }}
+      sx={{
+        display: { xs: "block", md: "none" },
+        "& .MuiDrawer-paper": {
+          width: SIDEBAR_WIDTH,
+          boxSizing: "border-box",
+        },
+      }}
+    >
+      {sidebarContent}
+    </Drawer>
   );
 }

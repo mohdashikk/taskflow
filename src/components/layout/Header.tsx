@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
 import { alpha, useTheme } from "@mui/material/styles";
 import {
   Avatar,
   Box,
-  Button,
   Divider,
   IconButton,
   ListItemIcon,
@@ -15,9 +13,9 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import KeyboardArrowDownOutlinedIcon from "@mui/icons-material/KeyboardArrowDownOutlined";
@@ -28,14 +26,11 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 import ThemeSwitcher from "@/features/auth/components/ThemeSwitcher";
 
-const PAGE_TITLES: Record<string, string> = {
-  "/dashboard": "Dashboard",
-  "/tasks": "Tasks",
-  "/space": "Space",
-};
+interface HeaderProps {
+  onMobileMenuToggle?: () => void;
+}
 
-export default function Header() {
-  const pathname = usePathname();
+export default function Header({ onMobileMenuToggle }: HeaderProps) {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const { user } = useAuth();
@@ -49,10 +44,6 @@ export default function Header() {
     "User";
   const email = user?.email ?? "";
   const initials = displayName.charAt(0).toUpperCase();
-  const pageTitle =
-    PAGE_TITLES[pathname] ||
-    pathname.split("/").filter(Boolean).pop()?.charAt(0).toUpperCase() +
-      (pathname.split("/").filter(Boolean).pop()?.slice(1) ?? "");
 
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -71,31 +62,96 @@ export default function Header() {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] as const }}
       sx={{
-        height: 72,
-        px: { xs: 2.5, sm: 3.5, md: 4 },
+        height: { xs: 64, sm: 72 },
+        px: { xs: 1.5, sm: 2.5, md: 3.5, lg: 4 },
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
+        gap: { xs: 1, sm: 0 },
         borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-        bgcolor: "background.paper",
+        bgcolor: theme.palette.background.paper,
         position: "sticky",
         top: 0,
         zIndex: 10,
       }}
     >
       {/* Page Title */}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography
+      <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, sm: 2 }, flex: 1, minWidth: 0 }}>
+        {onMobileMenuToggle && (
+          <IconButton
+            onClick={onMobileMenuToggle}
+            sx={{
+              display: { xs: "inline-flex", md: "none" },
+              width: 36,
+              height: 36,
+              borderRadius: 2,
+              color: theme.palette.text.primary,
+              bgcolor: isDark ? theme.palette.grey[900] : "#F2F4F7",
+              border: `1px solid ${isDark ? theme.palette.divider : "rgba(0,0,0,0.06)"}`,
+              transition: "all 180ms ease",
+              flexShrink: 0,
+              "&:hover": {
+                bgcolor: alpha(theme.palette.primary.main, 0.08),
+                borderColor: theme.palette.primary.main,
+                color: theme.palette.primary.main,
+              },
+            }}
+          >
+            <MenuOutlinedIcon fontSize="small" />
+          </IconButton>
+        )}
+        <Box
           sx={{
-            fontWeight: 700,
-            color: theme.palette.text.primary,
-            fontSize: { xs: 22, sm: 26 },
-            letterSpacing: "-0.01em",
-            lineHeight: 1.2,
+            flex: 1,
+            minWidth: 0,
+            display: { xs: "none", md: "block" },
+            maxWidth: 280,
           }}
         >
-          {pageTitle}
-        </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              height: 40,
+              px: 1.5,
+              borderRadius: 3,
+              bgcolor: isDark
+                ? theme.palette.grey[900]
+                : "#F2F4F7",
+              border: `1px solid ${isDark ? theme.palette.divider : "rgba(0,0,0,0.06)"}`,
+              transition: "all 180ms ease",
+              "&:hover": {
+                borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)",
+              },
+              "&:focus-within": {
+                borderColor: theme.palette.primary.main,
+                boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.08)}`,
+              },
+            }}
+          >
+            <SearchOutlinedIcon
+              sx={{
+                color: theme.palette.text.secondary,
+                fontSize: 18,
+                mr: 1,
+                flexShrink: 0,
+              }}
+            />
+            <input
+              placeholder="Search..."
+              aria-label="Search"
+              style={{
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                width: "100%",
+                color: theme.palette.text.primary,
+                fontSize: 14,
+                fontFamily: "inherit",
+              }}
+            />
+          </Box>
+        </Box>
       </Box>
 
       {/* Right Actions */}
@@ -106,76 +162,6 @@ export default function Header() {
           gap: { xs: 0.75, sm: 1.5 },
         }}
       >
-        {/* Search */}
-        <Box
-          sx={{
-            display: { xs: "none", md: "flex" },
-            alignItems: "center",
-            height: 40,
-            px: 1.5,
-            borderRadius: 3,
-            bgcolor: isDark
-              ? "rgba(255,255,255,0.04)"
-              : "#F2F4F7",
-            border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-            transition: "all 180ms ease",
-            maxWidth: 280,
-            width: "100%",
-            "&:hover": {
-              borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)",
-            },
-            "&:focus-within": {
-              borderColor: theme.palette.primary.main,
-              boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.08)}`,
-            },
-          }}
-        >
-          <SearchOutlinedIcon
-            sx={{
-              color: theme.palette.text.secondary,
-              fontSize: 18,
-              mr: 1,
-              flexShrink: 0,
-            }}
-          />
-          <input
-            placeholder="Search..."
-            aria-label="Search"
-            style={{
-              background: "transparent",
-              border: "none",
-              outline: "none",
-              width: "100%",
-              color: theme.palette.text.primary,
-              fontSize: 14,
-              fontFamily: "inherit",
-            }}
-          />
-        </Box>
-
-        {/* Quick Add */}
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
-          <Button
-            variant="contained"
-            startIcon={<AddOutlinedIcon fontSize="small" />}
-            sx={{
-              borderRadius: 3,
-              height: 40,
-              px: 2.5,
-              textTransform: "none",
-              fontWeight: 600,
-              fontSize: 14,
-              whiteSpace: "nowrap",
-              bgcolor: theme.palette.primary.main,
-              "&:hover": {
-                bgcolor: theme.palette.primary.dark,
-              },
-            }}
-          >
-            <Box sx={{ display: { xs: "none", sm: "inline" } }}>Add Task</Box>
-          </Button>
-        </motion.div>
-
         <ThemeSwitcher />
 
         {/* Notifications */}
@@ -183,11 +169,11 @@ export default function Header() {
           <Box sx={{ position: "relative", display: "inline-flex" }}>
             <IconButton
               sx={{
-                width: 40,
-                height: 40,
-                borderRadius: 3,
-                bgcolor: isDark ? "rgba(255,255,255,0.04)" : "#F2F4F7",
-                border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+                width: { xs: 36, sm: 40 },
+                height: { xs: 36, sm: 40 },
+                borderRadius: 2,
+                bgcolor: isDark ? theme.palette.grey[900] : "#F2F4F7",
+                border: `1px solid ${isDark ? theme.palette.divider : "rgba(0,0,0,0.06)"}`,
                 color: theme.palette.text.primary,
                 transition: "all 180ms ease",
                 "&:hover": {
@@ -197,15 +183,15 @@ export default function Header() {
                 },
               }}
             >
-              <NotificationsOutlinedIcon fontSize="small" />
+              <NotificationsOutlinedIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
             </IconButton>
             <Box
               sx={{
                 position: "absolute",
-                top: 9,
-                right: 9,
-                width: 8,
-                height: 8,
+                top: { xs: 7, sm: 9 },
+                right: { xs: 7, sm: 9 },
+                width: { xs: 7, sm: 8 },
+                height: { xs: 7, sm: 8 },
                 borderRadius: "50%",
                 bgcolor: theme.palette.success.main,
                 border: `1.5px solid ${isDark ? "rgba(255,255,255,0.08)" : theme.palette.background.paper}`,
@@ -220,14 +206,14 @@ export default function Header() {
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: 0.75,
-            px: 0.75,
+            gap: { xs: 0, sm: 0.75 },
+            px: { xs: 0.25, sm: 0.75 },
             py: 0.5,
-            borderRadius: 3,
+            borderRadius: 2,
             cursor: "pointer",
             transition: "background 180ms ease",
             "&:hover": {
-              bgcolor: isDark ? "rgba(255,255,255,0.04)" : "#F2F4F7",
+              bgcolor: isDark ? theme.palette.grey[900] : "#F2F4F7",
             },
           }}
         >
@@ -239,16 +225,16 @@ export default function Header() {
               color: theme.palette.mode === "dark"
                 ? theme.palette.primary.contrastText
                 : theme.palette.primary.main,
-              width: 36,
-              height: 36,
-              fontSize: 14,
+              width: { xs: 32, sm: 36 },
+              height: { xs: 32, sm: 36 },
+              fontSize: { xs: 12, sm: 14 },
               fontWeight: 700,
               border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
             }}
           >
             {initials}
           </Avatar>
-          <Box sx={{ display: { xs: "none", sm: "flex" }, flexDirection: "column", lineHeight: 1.3, maxWidth: 120 }}>
+          <Box sx={{ display: { xs: "none", sm: "flex" }, flexDirection: "column", lineHeight: 1.3, maxWidth: 120, ml: 0.5 }}>
             <Typography
               sx={{
                 fontWeight: 600,
@@ -278,6 +264,7 @@ export default function Header() {
               color: theme.palette.text.secondary,
               fontSize: 16,
               display: { xs: "none", sm: "block" },
+              ml: { xs: 0, sm: 0.25 },
             }}
           />
         </Box>

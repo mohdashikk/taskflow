@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { alpha, useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
@@ -70,9 +70,9 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
           }
         }}
         sx={{
-          bgcolor: "#FFFFFF",
+          bgcolor: isDark ? "#12101e" : "#FFFFFF",
           borderRadius: "16px",
-          border: isDark ? "1px solid rgba(255,255,255,0.06)" : "1px solid rgba(0,0,0,0.06)",
+          border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
           boxShadow: isDark ? "0 8px 24px rgba(0,0,0,.18)" : "0 8px 24px rgba(0,0,0,0.04)",
           p: 3,
           cursor: "pointer",
@@ -202,6 +202,8 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
           slotProps={{
             paper: {
               sx: {
+                bgcolor: isDark ? "#232135" : "#FFFFFF",
+                backdropFilter: "blur(24px)",
                 borderRadius: "12px",
                 border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : theme.palette.divider}`,
                 boxShadow: isDark ? "0 10px 30px rgba(0,0,0,.25)" : "0 10px 30px rgba(0,0,0,0.08)",

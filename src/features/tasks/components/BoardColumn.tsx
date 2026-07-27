@@ -263,8 +263,8 @@ export default function BoardColumn({
           flexDirection: "column",
           gap: `${COLUMN_GAP * 4}px`,
           minHeight: 120,
-          px: 1,
-          pt: 0.5,
+          px: 0,
+          pt: 0,
           borderRadius: "10px",
         }}
       >
