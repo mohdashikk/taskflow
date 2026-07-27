@@ -5,17 +5,15 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import Breadcrumbs from "@mui/material/Breadcrumbs";
-import Link from "@mui/material/Link";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
+import { useTheme } from "@mui/material/styles";
+import { motion, AnimatePresence } from "framer-motion";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import NavigateNextRoundedIcon from "@mui/icons-material/NavigateNextRounded";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 
 import ProjectCard from "../components/ProjectCard";
 import ProjectForm from "../components/ProjectForm";
@@ -25,14 +23,18 @@ import {
   useUpdateProject,
   useDeleteProject,
 } from "../hooks/useProjects";
+import { useProjectStatuses } from "../hooks/useProjectStatuses";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import type { Project, ProjectStatus } from "../data/mockData";
 
 export default function ProjectsPage() {
+  const theme = useTheme();
   const { user } = useAuth();
   const { data: projects, isLoading, isError, error, refetch } = useProjects(
     user?.id,
   );
+  const { data: statuses } = useProjectStatuses();
+
   const createProject = useCreateProject(user?.id);
   const updateProject = useUpdateProject(user?.id);
   const deleteProject = useDeleteProject(user?.id);
@@ -85,62 +87,46 @@ export default function ProjectsPage() {
   const showEmpty = !isLoading && !isError && (!projects || projects.length === 0);
 
   return (
-    <Box sx={{ maxWidth: 1600, mx: "auto" }}>
-      {/* Breadcrumb */}
-      <Breadcrumbs
-        separator={<NavigateNextRoundedIcon fontSize="small" sx={{ color: "text.disabled" }} />}
-        sx={{ mb: 2, "& .MuiBreadcrumbs-li": { fontSize: 13, fontWeight: 600 } }}
-      >
-        <Link underline="hover" color="text.secondary" href="/" sx={{ cursor: "pointer" }}>
-          Workspace
-        </Link>
-        <Typography color="text.primary" sx={{ fontSize: 13, fontWeight: 700 }}>
-          Projects
-        </Typography>
-      </Breadcrumbs>
-
-      {/* Header */}
+    <Box>
       <Box
         sx={{
           display: "flex",
           alignItems: { xs: "flex-start", sm: "center" },
-          justifyContent: "space-between",
+          justifyContent: "flex-end",
           flexDirection: { xs: "column", sm: "row" },
           gap: 2,
           mb: 4,
         }}
       >
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: -0.5 }}>
-            Projects
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
-            Manage your projects and monitor overall progress.
-          </Typography>
-        </Box>
-        <Button
-          variant="contained"
-          startIcon={<AddOutlinedIcon fontSize="small" />}
-          onClick={() => setIsFormOpen(true)}
-          sx={{
-            textTransform: "none",
-            fontWeight: 600,
-            borderRadius: 2,
-            height: 44,
-            px: 2.5,
-            flexShrink: 0,
-            boxShadow: "none",
-            "&:hover": { boxShadow: "none", bgcolor: "primary.dark" },
-          }}
-        >
-          Add Project
-        </Button>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
+          <Button
+            variant="contained"
+            startIcon={<AddOutlinedIcon fontSize="small" />}
+            onClick={() => setIsFormOpen(true)}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              borderRadius: "14px",
+              height: 48,
+              px: 3,
+              flexShrink: 0,
+              bgcolor: theme.palette.primary.main,
+              boxShadow: `0 4px 12px ${theme.palette.primary.main}33`,
+              "&:hover": {
+                boxShadow: "none",
+                bgcolor: theme.palette.primary.dark,
+              },
+            }}
+          >
+            Add Project
+          </Button>
+        </motion.div>
       </Box>
 
       {/* Body */}
       {isLoading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <CircularProgress size={28} />
+          <CircularProgress size={28} sx={{ color: "#006F99" }} />
         </Box>
       ) : isError ? (
         <Box
@@ -148,22 +134,29 @@ export default function ProjectsPage() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: 1.5,
+            gap: 2,
             py: 8,
             textAlign: "center",
           }}
         >
-          <ErrorOutlineOutlinedIcon sx={{ fontSize: 40, color: "error.main" }} />
-          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+          <ErrorOutlineOutlinedIcon sx={{ fontSize: 48, color: "#EF4444" }} />
+          <Typography sx={{ fontWeight: 700, fontSize: 16, color: "#111827" }}>
             Couldn&apos;t load projects
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 360 }}>
+          <Typography sx={{ color: "#6B7280", fontSize: 14, maxWidth: 360, lineHeight: 1.5 }}>
             {error instanceof Error ? error.message : "Something went wrong. Please try again."}
           </Typography>
           <Button
             variant="outlined"
             onClick={() => refetch()}
-            sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600 }}
+            sx={{
+              borderRadius: "14px",
+              textTransform: "none",
+              fontWeight: 600,
+              borderColor: "#E6E8EB",
+              color: "#6B7280",
+              "&:hover": { borderColor: "#006F99", color: "#006F99" },
+            }}
           >
             Try again
           </Button>
@@ -174,49 +167,76 @@ export default function ProjectsPage() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: 1.5,
+            gap: 2,
             py: 8,
             textAlign: "center",
           }}
         >
-          <FolderOutlinedIcon sx={{ fontSize: 40, color: "text.disabled" }} />
-          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+          <Box
+            sx={{
+              width: 56,
+              height: 56,
+              borderRadius: "50%",
+              bgcolor: "#F2F4F7",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <FolderOutlinedIcon sx={{ fontSize: 28, color: "#9CA3AF" }} />
+          </Box>
+          <Typography sx={{ fontWeight: 700, fontSize: 16, color: "#111827" }}>
             No Projects
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 360 }}>
+          <Typography sx={{ color: "#6B7280", fontSize: 14, maxWidth: 360, lineHeight: 1.5 }}>
             Create your first project to start managing tasks.
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddOutlinedIcon fontSize="small" />}
-            onClick={() => setIsFormOpen(true)}
-            sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600, boxShadow: "none" }}
-          >
-            Create Project
-          </Button>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
+            <Button
+              variant="contained"
+              startIcon={<AddOutlinedIcon fontSize="small" />}
+              onClick={() => setIsFormOpen(true)}
+              sx={{
+                borderRadius: "14px",
+                textTransform: "none",
+                fontWeight: 600,
+                bgcolor: "#006F99",
+                boxShadow: "0 4px 12px rgba(0, 111, 153, 0.2)",
+                "&:hover": { boxShadow: "none", bgcolor: "#005670" },
+              }}
+            >
+              Create Project
+            </Button>
+          </motion.div>
         </Box>
       ) : (
         <Box
           sx={{
             display: "grid",
-            gap: 2.5,
-            gridTemplateColumns: {
-              xs: "1fr",
-              sm: "repeat(2, 1fr)",
-              lg: "repeat(3, 1fr)",
-              xl: "repeat(4, 1fr)",
-            },
-            alignItems: "stretch",
+            gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+            gap: 3,
+            width: "100%",
           }}
         >
-          {projects?.map((p) => (
-            <ProjectCard
-              key={p.id}
-              project={p}
-              onEdit={(project) => setEditingProject(project)}
-              onDelete={(id) => setDeletingProjectId(id)}
-            />
-          ))}
+          <AnimatePresence>
+            {projects?.map((p) => (
+              <motion.div
+                key={p.id}
+                layout
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] as const }}
+              >
+                <ProjectCard
+                  project={p}
+                  statuses={statuses}
+                  onEdit={(project) => setEditingProject(project)}
+                  onDelete={(id) => setDeletingProjectId(id)}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </Box>
       )}
 
@@ -231,6 +251,7 @@ export default function ProjectsPage() {
             ? createProject.error.message
             : null
         }
+        statuses={statuses}
       />
 
       {/* Edit Project modal */}
@@ -255,51 +276,69 @@ export default function ProjectsPage() {
             ? updateProject.error.message
             : null
         }
+        statuses={statuses}
       />
 
       {/* Delete confirmation */}
       <Dialog
         open={Boolean(deletingProjectId)}
         onClose={() => setDeletingProjectId(null)}
-        slotProps={{ paper: { sx: { borderRadius: 3 } } }}
+        sx={{
+          "& .MuiDialog-paper": {
+            borderRadius: "24px",
+            border: "1px solid #E6E8EB",
+            boxShadow: "0 24px 64px rgba(15, 23, 42, 0.12)",
+          },
+        }}
       >
-        <DialogTitle sx={{ fontWeight: 800, fontSize: 20 }}>
+        <DialogTitle sx={{ fontWeight: 700, fontSize: 22, color: "#111827", letterSpacing: "-0.01em" }}>
           Delete Project
         </DialogTitle>
         <DialogContent>
-          <Typography variant="body1" sx={{ mb: 1 }}>
+          <Typography sx={{ fontSize: 15, color: "#6B7280", lineHeight: 1.6 }}>
             Are you sure you want to delete this project? This action cannot be undone.
           </Typography>
           {deleteProject.isError && deleteProject.error instanceof Error && (
-            <Typography variant="body2" sx={{ color: "error.main", fontWeight: 600, mt: 1 }}>
+            <Typography sx={{ color: "#EF4444", fontWeight: 600, mt: 2, fontSize: 14 }}>
               {deleteProject.error.message}
             </Typography>
           )}
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2.5, justifyContent: "flex-end" }}>
-          <Button
-            variant="outlined"
-            onClick={() => setDeletingProjectId(null)}
-            disabled={deleteProject.isPending}
-            sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600 }}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleDelete}
-            disabled={deleteProject.isPending}
-            sx={{
-              borderRadius: 2,
-              textTransform: "none",
-              fontWeight: 600,
-              bgcolor: "error.main",
-              boxShadow: "none",
-              "&:hover": { bgcolor: "error.dark", boxShadow: "none" },
-            }}
-          >
-            {deleteProject.isPending ? "Deleting..." : "Delete"}
-          </Button>
+        <DialogActions sx={{ px: 3, pb: 2.5, justifyContent: "flex-end", gap: 1 }}>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
+            <Button
+              variant="outlined"
+              onClick={() => setDeletingProjectId(null)}
+              disabled={deleteProject.isPending}
+              sx={{
+                borderRadius: "14px",
+                textTransform: "none",
+                fontWeight: 600,
+                borderColor: "#E6E8EB",
+                color: "#6B7280",
+                "&:hover": { borderColor: "#006F99", color: "#006F99" },
+              }}
+            >
+              Cancel
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
+            <Button
+              variant="contained"
+              onClick={handleDelete}
+              disabled={deleteProject.isPending}
+              sx={{
+                borderRadius: "14px",
+                textTransform: "none",
+                fontWeight: 600,
+                bgcolor: "#EF4444",
+                boxShadow: "0 4px 12px rgba(239, 68, 68, 0.2)",
+                "&:hover": { boxShadow: "none", bgcolor: "#DC2626" },
+              }}
+            >
+              {deleteProject.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </motion.div>
         </DialogActions>
       </Dialog>
     </Box>

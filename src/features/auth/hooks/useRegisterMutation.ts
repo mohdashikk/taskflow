@@ -15,7 +15,7 @@ export const useRegisterMutation = () => {
     onMutate: () => {
       setIsSubmitting(true);
     },
-    onSuccess: async (result) => {
+    onSuccess: async (_result) => {
       await queryClient.invalidateQueries();
     },
     onSettled: () => {

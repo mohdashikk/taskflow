@@ -1,5 +1,14 @@
 export type ProjectStatus = "active" | "planning" | "completed" | "archived";
 
+export interface ProjectStatusRow {
+  id: string;
+  name: string;
+  color: string;
+  position: number;
+  is_default: boolean;
+  created_at: string;
+}
+
 /**
  * Raw row shape from the `projects` Supabase table.
  * Only the columns required by the current UI are selected.
@@ -26,6 +35,7 @@ export interface Project {
   dueDate: string;
   tasksDone: number;
   tasksTotal: number;
+  created_at: string;
 }
 
 export const STATUS_LABELS: Record<ProjectStatus, string> = {
@@ -65,7 +75,7 @@ export const toProject = (row: ProjectRow): Project => ({
   description: row.description ?? "",
   status: normalizeStatus(row.status),
   dueDate: row.due_date ? formatDueDate(row.due_date) : "—",
-  // Placeholder values — task progress lands in a later phase.
   tasksDone: 0,
   tasksTotal: 0,
+  created_at: row.created_at,
 });

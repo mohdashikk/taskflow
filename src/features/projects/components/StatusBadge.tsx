@@ -5,23 +5,33 @@ import {
   STATUS_LABELS,
   type ProjectStatus,
 } from "../data/mockData";
+import type { ProjectStatusRow } from "../data/mockData";
 
-export function StatusBadge({ status }: { status: ProjectStatus }) {
-  const color = status === "active" ? "#10b981" : STATUS_COLORS[status];
+interface StatusBadgeProps {
+  status: ProjectStatus;
+  statuses?: Map<string, ProjectStatusRow>;
+}
+
+export function StatusBadge({ status, statuses }: StatusBadgeProps) {
+  const statusRow = statuses?.get(status);
+  const color = statusRow?.color ?? (status === "active" ? "#22C55E" : STATUS_COLORS[status]);
+  const label = statusRow?.name ?? STATUS_LABELS[status];
+
   return (
     <Box
       sx={{
         display: "inline-flex",
         alignItems: "center",
-        gap: 0.75,
+        gap: 0.5,
         color,
-        bgcolor: alpha(color, 0.12),
-        fontWeight: 700,
+        bgcolor: alpha(color, 0.1),
+        fontWeight: 600,
         fontSize: 12,
-        borderRadius: 2,
+        borderRadius: "10px",
         px: 1.25,
         py: 0.25,
-        textTransform: "none",
+        lineHeight: 1.4,
+        letterSpacing: "-0.01em",
       }}
     >
       <Box
@@ -32,7 +42,7 @@ export function StatusBadge({ status }: { status: ProjectStatus }) {
           bgcolor: color,
         }}
       />
-      {STATUS_LABELS[status]}
+      {label}
     </Box>
   );
 }

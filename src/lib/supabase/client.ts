@@ -10,8 +10,6 @@ export const getSupabaseClient = (): SupabaseClient | null => {
   return createClient(url, key);
 };
 
-let client: SupabaseClient | null | undefined;
-
 export const supabase = (() => {
   const result = getSupabaseClient();
   if (!result) {
