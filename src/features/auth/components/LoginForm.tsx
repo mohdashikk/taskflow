@@ -16,9 +16,11 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { motion } from "framer-motion";
 import { useLoginMutation } from "../hooks/useLoginMutation";
+import { useAuthTheme, AUTH_ACCENT_HOVER } from "../hooks/useAuthTheme";
 
 export default function LoginForm() {
   const router = useRouter();
+  const colors = useAuthTheme();
   const [showPassword, setShowPassword] = useState(false);
 
   const passwordInputType = showPassword ? "text" : "password";
@@ -59,10 +61,12 @@ export default function LoginForm() {
         sx={{
           width: "100%",
           borderRadius: "24px",
-          border: "1px solid #E6E8EB",
-          backgroundColor: "#FFFFFF",
+          border: `1px solid ${colors.cardBorder}`,
+          backgroundColor: colors.cardBg,
           p: { xs: 3, sm: 4 },
-          boxShadow: "0 24px 64px rgba(15, 23, 42, 0.06)",
+          boxShadow: colors.isDark
+            ? "0 24px 64px rgba(0, 0, 0, 0.4)"
+            : "0 24px 64px rgba(15, 23, 42, 0.06)",
         }}
       >
         <Box sx={{ mb: 5, textAlign: "center" }}>
@@ -79,9 +83,9 @@ export default function LoginForm() {
                 width: 52,
                 height: 52,
                 borderRadius: 4,
-                bgcolor: "#006F99",
+                bgcolor: colors.accent,
                 mb: 2.5,
-                boxShadow: "0 8px 24px rgba(0, 111, 153, 0.2)",
+                boxShadow: colors.accentAlpha(0.25),
               }}
             >
               <svg
@@ -102,7 +106,7 @@ export default function LoginForm() {
           <Typography
             component="h1"
             sx={{
-              color: "#111827",
+              color: colors.isDark ? "#FFFFFF" : "#111827",
               fontSize: { xs: 26, sm: 30 },
               fontWeight: 700,
               letterSpacing: "-0.02em",
@@ -114,7 +118,7 @@ export default function LoginForm() {
           </Typography>
           <Typography
             sx={{
-              color: "#6B7280",
+              color: colors.isDark ? "#B5B7C8" : "#6B7280",
               fontSize: 15,
               lineHeight: 1.6,
             }}
@@ -144,16 +148,16 @@ export default function LoginForm() {
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "14px",
-                bgcolor: "#F7F8FA",
+                bgcolor: colors.inputBg,
                 "& fieldset": {
-                  borderColor: "#E6E8EB",
+                  borderColor: colors.inputBorder,
                 },
                 "&:hover fieldset": {
-                  borderColor: "#006F99",
+                  borderColor: colors.accent,
                 },
                 "&.Mui-focused fieldset": {
-                  borderColor: "#006F99",
-                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                  borderColor: colors.accent,
+                  boxShadow: colors.accentAlpha(0.1),
                 },
               },
             }}
@@ -182,10 +186,10 @@ export default function LoginForm() {
                       }
                       sx={{
                         borderRadius: 2,
-                        color: "#6B7280",
+                        color: colors.isDark ? "#B5B7C8" : "#6B7280",
                         "&:hover": {
-                          bgcolor: "#F2F4F7",
-                          color: "#111827",
+                          bgcolor: colors.accentAlpha(0.06),
+                          color: colors.accent,
                         },
                       }}
                     >
@@ -202,16 +206,16 @@ export default function LoginForm() {
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "14px",
-                bgcolor: "#F7F8FA",
+                bgcolor: colors.inputBg,
                 "& fieldset": {
-                  borderColor: "#E6E8EB",
+                  borderColor: colors.inputBorder,
                 },
                 "&:hover fieldset": {
-                  borderColor: "#006F99",
+                  borderColor: colors.accent,
                 },
                 "&.Mui-focused fieldset": {
-                  borderColor: "#006F99",
-                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                  borderColor: colors.accent,
+                  boxShadow: colors.accentAlpha(0.1),
                 },
               },
             }}
@@ -230,9 +234,9 @@ export default function LoginForm() {
                   name="remember"
                   sx={{
                     borderRadius: 2,
-                    color: "#D1D5DB",
+                    color: colors.isDark ? "rgba(255,255,255,0.15)" : "#D1D5DB",
                     "&.Mui-checked": {
-                      color: "#006F99",
+                      color: colors.accent,
                     },
                   }}
                 />
@@ -240,7 +244,7 @@ export default function LoginForm() {
               label={
                 <Typography
                   sx={{
-                    color: "#6B7280",
+                    color: colors.isDark ? "#B5B7C8" : "#6B7280",
                     fontSize: 14,
                     fontWeight: 500,
                   }}
@@ -254,11 +258,11 @@ export default function LoginForm() {
               href="/forgot-password"
               underline="hover"
               sx={{
-                color: "#006F99",
+                color: colors.accent,
                 fontSize: 14,
                 fontWeight: 600,
                 "&:hover": {
-                  color: "#005670",
+                  color: AUTH_ACCENT_HOVER,
                 },
               }}
             >
@@ -278,18 +282,18 @@ export default function LoginForm() {
               sx={{
                 height: 52,
                 borderRadius: "14px",
-                bgcolor: "#006F99",
-                boxShadow: "0 8px 24px rgba(0, 111, 153, 0.2)",
+                bgcolor: colors.accent,
+                boxShadow: colors.accentAlpha(0.25),
                 fontSize: 16,
                 fontWeight: 600,
                 textTransform: "none",
                 letterSpacing: "-0.01em",
                 "&:hover": {
-                  bgcolor: "#005670",
-                  boxShadow: "0 12px 28px rgba(0, 111, 153, 0.24)",
+                  bgcolor: AUTH_ACCENT_HOVER,
+                  boxShadow: colors.accentAlpha(0.3),
                 },
                 "&.Mui-disabled": {
-                  bgcolor: "#D1D5DB",
+                  bgcolor: colors.isDark ? "rgba(255,255,255,0.08)" : "#D1D5DB",
                   boxShadow: "none",
                 },
               }}
@@ -318,7 +322,7 @@ export default function LoginForm() {
         <Typography
           sx={{
             mt: 4,
-            color: "#6B7280",
+            color: colors.isDark ? "#B5B7C8" : "#6B7280",
             fontSize: 14,
             textAlign: "center",
             lineHeight: 1.6,
@@ -329,10 +333,10 @@ export default function LoginForm() {
             href="/register"
             underline="hover"
             sx={{
-              color: "#006F99",
+              color: colors.accent,
               fontWeight: 700,
               "&:hover": {
-                color: "#005670",
+                color: AUTH_ACCENT_HOVER,
               },
             }}
           >

@@ -127,6 +127,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
       }}
       {...attributes}
       {...listeners}
+      data-sortable="true"
     >
       <Box
         sx={{

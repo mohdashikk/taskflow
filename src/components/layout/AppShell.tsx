@@ -4,6 +4,7 @@ import { type ReactNode, useState } from "react";
 import { usePathname } from "next/navigation";
 import Box from "@mui/material/Box";
 import { useTheme } from "@mui/material/styles";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 
@@ -16,7 +17,8 @@ export default function AppShell({
 }) {
   const pathname = usePathname();
   const theme = useTheme();
-  const isAuthScreen = AUTH_ROUTES.includes(pathname);
+  const { isAuthenticated, isLoading } = useAuth();
+  const isAuthScreen = AUTH_ROUTES.includes(pathname) || !isAuthenticated || isLoading;
   const isProjectScreen = pathname.startsWith("/projects/");
   const isDark = theme.palette.mode === "dark";
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -57,7 +59,16 @@ export default function AppShell({
       {!isAuthScreen && (
         <>
           <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
-          <Box sx={{ display: { xs: "none", md: "block" }, flexShrink: 0 }}>
+          <Box
+            sx={{
+              display: { xs: "none", md: "block" },
+              flexShrink: 0,
+              position: "sticky",
+              top: 0,
+              height: "100vh",
+              alignSelf: "flex-start",
+            }}
+          >
             <Sidebar open={true} onClose={() => {}} permanent />
           </Box>
         </>
@@ -73,7 +84,7 @@ export default function AppShell({
           zIndex: 1,
         }}
       >
-        <Header onMobileMenuToggle={handleDrawerToggle} />
+        {!isAuthScreen && <Header onMobileMenuToggle={handleDrawerToggle} />}
         <Box
           component="main"
           sx={{
