@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   DndContext,
@@ -18,6 +18,11 @@ import {
 import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
+import ViewModuleOutlinedIcon from "@mui/icons-material/ViewModuleOutlined";
+import ViewListOutlinedIcon from "@mui/icons-material/ViewListOutlined";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Toolbar from "@mui/material/Toolbar";
 import type { TaskRow } from "../services/tasksService";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -30,6 +35,7 @@ import { createProjectStatus, deleteProjectStatus } from "@/features/projects/se
 import BoardColumn from "./BoardColumn";
 import AddColumnButton from "./AddColumnButton";
 import TaskCard from "./TaskCard";
+import TaskListView from "./TaskListView";
 
 interface KanbanBoardProps {
   projectId: string;
@@ -43,9 +49,13 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
   const { data: statuses = [], isLoading: statusesLoading } = useProjectStatuses(projectId);
   const queryClient = useQueryClient();
 
+  const [viewMode, setViewMode] = useState<"board" | "list">("board");
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [dragOverStatusId, setDragOverStatusId] = useState<string | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number>(0);
+  const [isPanning, setIsPanning] = useState(false);
+  const panState = useRef({ startX: 0, scrollLeft: 0 });
+  const boardScrollRef = useRef<HTMLDivElement>(null);
 
   const createMutation = useMutation({
     mutationFn: (values: { title: string; status_id: string; priority: string; due_date: string | null }) =>
@@ -164,6 +174,7 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const id = event.active.id as string;
     setActiveTaskId(id);
+    setIsPanning(false);
   }, []);
 
   const handleDragOver = useCallback((event: DragOverEvent) => {
@@ -318,6 +329,36 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
     setDragOverIndex(0);
   }, []);
 
+  const handleBoardMouseDown = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.button !== 0) return;
+    if (activeTaskId) return;
+    const target = event.target as HTMLElement;
+    if (target.closest('button, input, textarea, select, [role="menuitem"], .MuiMenu-paper, .MuiDialog-root, [data-sortable="true"]')) {
+      return;
+    }
+    const container = boardScrollRef.current;
+    if (!container) return;
+    panState.current = { startX: event.clientX, scrollLeft: container.scrollLeft };
+    setIsPanning(true);
+  }, [activeTaskId]);
+
+  const handleBoardMouseMove = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    if (!isPanning) return;
+    const container = boardScrollRef.current;
+    if (!container) return;
+    const x = event.clientX;
+    const walk = (x - panState.current.startX) * 1.5;
+    container.scrollLeft = panState.current.scrollLeft - walk;
+  }, [isPanning]);
+
+  const handleBoardMouseUp = useCallback(() => {
+    setIsPanning(false);
+  }, []);
+
+  const handleBoardMouseLeave = useCallback(() => {
+    setIsPanning(false);
+  }, []);
+
   if (isLoading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 8, flex: 1 }}>
@@ -335,123 +376,179 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
         minHeight: "calc(100vh - 200px)",
       }}
     >
-      <DndContext
-        sensors={sensors}
-        collisionDetection={(args) => {
-          const pointerResult = pointerWithin(args);
-          if (pointerResult.length > 0) {
-            return pointerResult;
-          }
-          return closestCorners(args);
+      <Toolbar
+        sx={{
+          gap: 1.5,
+          pl: 0,
+          pr: 0,
+          minHeight: "auto !important",
+          py: 1,
+          borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
         }}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
       >
-        <Box
-          className="thin-scrollbar hide-scrollbar"
+        <ToggleButtonGroup
+          value={viewMode}
+          exclusive
+          onChange={(_, newMode) => {
+            if (newMode) setViewMode(newMode);
+          }}
+          size="small"
           sx={{
-            display: "flex",
-            gap: 4,
-            overflowX: "auto",
-            overflowY: "visible",
-            pb: 2,
-            pt: 1,
-            flex: 1,
-            alignItems: "flex-start",
-            minHeight: 0,
+            bgcolor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
+            borderRadius: "12px",
+            "& .Mui-selected": {
+              bgcolor: "primary.main !important",
+              color: "primary.contrastText !important",
+            },
           }}
         >
-          {columns.length === 0 ? (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                py: 8,
-                textAlign: "center",
-                flex: 1,
-                width: "100%",
-              }}
-            >
+          <ToggleButton value="board" aria-label="board view">
+            <ViewModuleOutlinedIcon sx={{ fontSize: 18 }} />
+          </ToggleButton>
+          <ToggleButton value="list" aria-label="list view">
+            <ViewListOutlinedIcon sx={{ fontSize: 18 }} />
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Toolbar>
+
+      {viewMode === "board" ? (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={(args) => {
+            const pointerResult = pointerWithin(args);
+            if (pointerResult.length > 0) {
+              return pointerResult;
+            }
+            return closestCorners(args);
+          }}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
+          <Box
+            ref={boardScrollRef}
+            className="thin-scrollbar hide-scrollbar"
+            onMouseDown={handleBoardMouseDown}
+            onMouseMove={handleBoardMouseMove}
+            onMouseUp={handleBoardMouseUp}
+            onMouseLeave={handleBoardMouseLeave}
+            sx={{
+              display: "flex",
+              gap: 4,
+              overflowX: "auto",
+              overflowY: "visible",
+              pb: 2,
+              pt: 1,
+              flex: 1,
+              alignItems: "flex-start",
+              minHeight: 0,
+              cursor: isPanning ? "grabbing" : "grab",
+              userSelect: isPanning ? "none" : "auto",
+            }}
+          >
+            {columns.length === 0 ? (
               <Box
                 sx={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: "50%",
-                  bgcolor: isDark ? "#1C1929" : "action.hover",
                   display: "flex",
+                  flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  mb: 2,
+                  py: 8,
+                  textAlign: "center",
+                  flex: 1,
+                  width: "100%",
                 }}
               >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="text.secondary"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                <Box
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: "50%",
+                    bgcolor: isDark ? "#1C1929" : "action.hover",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mb: 2,
+                  }}
                 >
-                  <rect x="3" y="3" width="7" height="7" />
-                  <rect x="14" y="3" width="7" height="7" />
-                  <rect x="14" y="14" width="7" height="7" />
-                  <rect x="3" y="14" width="7" height="7" />
-                </svg>
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="text.secondary"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect x="3" y="3" width="7" height="7" />
+                    <rect x="14" y="3" width="7" height="7" />
+                    <rect x="14" y="14" width="7" height="7" />
+                    <rect x="3" y="14" width="7" height="7" />
+                  </svg>
+                </Box>
+                <Typography sx={{ fontWeight: 600, color: "text.primary", fontSize: 15, mb: 0.5 }}>
+                  No workflow statuses configured
+                </Typography>
+                <Typography sx={{ color: "text.secondary", fontSize: 13, maxWidth: 320, lineHeight: 1.5 }}>
+                  Add a status in project settings to get started.
+                </Typography>
               </Box>
-              <Typography sx={{ fontWeight: 600, color: "text.primary", fontSize: 15, mb: 0.5 }}>
-                No workflow statuses configured
-              </Typography>
-              <Typography sx={{ color: "text.secondary", fontSize: 13, maxWidth: 320, lineHeight: 1.5 }}>
-                Add a status in project settings to get started.
-              </Typography>
-            </Box>
-          ) : (
-            <>
-              {columns.map((column) => (
-                <BoardColumn
-                  key={column.statusId}
-                  statusId={column.statusId}
-                  statusName={column.statusName}
-                  tasks={column.tasks}
-                  onCreate={handleCreate}
-                  createPending={createMutation.isPending}
-                  onEditTask={handleEdit}
-                  onDeleteTask={handleDelete}
-                  onDeleteColumn={handleDeleteColumn}
-                  onUpdateTask={handleUpdateTask}
-                  wipLimit={0}
-                  activeTaskId={activeTaskId ?? undefined}
-                  isDragOver={column.statusId === dragOverStatusId}
-                  dragOverIndex={column.statusId === dragOverStatusId ? dragOverIndex : -1}
-                />
-              ))}
-              <AddColumnButton projectId={projectId} onAdd={handleAddColumn} adding={addStatusMutation.isPending} />
-            </>
-          )}
-        </Box>
+            ) : (
+              <>
+                {columns.map((column) => (
+                  <BoardColumn
+                    key={column.statusId}
+                    statusId={column.statusId}
+                    statusName={column.statusName}
+                    tasks={column.tasks}
+                    onCreate={handleCreate}
+                    createPending={createMutation.isPending}
+                    onEditTask={handleEdit}
+                    onDeleteTask={handleDelete}
+                    onDeleteColumn={handleDeleteColumn}
+                    onUpdateTask={handleUpdateTask}
+                    wipLimit={0}
+                    activeTaskId={activeTaskId ?? undefined}
+                    isDragOver={column.statusId === dragOverStatusId}
+                    dragOverIndex={column.statusId === dragOverStatusId ? dragOverIndex : -1}
+                  />
+                ))}
+                <AddColumnButton projectId={projectId} onAdd={handleAddColumn} adding={addStatusMutation.isPending} />
+              </>
+            )}
+          </Box>
 
-        <DragOverlay>
-          {activeTask ? (
-            <Box
-              sx={{
-                opacity: 0.95,
-                transform: "rotate(2deg)",
-                boxShadow: theme.palette.mode === "dark" ? "0 20px 40px rgba(0, 0, 0, 0.4)" : "0 20px 40px rgba(0, 0, 0, 0.15)",
-                borderRadius: "16px",
-                maxWidth: 320,
-              }}
-            >
-              <TaskCard task={activeTask} />
-            </Box>
-          ) : null}
-        </DragOverlay>
-      </DndContext>
+          <DragOverlay>
+            {activeTask ? (
+              <Box
+                sx={{
+                  opacity: 0.95,
+                  transform: "rotate(2deg)",
+                  boxShadow: theme.palette.mode === "dark" ? "0 20px 40px rgba(0, 0, 0, 0.4)" : "0 20px 40px rgba(0, 0, 0, 0.15)",
+                  borderRadius: "16px",
+                  maxWidth: 320,
+                }}
+              >
+                <TaskCard task={activeTask} />
+              </Box>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+      ) : (
+        <Box sx={{ flex: 1, overflow: "auto", py: 2 }}>
+            <TaskListView
+              tasks={tasks}
+              statuses={statuses}
+              onCreate={handleCreate}
+              createPending={createMutation.isPending}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onUpdate={handleUpdateTask}
+            />
+        </Box>
+      )}
     </Box>
   );
 }

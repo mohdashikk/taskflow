@@ -12,10 +12,13 @@ export const useLogout = () => {
   return useCallback(async () => {
     try {
       await supabase?.auth.signOut();
+    } catch {
+      // ignore auth errors during logout
     } finally {
       try {
         localStorage.clear();
       } catch {
+        // ignore localStorage errors
       }
       queryClient.clear();
       router.replace("/");

@@ -25,6 +25,8 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 import ThemeSwitcher from "@/features/auth/components/ThemeSwitcher";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   onMobileMenuToggle?: () => void;
@@ -35,6 +37,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
   const isDark = theme.palette.mode === "dark";
   const { user } = useAuth();
   const logout = useLogout();
+  const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -53,6 +56,16 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
   const handleLogout = () => {
     handleClose();
     void logout();
+  };
+
+  const handleEditProfile = () => {
+    handleClose();
+    router.push("/settings");
+  };
+
+  const handleAccountSettings = () => {
+    handleClose();
+    router.push("/settings");
   };
 
   return (
@@ -313,7 +326,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
           </Box>
           <Divider sx={{ borderColor: theme.palette.divider, my: 0.5 }} />
           <MenuItem
-            onClick={handleClose}
+            onClick={handleEditProfile}
             sx={{
               fontSize: 14,
               py: 1,
@@ -329,7 +342,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
             Edit profile
           </MenuItem>
           <MenuItem
-            onClick={handleClose}
+            onClick={handleAccountSettings}
             sx={{
               fontSize: 14,
               py: 1,
