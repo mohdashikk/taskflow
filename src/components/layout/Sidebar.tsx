@@ -20,6 +20,7 @@ import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 
@@ -51,8 +52,13 @@ const MAIN_MENU_ITEMS: NavItem[] = [
 
 const GENERAL_ITEMS: NavItem[] = [
   {
+    label: "Profile",
+    href: "/profile",
+    icon: <PersonOutlinedIcon />,
+  },
+  {
     label: "Settings",
-    href: "#",
+    href: "/settings",
     icon: <SettingsOutlinedIcon />,
   },
   {
