@@ -11,6 +11,7 @@ import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import { motion } from "framer-motion";
+import { useTheme, alpha } from "@mui/material/styles";
 import { STATUS_LABELS, type ProjectStatus } from "../data/mockData";
 import type { ProjectStatusRow } from "../data/mockData";
 
@@ -47,6 +48,9 @@ export default function ProjectForm({
   error,
   statuses,
 }: ProjectFormProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+
   const statusOptions = statuses && statuses.length > 0
     ? statuses.map((s) => ({ value: s.name as ProjectStatus, label: s.name }))
     : FALLBACK_OPTIONS.map((s) => ({ value: s, label: STATUS_LABELS[s] }));
@@ -57,6 +61,16 @@ export default function ProjectForm({
   const [description, setDescription] = useState(initialValues?.description ?? "");
   const [status, setStatus] = useState<ProjectStatus>(initialValues?.status ?? defaultStatus);
   const [dueDate, setDueDate] = useState(initialValues?.due_date ? initialValues.due_date.slice(0, 10) : "");
+
+  const inputBg = isDark ? "#1A1728" : "#FFFFFF";
+  const inputBorder = isDark ? "rgba(255,255,255,0.08)" : "#E6E8EB";
+  const inputHoverBorder = "#006F99";
+  const inputFocusShadow = isDark ? alpha("#006F99", 0.12) : "rgba(0, 111, 153, 0.08)";
+  const titleColor = isDark ? "#FFFFFF" : "#111827";
+  const dialogBorder = isDark ? "rgba(255,255,255,0.08)" : "#E6E8EB";
+  const dialogShadow = isDark ? "0 24px 64px rgba(0, 0, 0, 0.4)" : "0 24px 64px rgba(15, 23, 42, 0.1)";
+  const cancelBorder = isDark ? "rgba(255,255,255,0.12)" : "#E6E8EB";
+  const cancelColor = isDark ? "#B5B7C8" : "#6B7280";
 
   const resetForm = () => {
     setTitle(initialValues?.title ?? "");
@@ -90,12 +104,12 @@ export default function ProjectForm({
       sx={{
         "& .MuiDialog-paper": {
           borderRadius: "24px",
-          border: "1px solid #E6E8EB",
-          boxShadow: "0 24px 64px rgba(15, 23, 42, 0.1)",
+          border: `1px solid ${dialogBorder}`,
+          boxShadow: dialogShadow,
         },
       }}
     >
-      <DialogTitle sx={{ fontWeight: 700, fontSize: 22, color: "#111827", letterSpacing: "-0.01em" }}>
+      <DialogTitle sx={{ fontWeight: 700, fontSize: 22, color: titleColor, letterSpacing: "-0.01em" }}>
         {mode === "edit" ? "Edit Project" : "Add Project"}
       </DialogTitle>
       <Box component="form" onSubmit={handleSubmit} key={open ? "form-open" : "form-closed"}>
@@ -110,12 +124,16 @@ export default function ProjectForm({
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "14px",
-                bgcolor: "#F7F8FA",
-                "& fieldset": { borderColor: "#E6E8EB" },
-                "&:hover fieldset": { borderColor: "#006F99" },
+                bgcolor: inputBg,
+                "& fieldset": { borderColor: inputBorder },
+                "&:hover fieldset": { borderColor: inputHoverBorder },
                 "&.Mui-focused fieldset": {
-                  borderColor: "#006F99",
-                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                  borderColor: inputHoverBorder,
+                  boxShadow: `0 0 0 3px ${inputFocusShadow}`,
+                },
+                "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
+                  WebkitBoxShadow: `0 0 0px 1000px ${inputBg} inset`,
+                  transition: "background-color 5000s ease-in-out 0s",
                 },
               },
             }}
@@ -131,12 +149,16 @@ export default function ProjectForm({
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "14px",
-                bgcolor: "#F7F8FA",
-                "& fieldset": { borderColor: "#E6E8EB" },
-                "&:hover fieldset": { borderColor: "#006F99" },
+                bgcolor: inputBg,
+                "& fieldset": { borderColor: inputBorder },
+                "&:hover fieldset": { borderColor: inputHoverBorder },
                 "&.Mui-focused fieldset": {
-                  borderColor: "#006F99",
-                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                  borderColor: inputHoverBorder,
+                  boxShadow: `0 0 0 3px ${inputFocusShadow}`,
+                },
+                "& textarea:-webkit-autofill, & textarea:-webkit-autofill:hover, & textarea:-webkit-autofill:focus": {
+                  WebkitBoxShadow: `0 0 0px 1000px ${inputBg} inset`,
+                  transition: "background-color 5000s ease-in-out 0s",
                 },
               },
             }}
@@ -152,12 +174,16 @@ export default function ProjectForm({
                 minWidth: 150,
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "14px",
-                  bgcolor: "#F7F8FA",
-                  "& fieldset": { borderColor: "#E6E8EB" },
-                  "&:hover fieldset": { borderColor: "#006F99" },
+                  bgcolor: inputBg,
+                  "& fieldset": { borderColor: inputBorder },
+                  "&:hover fieldset": { borderColor: inputHoverBorder },
                   "&.Mui-focused fieldset": {
-                    borderColor: "#006F99",
-                    boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                    borderColor: inputHoverBorder,
+                    boxShadow: `0 0 0 3px ${inputFocusShadow}`,
+                  },
+                  "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
+                    WebkitBoxShadow: `0 0 0px 1000px ${inputBg} inset`,
+                    transition: "background-color 5000s ease-in-out 0s",
                   },
                 },
               }}
@@ -180,12 +206,16 @@ export default function ProjectForm({
                 minWidth: 160,
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "14px",
-                  bgcolor: "#F7F8FA",
-                  "& fieldset": { borderColor: "#E6E8EB" },
-                  "&:hover fieldset": { borderColor: "#006F99" },
+                  bgcolor: inputBg,
+                  "& fieldset": { borderColor: inputBorder },
+                  "&:hover fieldset": { borderColor: inputHoverBorder },
                   "&.Mui-focused fieldset": {
-                    borderColor: "#006F99",
-                    boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                    borderColor: inputHoverBorder,
+                    boxShadow: `0 0 0 3px ${inputFocusShadow}`,
+                  },
+                  "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
+                    WebkitBoxShadow: `0 0 0px 1000px ${inputBg} inset`,
+                    transition: "background-color 5000s ease-in-out 0s",
                   },
                 },
               }}
@@ -208,8 +238,8 @@ export default function ProjectForm({
                 borderRadius: "14px",
                 textTransform: "none",
                 fontWeight: 600,
-                borderColor: "#E6E8EB",
-                color: "#6B7280",
+                borderColor: cancelBorder,
+                color: cancelColor,
                 "&:hover": { borderColor: "#006F99", color: "#006F99" },
               }}
             >
