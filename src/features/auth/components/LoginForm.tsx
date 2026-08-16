@@ -17,10 +17,12 @@ import Typography from "@mui/material/Typography";
 import { motion } from "framer-motion";
 import { useLoginMutation } from "../hooks/useLoginMutation";
 import { useAuthTheme, AUTH_ACCENT_HOVER } from "../hooks/useAuthTheme";
+import { useTheme } from "@mui/material/styles";
 
 export default function LoginForm() {
   const router = useRouter();
   const colors = useAuthTheme();
+  const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
 
   const passwordInputType = showPassword ? "text" : "password";
@@ -148,7 +150,7 @@ export default function LoginForm() {
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "14px",
-                bgcolor: "#FFFFFF",
+                bgcolor: theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF",
                 "& fieldset": {
                   borderColor: colors.inputBorder,
                 },
@@ -160,7 +162,7 @@ export default function LoginForm() {
                   boxShadow: colors.accentAlpha(0.1),
                 },
                 "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
-                  WebkitBoxShadow: "0 0 0px 1000px #FFFFFF inset",
+                  WebkitBoxShadow: `0 0 0px 1000px ${theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF"} inset`,
                   transition: "background-color 5000s ease-in-out 0s",
                 },
               },
@@ -210,7 +212,7 @@ export default function LoginForm() {
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "14px",
-                bgcolor: "#FFFFFF",
+                bgcolor: theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF",
                 "& fieldset": {
                   borderColor: colors.inputBorder,
                 },
@@ -222,7 +224,7 @@ export default function LoginForm() {
                   boxShadow: colors.accentAlpha(0.1),
                 },
                 "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
-                  WebkitBoxShadow: "0 0 0px 1000px #FFFFFF inset",
+                  WebkitBoxShadow: `0 0 0px 1000px ${theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF"} inset`,
                   transition: "background-color 5000s ease-in-out 0s",
                 },
               },

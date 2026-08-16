@@ -17,10 +17,12 @@ import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { useRegisterMutation } from "../hooks/useRegisterMutation";
 import { useAuthTheme, AUTH_ACCENT_HOVER } from "../hooks/useAuthTheme";
+import { useTheme } from "@mui/material/styles";
 
 export default function RegisterForm() {
   const router = useRouter();
   const colors = useAuthTheme();
+  const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
@@ -163,7 +165,7 @@ export default function RegisterForm() {
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "14px",
-                bgcolor: colors.inputBg,
+                bgcolor: theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF",
                 "& fieldset": {
                   borderColor: colors.inputBorder,
                 },
@@ -175,7 +177,7 @@ export default function RegisterForm() {
                   boxShadow: colors.accentAlpha(0.1),
                 },
                 "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
-                  WebkitBoxShadow: "0 0 0px 1000px #FFFFFF inset",
+                  WebkitBoxShadow: `0 0 0px 1000px ${theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF"} inset`,
                   transition: "background-color 5000s ease-in-out 0s",
                 },
               },
@@ -194,7 +196,7 @@ export default function RegisterForm() {
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "14px",
-                bgcolor: colors.inputBg,
+                bgcolor: theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF",
                 "& fieldset": {
                   borderColor: colors.inputBorder,
                 },
@@ -206,7 +208,7 @@ export default function RegisterForm() {
                   boxShadow: colors.accentAlpha(0.1),
                 },
                 "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
-                  WebkitBoxShadow: "0 0 0px 1000px #FFFFFF inset",
+                  WebkitBoxShadow: `0 0 0px 1000px ${theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF"} inset`,
                   transition: "background-color 5000s ease-in-out 0s",
                 },
               },
@@ -251,7 +253,7 @@ export default function RegisterForm() {
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "14px",
-                bgcolor: colors.inputBg,
+                bgcolor: theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF",
                 "& fieldset": {
                   borderColor: colors.inputBorder,
                 },
@@ -263,7 +265,7 @@ export default function RegisterForm() {
                   boxShadow: colors.accentAlpha(0.1),
                 },
                 "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
-                  WebkitBoxShadow: "0 0 0px 1000px #FFFFFF inset",
+                  WebkitBoxShadow: `0 0 0px 1000px ${theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF"} inset`,
                   transition: "background-color 5000s ease-in-out 0s",
                 },
               },
