@@ -44,7 +44,7 @@ const MAIN_MENU_ITEMS: NavItem[] = [
   },
   {
     label: "Calendar",
-    href: "#",
+    href: "/calendar",
     icon: <CalendarTodayOutlinedIcon />,
   },
 ];
