@@ -174,6 +174,10 @@ export default function RegisterForm() {
                   borderColor: colors.accent,
                   boxShadow: colors.accentAlpha(0.1),
                 },
+                "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
+                  WebkitBoxShadow: "0 0 0px 1000px #FFFFFF inset",
+                  transition: "background-color 5000s ease-in-out 0s",
+                },
               },
             }}
           />
@@ -200,6 +204,10 @@ export default function RegisterForm() {
                 "&.Mui-focused fieldset": {
                   borderColor: colors.accent,
                   boxShadow: colors.accentAlpha(0.1),
+                },
+                "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
+                  WebkitBoxShadow: "0 0 0px 1000px #FFFFFF inset",
+                  transition: "background-color 5000s ease-in-out 0s",
                 },
               },
             }}
@@ -253,6 +261,10 @@ export default function RegisterForm() {
                 "&.Mui-focused fieldset": {
                   borderColor: colors.accent,
                   boxShadow: colors.accentAlpha(0.1),
+                },
+                "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
+                  WebkitBoxShadow: "0 0 0px 1000px #FFFFFF inset",
+                  transition: "background-color 5000s ease-in-out 0s",
                 },
               },
             }}
