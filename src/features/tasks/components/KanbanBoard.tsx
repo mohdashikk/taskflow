@@ -538,15 +538,15 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
         </DndContext>
       ) : (
         <Box sx={{ flex: 1, overflow: "auto", py: 2 }}>
-          <TaskListView
-            tasks={tasks}
-            statuses={statuses}
-            onCreate={handleCreate}
-            createPending={createMutation.isPending}
-            onEditTask={handleEdit}
-            onDeleteTask={handleDelete}
-            onUpdateTask={handleUpdateTask}
-          />
+            <TaskListView
+              tasks={tasks}
+              statuses={statuses}
+              onCreate={handleCreate}
+              createPending={createMutation.isPending}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onUpdate={handleUpdateTask}
+            />
         </Box>
       )}
     </Box>

@@ -43,12 +43,6 @@ export const useAuth = () => {
               queryKey: ["currentUser"],
             });
           }
-        },
-        (error) => {
-          if (error?.message?.includes("Failed to fetch")) {
-            supabase.auth.signOut();
-            queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-          }
         }
       );
 

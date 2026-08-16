@@ -15,15 +15,12 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
-import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
-import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 
 export const SIDEBAR_WIDTH = 260;
@@ -41,29 +38,14 @@ const MAIN_MENU_ITEMS: NavItem[] = [
     icon: <DashboardOutlinedIcon />,
   },
   {
-    label: "Tasks",
-    href: "/tasks",
-    icon: <TaskAltOutlinedIcon />,
-  },
-  {
     label: "Projects",
     href: "/projects",
     icon: <FolderOutlinedIcon />,
   },
   {
-    label: "Team Members",
-    href: "#",
-    icon: <PeopleOutlinedIcon />,
-  },
-  {
     label: "Calendar",
     href: "#",
     icon: <CalendarTodayOutlinedIcon />,
-  },
-  {
-    label: "Reports",
-    href: "#",
-    icon: <AssessmentOutlinedIcon />,
   },
 ];
 
