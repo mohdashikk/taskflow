@@ -23,6 +23,7 @@ export interface ContinueWorkingItem {
 
 export interface UpcomingDeadline {
   id: string;
+  projectId: string;
   title: string;
   dueDate: string;
   projectName: string;
@@ -37,7 +38,7 @@ export function useDashboardData() {
   const projects = projectsQuery.data ?? [];
 
   const allTasksQuery = useQuery({
-    queryKey: ["all-dashboard-tasks", userId],
+    queryKey: ["all-dashboard-tasks", userId, projects.map(p => p.id)],
     queryFn: async (): Promise<TaskRow[]> => {
       if (!userId || projects.length === 0) return [];
       
@@ -92,6 +93,7 @@ export function useDashboardData() {
       id: t.id,
       title: t.title,
       dueDate: t.due_date ?? "",
+      projectId: t.project_id,
       projectName: projects.find(p => p.id === t.project_id)?.name ?? "Unknown Project",
       status: t.status_id,
     }));
@@ -108,5 +110,6 @@ export function useDashboardData() {
     upcomingDeadlines,
     recentProjects,
     isLoading: projectsQuery.isLoading || allTasksQuery.isLoading,
+    error: projectsQuery.error || allTasksQuery.error,
   };
 }

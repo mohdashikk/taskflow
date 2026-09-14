@@ -164,7 +164,7 @@ export default function RegisterForm() {
             }}
             sx={{
               "& .MuiOutlinedInput-root": {
-                borderRadius: "14px",
+                borderRadius: "10px",
                 bgcolor: theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF",
                 "& fieldset": {
                   borderColor: colors.inputBorder,
@@ -195,7 +195,7 @@ export default function RegisterForm() {
             onChange={(e) => setEmail(e.target.value)}
             sx={{
               "& .MuiOutlinedInput-root": {
-                borderRadius: "14px",
+                borderRadius: "10px",
                 bgcolor: theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF",
                 "& fieldset": {
                   borderColor: colors.inputBorder,
@@ -252,7 +252,7 @@ export default function RegisterForm() {
             }}
             sx={{
               "& .MuiOutlinedInput-root": {
-                borderRadius: "14px",
+                borderRadius: "10px",
                 bgcolor: theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF",
                 "& fieldset": {
                   borderColor: colors.inputBorder,
@@ -282,8 +282,8 @@ export default function RegisterForm() {
               variant="contained"
               disabled={isSubmitting}
               sx={{
-                height: 52,
-                borderRadius: "14px",
+                height: 48,
+                borderRadius: "10px",
                 bgcolor: colors.accent,
                 boxShadow: colors.accentAlpha(0.25),
                 fontSize: 16,

@@ -72,6 +72,7 @@ export default function ProjectWorkspaceLayout({
     description: string;
     status: ProjectStatus;
     due_date: string | null;
+    start_date?: string | null;
   }) => {
     if (!editingProject) return;
     updateProject.mutate(
@@ -81,6 +82,7 @@ export default function ProjectWorkspaceLayout({
         description: values.description,
         status: values.status,
         due_date: values.due_date,
+        start_date: values.start_date,
       },
       {
         onSuccess: () => {
@@ -123,21 +125,7 @@ export default function ProjectWorkspaceLayout({
 
       {project && !isLoading && !isError && (
         <>
-          <Box sx={{ mb: 3 }}>
-            <Button
-              startIcon={<ArrowBackOutlinedIcon />}
-              onClick={() => router.push("/projects")}
-              sx={{
-                textTransform: "none",
-                fontWeight: 500,
-                color: theme.palette.text.secondary,
-                "&:hover": { color: theme.palette.primary.main },
-                mb: 2,
-              }}
-            >
-              Projects
-            </Button>
-
+          <Box sx={{ mb: "30px" }}>
             <Box
               sx={{
                 display: "flex",
@@ -148,10 +136,10 @@ export default function ProjectWorkspaceLayout({
             >
               <Typography
                 sx={{
-                  fontWeight: 700,
+                  fontWeight: 600,
                   fontSize: { xs: 24, sm: 28 },
                   lineHeight: 1.2,
-                  letterSpacing: "-0.01em",
+                  letterSpacing: "normal",
                   color: theme.palette.text.primary,
                   flexGrow: 1,
                 }}
@@ -168,7 +156,7 @@ export default function ProjectWorkspaceLayout({
                 sx={{
                   textTransform: "none",
                   fontWeight: 600,
-                  borderRadius: "12px",
+                  borderRadius: "20px",
                   borderColor: isDark ? "rgba(255,255,255,0.12)" : "#E6E8EB",
                   color: theme.palette.text.secondary,
                   "&:hover": {
@@ -185,7 +173,7 @@ export default function ProjectWorkspaceLayout({
               <Typography
                 sx={{
                   color: theme.palette.text.secondary,
-                  fontSize: 15,
+                  fontSize: 14,
                   lineHeight: 1.6,
                   mt: 1,
                   maxWidth: 720,
@@ -200,7 +188,7 @@ export default function ProjectWorkspaceLayout({
             sx={{
               borderBottom: 1,
               borderColor: isDark ? "rgba(255,255,255,0.06)" : "divider",
-              mb: 3,
+              mb: "30px",
             }}
           >
             <Tabs
@@ -215,6 +203,7 @@ export default function ProjectWorkspaceLayout({
                     textTransform: "none",
                     fontWeight: 500,
                     fontSize: 14,
+                    minHeight: 52,
                     "&.Mui-selected": {
                       fontWeight: 600,
                       color: theme.palette.primary.main,
@@ -239,10 +228,13 @@ export default function ProjectWorkspaceLayout({
                 description: editingProject.description ?? "",
                 status: normalizeStatus(editingProject.status),
                 due_date: editingProject.due_date,
+                start_date: editingProject.start_date ?? null,
               }
             : undefined
         }
         onSubmit={handleEditSubmit}
+        ownerName={user?.user_metadata?.display_name || "You"}
+        ownerEmail={user?.email || ""}
         onCancel={handleEditCancel}
         isPending={updateProject.isPending}
         error={

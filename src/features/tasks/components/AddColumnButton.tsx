@@ -124,7 +124,7 @@ export default function AddColumnButton({ onAdd, adding }: AddColumnButtonProps)
             sx={{
               mt: 1,
               "& .MuiOutlinedInput-root": {
-                borderRadius: "14px",
+                borderRadius: "10px",
                 bgcolor: isDark ? "#2B2942" : "#F7F8FA",
                 fontSize: 14,
                 color: "text.primary",

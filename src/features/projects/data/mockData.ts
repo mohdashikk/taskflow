@@ -20,12 +20,14 @@ export interface ProjectRow {
   status: string;
   due_date: string | null;
   created_at: string;
+  start_date?: string | null;
+  tasks_total?: number;
+  tasks_done?: number;
 }
 
 /**
  * Domain model consumed by the UI (ProjectCard).
- * `tasksDone` / `tasksTotal` are static placeholders until task
- * management is implemented in a later phase.
+ * Task totals are calculated from Supabase rows by the projects service.
  */
 export interface Project {
   id: string;
@@ -33,6 +35,8 @@ export interface Project {
   description: string;
   status: ProjectStatus;
   dueDate: string;
+  dueDateRaw: string | null;
+  startDate: string | null;
   tasksDone: number;
   tasksTotal: number;
   created_at: string;
@@ -75,7 +79,9 @@ export const toProject = (row: ProjectRow): Project => ({
   description: row.description ?? "",
   status: normalizeStatus(row.status),
   dueDate: row.due_date ? formatDueDate(row.due_date) : "—",
-  tasksDone: 0,
-  tasksTotal: 0,
+  dueDateRaw: row.due_date,
+  startDate: row.start_date ?? null,
+  tasksDone: row.tasks_done ?? 0,
+  tasksTotal: row.tasks_total ?? 0,
   created_at: row.created_at,
 });

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -14,6 +15,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import { useRouter } from "next/navigation";
 
 import ProjectCard from "../components/ProjectCard";
 import ProjectForm from "../components/ProjectForm";
@@ -28,6 +30,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import type { Project, ProjectStatus } from "../data/mockData";
 
 export default function ProjectsPage() {
+  const router = useRouter();
   const theme = useTheme();
   const { user } = useAuth();
   const { data: projects, isLoading, isError, error, refetch } = useProjects(
@@ -40,6 +43,7 @@ export default function ProjectsPage() {
   const deleteProject = useDeleteProject(user?.id);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [filter, setFilter] = useState<"all" | ProjectStatus>("all");
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [deletingProjectId, setDeletingProjectId] = useState<string | null>(
     null,
@@ -61,6 +65,7 @@ export default function ProjectsPage() {
     description: string;
     status: ProjectStatus;
     due_date: string | null;
+    start_date?: string | null;
   }) => {
     if (!editingProject) return;
     updateProject.mutate(
@@ -70,6 +75,7 @@ export default function ProjectsPage() {
         description: values.description,
         status: values.status,
         due_date: values.due_date,
+        start_date: values.start_date,
       },
       {
         onSuccess: () => setEditingProject(null),
@@ -85,6 +91,7 @@ export default function ProjectsPage() {
   };
 
   const showEmpty = !isLoading && !isError && (!projects || projects.length === 0);
+  const visibleProjects = filter === "all" ? projects : projects?.filter((project) => project.status === filter);
 
   return (
     <Box>
@@ -92,21 +99,25 @@ export default function ProjectsPage() {
         sx={{
           display: "flex",
           alignItems: { xs: "flex-start", sm: "center" },
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
           flexDirection: { xs: "column", sm: "row" },
           gap: 2,
-          mb: 4,
+          mb: 3,
         }}
       >
+        <Box>
+          <Typography component="h1" sx={{ fontSize:{xs:24,sm:28}, fontWeight:750, letterSpacing:"-.025em", color:"text.primary" }}>Projects</Typography>
+          <Typography sx={{ mt:.5, color:"text.secondary", fontSize:14 }}>Organize work, track progress, and deliver with clarity.</Typography>
+        </Box>
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
           <Button
             variant="contained"
             startIcon={<AddOutlinedIcon fontSize="small" />}
-            onClick={() => setIsFormOpen(true)}
+            onClick={() => router.push("/projects/new")}
             sx={{
               textTransform: "none",
               fontWeight: 600,
-              borderRadius: "14px",
+              borderRadius: "10px",
               height: 48,
               px: 3,
               flexShrink: 0,
@@ -123,10 +134,18 @@ export default function ProjectsPage() {
         </motion.div>
       </Box>
 
+      {!isLoading && !isError && !showEmpty && (
+        <Box sx={{ display:"flex", gap:1, mb:3, overflowX:"auto", pb:.5 }}>
+          {(["all", "active", "planning", "completed"] as const).map((value) => (
+            <Chip key={value} label={value === "all" ? `All ${projects?.length ?? 0}` : value} onClick={() => setFilter(value)} variant={filter === value ? "filled" : "outlined"} color={filter === value ? "primary" : "default"} sx={{ textTransform:"capitalize", px:.5 }} />
+          ))}
+        </Box>
+      )}
+
       {/* Body */}
       {isLoading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <CircularProgress size={28} sx={{ color: "#006F99" }} />
+          <CircularProgress size={28} sx={{ color: "primary.main" }} />
         </Box>
       ) : isError ? (
         <Box
@@ -155,7 +174,7 @@ export default function ProjectsPage() {
               fontWeight: 600,
               borderColor: "#E6E8EB",
               color: "#6B7280",
-              "&:hover": { borderColor: "#006F99", color: "#006F99" },
+              "&:hover": { borderColor: "primary.main", color: "primary.main" },
             }}
           >
             Try again
@@ -195,14 +214,14 @@ export default function ProjectsPage() {
             <Button
               variant="contained"
               startIcon={<AddOutlinedIcon fontSize="small" />}
-              onClick={() => setIsFormOpen(true)}
+              onClick={() => router.push("/projects/new")}
               sx={{
                 borderRadius: "14px",
                 textTransform: "none",
                 fontWeight: 600,
-                bgcolor: "#006F99",
+                bgcolor: "primary.main",
                 boxShadow: "0 4px 12px rgba(0, 111, 153, 0.2)",
-                "&:hover": { boxShadow: "none", bgcolor: "#005670" },
+                "&:hover": { boxShadow: "none", bgcolor: "primary.dark" },
               }}
             >
               Create Project
@@ -213,13 +232,13 @@ export default function ProjectsPage() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
-            gap: 3,
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))", xl: "repeat(4, minmax(0, 1fr))" },
+            gap: "30px",
             width: "100%",
           }}
         >
           <AnimatePresence>
-            {projects?.map((p) => (
+            {visibleProjects?.map((p) => (
               <motion.div
                 key={p.id}
                 layout
@@ -264,11 +283,14 @@ export default function ProjectsPage() {
                 title: editingProject.name,
                 description: editingProject.description,
                 status: editingProject.status,
-                due_date: editingProject.dueDate === "—" ? null : editingProject.dueDate,
+                due_date: editingProject.dueDateRaw,
+                start_date: editingProject.startDate,
               }
             : undefined
         }
         onSubmit={handleEdit}
+        ownerName={user?.user_metadata?.display_name || "You"}
+        ownerEmail={user?.email || ""}
         onCancel={() => setEditingProject(null)}
         isPending={updateProject.isPending}
         error={
@@ -316,7 +338,7 @@ export default function ProjectsPage() {
                 fontWeight: 600,
                 borderColor: "#E6E8EB",
                 color: "#6B7280",
-                "&:hover": { borderColor: "#006F99", color: "#006F99" },
+                "&:hover": { borderColor: "primary.main", color: "primary.main" },
               }}
             >
               Cancel

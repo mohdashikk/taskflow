@@ -25,7 +25,7 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 
-export const SIDEBAR_WIDTH = 72;
+export const SIDEBAR_WIDTH = 104;
 
 export interface NavItem {
   label: string;
@@ -92,7 +92,7 @@ export default function Sidebar({ open, onClose, permanent = false }: SidebarPro
 
   const navItemSx = (selected: boolean) => {
     return {
-      minHeight: 48,
+      minHeight: 60,
       borderRadius: 2,
       px: 2,
       py: 1.25,
@@ -181,9 +181,9 @@ export default function Sidebar({ open, onClose, permanent = false }: SidebarPro
         height: "100vh",
         bgcolor: "background.paper",
         borderRight: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : theme.palette.divider}`,
-        boxShadow: isDark ? "none" : "0 1px 2px rgba(0,0,0,0.04)",
-        px: 2.5,
-        py: 3.5,
+        boxShadow: "none",
+        px: 2,
+        py: 4,
         overflowY: "auto",
         "&::-webkit-scrollbar": {
           display: "none",
@@ -208,7 +208,7 @@ export default function Sidebar({ open, onClose, permanent = false }: SidebarPro
             width: 40,
             height: 40,
             borderRadius: 3,
-            boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
+            boxShadow: "none",
           }}
         >
           <AssignmentTurnedInOutlinedIcon fontSize="small" sx={{ color: "#FFFFFF" }} />

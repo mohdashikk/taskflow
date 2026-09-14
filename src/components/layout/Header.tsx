@@ -26,7 +26,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 import ThemeSwitcher from "@/features/auth/components/ThemeSwitcher";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 interface HeaderProps {
   onMobileMenuToggle?: () => void;
@@ -38,6 +38,8 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
   const { user } = useAuth();
   const logout = useLogout();
   const router = useRouter();
+  const pathname = usePathname();
+  const pageTitle = pathname.startsWith("/projects") ? "Projects" : pathname === "/dashboard" ? "Dashboard" : pathname.split("/")[1]?.replace(/^./, c => c.toUpperCase()) || "TaskFlow";
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -75,14 +77,17 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] as const }}
       sx={{
-        height: { xs: 64, sm: 72 },
+        height: { xs: 72, md: 104, xl: 120 },
+        flexShrink: 0,
         px: { xs: 1.5, sm: 2.5, md: 3.5, lg: 4 },
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         gap: { xs: 1, sm: 0 },
-        borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-        bgcolor: theme.palette.background.paper,
+        borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,.10)"}`,
+        bgcolor: isDark ? "rgba(20,19,32,.82)" : "rgba(255,255,255,.82)",
+        backdropFilter: "saturate(180%) blur(20px)",
+        WebkitBackdropFilter: "saturate(180%) blur(20px)",
         position: "sticky",
         top: 0,
         zIndex: 10,
@@ -113,21 +118,23 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
             <MenuOutlinedIcon fontSize="small" />
           </IconButton>
         )}
+        <Typography component="h1" sx={{fontSize:{xs:20,md:28,xl:32},fontWeight:750,letterSpacing:"-.025em",mr:"auto"}}>{pageTitle}</Typography>
         <Box
           sx={{
             flex: 1,
             minWidth: 0,
             display: { xs: "none", md: "block" },
-            maxWidth: 280,
+            maxWidth: 316,
+            mr: 3,
           }}
         >
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
-              height: 40,
+              height: 48,
               px: 1.5,
-              borderRadius: 3,
+              borderRadius: "30px",
               bgcolor: isDark
                 ? theme.palette.grey[900]
                 : "#F2F4F7",
@@ -238,8 +245,9 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
               color: theme.palette.mode === "dark"
                 ? theme.palette.primary.contrastText
                 : theme.palette.primary.main,
-              width: { xs: 32, sm: 36 },
-              height: { xs: 32, sm: 36 },
+              width: { xs: 32, sm: 48, xl: 58 },
+              height: { xs: 32, sm: 48, xl: 58 },
+              borderRadius: "50%",
               fontSize: { xs: 12, sm: 14 },
               fontWeight: 700,
               border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
@@ -252,7 +260,8 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
               sx={{
                 fontWeight: 600,
                 color: theme.palette.text.primary,
-                fontSize: 13,
+              fontSize: { sm: 15, xl: 17 },
+              lineHeight: 1.25,
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
@@ -263,7 +272,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
             <Typography
               sx={{
                 color: theme.palette.text.secondary,
-                fontSize: 11,
+                fontSize: { sm: 11, xl: 12 },
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",

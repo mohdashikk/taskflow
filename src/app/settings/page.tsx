@@ -169,7 +169,7 @@ export default function SettingsPage() {
                 onChange={(e) => setDisplayName(e.target.value)}
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    borderRadius: "14px",
+                    borderRadius: "10px",
                     bgcolor: theme.inputBg,
                     "& fieldset": { borderColor: theme.inputBorder },
                     "&:hover fieldset": { borderColor: theme.accent },
@@ -189,7 +189,7 @@ export default function SettingsPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    borderRadius: "14px",
+                    borderRadius: "10px",
                     bgcolor: theme.inputBg,
                     "& fieldset": { borderColor: theme.inputBorder },
                     "&:hover fieldset": { borderColor: theme.accent },
@@ -208,8 +208,8 @@ export default function SettingsPage() {
                   variant="contained"
                   disabled={isSubmitting}
                   sx={{
-                    height: 52,
-                    borderRadius: "14px",
+                    height: 48,
+                    borderRadius: "10px",
                     bgcolor: theme.accent,
                     boxShadow: theme.accentAlpha(0.25),
                     fontSize: 16,
@@ -262,7 +262,7 @@ export default function SettingsPage() {
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    borderRadius: "14px",
+                    borderRadius: "10px",
                     bgcolor: theme.inputBg,
                     "& fieldset": { borderColor: theme.inputBorder },
                     "&:hover fieldset": { borderColor: theme.accent },
@@ -282,7 +282,7 @@ export default function SettingsPage() {
                 onChange={(e) => setNewPassword(e.target.value)}
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    borderRadius: "14px",
+                    borderRadius: "10px",
                     bgcolor: theme.inputBg,
                     "& fieldset": { borderColor: theme.inputBorder },
                     "&:hover fieldset": { borderColor: theme.accent },
@@ -302,7 +302,7 @@ export default function SettingsPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    borderRadius: "14px",
+                    borderRadius: "10px",
                     bgcolor: theme.inputBg,
                     "& fieldset": { borderColor: theme.inputBorder },
                     "&:hover fieldset": { borderColor: theme.accent },
@@ -321,8 +321,8 @@ export default function SettingsPage() {
                   variant="contained"
                   disabled={isSubmitting}
                   sx={{
-                    height: 52,
-                    borderRadius: "14px",
+                    height: 48,
+                    borderRadius: "10px",
                     bgcolor: theme.accent,
                     boxShadow: theme.accentAlpha(0.25),
                     fontSize: 16,

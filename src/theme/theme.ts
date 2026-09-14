@@ -1,36 +1,36 @@
 import { alpha, createTheme, type Theme } from "@mui/material/styles";
 
 const lightColors = {
-  primary: "#715AF8",
-  primaryLight: alpha("#715AF8", 0.08),
-  primaryDark: "#5B46D8",
-  background: "#F7F8FA",
+  primary: "#00A15D",
+  primaryLight: alpha("#00A15D", 0.1),
+  primaryDark: "#006E40",
+  background: "#F8F8F8",
   paper: "#FFFFFF",
   card: "#FFFFFF",
-  surface: "#F2F4F7",
-  board: "#F7F8FA",
-  border: "rgba(0,0,0,0.06)",
-  textPrimary: "#111827",
-  textSecondary: "#6B7280",
+  surface: "#F5F5F7",
+  board: "#FFFFFF",
+  border: "#E5E5E7",
+  textPrimary: "#000000",
+  textSecondary: "#717579",
   success: "#22C55E",
   warning: "#F59E0B",
   danger: "#EF4444",
-  shadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
-  shadowHover: "0 8px 24px rgba(0, 0, 0, 0.08)",
+  shadow: "0 5px 5px rgba(82,63,105,.05)",
+  shadowHover: "0 7px 29px rgba(136,108,192,.20)",
 };
 
 const darkColors = {
-  primary: "#715AF8",
-  primaryLight: alpha("#715AF8", 0.08),
-  primaryDark: "#5B46D8",
-  background: "#0a080e",
-  paper: "#0a080e",
-  card: "#0a080e",
-  surface: "#0a080e",
-  board: "#0a080e",
-  border: "rgba(255,255,255,0.06)",
-  textPrimary: "#B5B7C8",
-  textSecondary: "#B5B7C8",
+  primary: "#2997FF",
+  primaryLight: alpha("#2997FF", 0.1),
+  primaryDark: "#147CE5",
+  background: "#0E0D18",
+  paper: "#141320",
+  card: "#181725",
+  surface: "#1D1B2C",
+  board: "#0E0D18",
+  border: "rgba(255,255,255,0.085)",
+  textPrimary: "#F3F2FA",
+  textSecondary: "#A8A6B8",
   success: "#22C55E",
   warning: "#F59E0B",
   danger: "#EF4444",
@@ -58,7 +58,7 @@ export const getTheme = (mode: ColorMode): Theme => {
         contrastText: "#FFFFFF",
       },
       secondary: {
-        main: "#715AF8",
+        main: colors.primary,
         contrastText: "#FFFFFF",
       },
       background: {
@@ -93,10 +93,10 @@ export const getTheme = (mode: ColorMode): Theme => {
       },
     },
     shape: {
-      borderRadius: 12,
+      borderRadius: 8,
     },
     typography: {
-      fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
+      fontFamily: '"Poppins", Arial, sans-serif',
       h1: {
         fontSize: "3rem",
         fontWeight: 700,
@@ -123,6 +123,7 @@ export const getTheme = (mode: ColorMode): Theme => {
       h5: {
         fontSize: "1.25rem",
         fontWeight: 600,
+        letterSpacing: "normal",
         lineHeight: 1.4,
       },
       h6: {
@@ -131,7 +132,7 @@ export const getTheme = (mode: ColorMode): Theme => {
         lineHeight: 1.4,
       },
       body1: {
-        fontSize: "1rem",
+        fontSize: "0.875rem",
         lineHeight: 1.6,
       },
       body2: {
@@ -167,7 +168,7 @@ export const getTheme = (mode: ColorMode): Theme => {
       MuiButton: {
         styleOverrides: {
           root: {
-            borderRadius: 12,
+            borderRadius: 8,
             padding: "10px 20px",
             height: 44,
             transition: "all 180ms cubic-bezier(0.4, 0, 0.2, 1)",
@@ -176,7 +177,7 @@ export const getTheme = (mode: ColorMode): Theme => {
             },
           },
           contained: {
-            boxShadow: colors.shadow,
+            boxShadow: "none",
             "&:hover": {
               boxShadow: colors.shadowHover,
             },
@@ -186,7 +187,7 @@ export const getTheme = (mode: ColorMode): Theme => {
       MuiIconButton: {
         styleOverrides: {
           root: {
-            borderRadius: 12,
+            borderRadius: 8,
             transition: "all 180ms cubic-bezier(0.4, 0, 0.2, 1)",
             "&:active": {
               transform: "scale(0.92)",
@@ -198,7 +199,7 @@ export const getTheme = (mode: ColorMode): Theme => {
         styleOverrides: {
           root: {
             borderRadius: 20,
-            border: `1px solid ${colors.border}`,
+            border: "2px solid transparent",
             boxShadow: colors.shadow,
             transition: "all 220ms cubic-bezier(0.4, 0, 0.2, 1)",
             backgroundImage: "none",
@@ -209,7 +210,8 @@ export const getTheme = (mode: ColorMode): Theme => {
         styleOverrides: {
           root: {
             backgroundImage: "none",
-            borderRadius: 20,
+            borderRadius: 10,
+            boxShadow: "none",
           },
         },
       },
@@ -217,8 +219,16 @@ export const getTheme = (mode: ColorMode): Theme => {
         styleOverrides: {
           root: {
             "& .MuiOutlinedInput-root": {
-              borderRadius: 12,
+              minHeight: 48,
+              borderRadius: 10,
+              backgroundColor: colors.paper,
               transition: "all 180ms ease",
+              "&.MuiInputBase-multiline": {
+                minHeight: 112,
+                height: "auto",
+                padding: "13px 16px",
+                alignItems: "flex-start",
+              },
               "& fieldset": {
                 borderColor: colors.border,
               },
@@ -230,13 +240,47 @@ export const getTheme = (mode: ColorMode): Theme => {
                 boxShadow: `0 0 0 3px ${alpha(colors.primary, 0.08)}`,
               },
             },
+            "& .MuiInputBase-input": {
+              boxSizing: "border-box",
+              height: "auto",
+              padding: "13px 16px",
+              fontFamily: '"Poppins", Arial, sans-serif',
+              fontSize: 14,
+              lineHeight: "22px",
+            },
+            "& .MuiInputBase-inputSizeSmall": {
+              padding: "13px 16px",
+            },
+            "& .MuiInputBase-multiline .MuiInputBase-input": {
+              minHeight: 84,
+              padding: 0,
+            },
+            "& .MuiSelect-select": {
+              display: "flex",
+              alignItems: "center",
+            },
+          },
+        },
+      },
+      MuiFormControl: {
+        styleOverrides: {
+          root: {
+            fontFamily: '"Poppins", Arial, sans-serif',
+          },
+        },
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            fontFamily: '"Poppins", Arial, sans-serif',
+            fontSize: 14,
           },
         },
       },
       MuiDialog: {
         styleOverrides: {
           paper: {
-            borderRadius: 20,
+            borderRadius: 12,
             border: `1px solid ${colors.border}`,
             boxShadow: colors.shadowHover,
           },
@@ -245,7 +289,7 @@ export const getTheme = (mode: ColorMode): Theme => {
       MuiMenu: {
         styleOverrides: {
           paper: {
-            borderRadius: 16,
+            borderRadius: 10,
             border: `1px solid ${colors.border}`,
             boxShadow: colors.shadowHover,
           },
@@ -254,7 +298,7 @@ export const getTheme = (mode: ColorMode): Theme => {
       MuiListItemButton: {
         styleOverrides: {
           root: {
-            borderRadius: 12,
+            borderRadius: 8,
             transition: "all 180ms cubic-bezier(0.4, 0, 0.2, 1)",
           },
         },
@@ -262,14 +306,14 @@ export const getTheme = (mode: ColorMode): Theme => {
       MuiAvatar: {
         styleOverrides: {
           root: {
-            borderRadius: 12,
+            borderRadius: 8,
           },
         },
       },
       MuiTooltip: {
         styleOverrides: {
           tooltip: {
-            borderRadius: 10,
+            borderRadius: 7,
             padding: "6px 12px",
             fontSize: 12,
             fontWeight: 500,
@@ -280,7 +324,7 @@ export const getTheme = (mode: ColorMode): Theme => {
       MuiChip: {
         styleOverrides: {
           root: {
-            borderRadius: 10,
+            borderRadius: 7,
             fontWeight: 600,
           },
         },
