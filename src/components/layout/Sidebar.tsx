@@ -7,6 +7,7 @@ import {
   Box,
   Divider,
   Drawer,
+  IconButton,
   List,
   ListItemButton,
   ListItemIcon,
@@ -24,7 +25,7 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 
-export const SIDEBAR_WIDTH = 260;
+export const SIDEBAR_WIDTH = 72;
 
 export interface NavItem {
   label: string;
@@ -95,7 +96,7 @@ export default function Sidebar({ open, onClose, permanent = false }: SidebarPro
       borderRadius: 2,
       px: 2,
       py: 1.25,
-      gap: 1.5,
+      justifyContent: "center",
       transition: "all 180ms cubic-bezier(0.4, 0, 0.2, 1)",
       color: selected
         ? theme.palette.text.primary
@@ -197,8 +198,7 @@ export default function Sidebar({ open, onClose, permanent = false }: SidebarPro
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: 1.5,
-          px: 1,
+          justifyContent: "center",
           mb: 6,
         }}
       >
@@ -213,35 +213,11 @@ export default function Sidebar({ open, onClose, permanent = false }: SidebarPro
         >
           <AssignmentTurnedInOutlinedIcon fontSize="small" sx={{ color: "#FFFFFF" }} />
         </Avatar>
-        <Typography
-          sx={{
-            fontWeight: 700,
-            color: theme.palette.text.primary,
-            fontSize: 20,
-            lineHeight: 1.2,
-            letterSpacing: "-0.01em",
-          }}
-        >
-          TaskFlow
-        </Typography>
-      </Box>
+        </Box>
 
       {/* Main Menu */}
       <Box sx={{ mb: 4 }}>
-        <Typography
-          sx={{
-            fontSize: 11,
-            fontWeight: 600,
-            color: theme.palette.text.secondary,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            px: 1.5,
-            mb: 2,
-          }}
-        >
-          Main Menu
-        </Typography>
-        <List sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        <List sx={{ display: "flex", flexDirection: "column", gap: 1, alignItems: "center" }}>
           {MAIN_MENU_ITEMS.map((item) => {
             const selected = isSelected(item.href);
             return (
@@ -251,9 +227,9 @@ export default function Sidebar({ open, onClose, permanent = false }: SidebarPro
                 href={item.href}
                 selected={selected}
                 sx={navItemSx(selected)}
+                title={item.label}
               >
                 <ListItemIcon sx={iconSx}>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.label} sx={textSx(selected)} />
               </ListItemButton>
             );
           })}
@@ -264,20 +240,7 @@ export default function Sidebar({ open, onClose, permanent = false }: SidebarPro
 
       {/* General */}
       <Box sx={{ flex: 1 }}>
-        <Typography
-          sx={{
-            fontSize: 11,
-            fontWeight: 600,
-            color: theme.palette.text.secondary,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            px: 1.5,
-            mb: 2,
-          }}
-        >
-          General
-        </Typography>
-        <List sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        <List sx={{ display: "flex", flexDirection: "column", gap: 1, alignItems: "center" }}>
           {GENERAL_ITEMS.map((item) => {
             const selected = isSelected(item.href);
             return (
@@ -287,48 +250,20 @@ export default function Sidebar({ open, onClose, permanent = false }: SidebarPro
                 href={item.href}
                 selected={selected}
                 sx={navItemSx(selected)}
+                title={item.label}
               >
                 <ListItemIcon sx={iconSx}>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.label} sx={textSx(selected)} />
               </ListItemButton>
             );
           })}
           <ListItemButton
             onClick={handleLogout}
-            sx={{
-              minHeight: 48,
-              borderRadius: 2,
-              px: 2,
-              py: 1.25,
-              gap: 1.5,
-              transition: "all 180ms cubic-bezier(0.4, 0, 0.2, 1)",
-              color: theme.palette.text.secondary,
-              position: "relative",
-              "&:hover": {
-                bgcolor: alpha(theme.palette.error.main, 0.08),
-                color: theme.palette.error.main,
-                "& .MuiListItemIcon-root": {
-                  color: theme.palette.error.main,
-                },
-              },
-              "& .MuiListItemIcon-root": {
-                minWidth: "auto",
-                color: "inherit",
-              },
-            }}
+            sx={navItemSx(false)}
+            title="Logout"
           >
             <ListItemIcon sx={iconSx}>
               <LogoutOutlinedIcon />
             </ListItemIcon>
-            <ListItemText
-              primary="Logout"
-              sx={{
-                "& .MuiListItemText-primary": {
-                  fontWeight: 500,
-                  fontSize: 14,
-                },
-              }}
-            />
           </ListItemButton>
         </List>
       </Box>
@@ -357,3 +292,4 @@ export default function Sidebar({ open, onClose, permanent = false }: SidebarPro
     </Drawer>
   );
 }
+

@@ -59,7 +59,7 @@ const STATUS_SET: ReadonlySet<ProjectStatus> = new Set<ProjectStatus>([
   "archived",
 ]);
 
-const normalizeStatus = (value: string): ProjectStatus =>
+export const normalizeStatus = (value: string): ProjectStatus =>
   STATUS_SET.has(value as ProjectStatus) ? (value as ProjectStatus) : "planning";
 
 const formatDueDate = (iso: string): string =>

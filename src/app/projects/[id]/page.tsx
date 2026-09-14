@@ -1,18 +1,10 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { useParams } from "next/navigation";
-import Box from "@mui/material/Box";
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import KanbanBoard from "@/features/tasks/components/KanbanBoard";
+type PageProps = {
+  params: Promise<{ id: string }>;
+};
 
-export default function ProjectTasksPage() {
-  const params = useParams();
-  const { user } = useAuth();
-  const projectId = params.id as string;
-
-  return (
-    <Box sx={{ width: "100%" }}>
-      <KanbanBoard projectId={projectId} userId={user?.id ?? ""} />
-    </Box>
-  );
+export default async function ProjectRedirect({ params }: PageProps) {
+  const { id } = await params;
+  redirect(`/projects/${id}/overview`);
 }

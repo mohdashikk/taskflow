@@ -111,6 +111,34 @@ export const updateProject = async (
   return data as ProjectRow;
 };
 
+export const fetchProject = async (
+  id: string,
+  userId: string,
+): Promise<ProjectRow> => {
+  if (!supabase) {
+    throw new Error(
+      "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local.",
+    );
+  }
+
+  const { data, error } = await supabase
+    .from("projects")
+    .select("id, title, description, status, due_date, created_at")
+    .eq("id", id)
+    .eq("user_id", userId)
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data) {
+    throw new Error("Project not found.");
+  }
+
+  return data as ProjectRow;
+};
+
 export const deleteProject = async (id: string): Promise<void> => {
   if (!supabase) {
     throw new Error(
