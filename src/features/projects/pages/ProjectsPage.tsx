@@ -232,7 +232,7 @@ export default function ProjectsPage() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))", xl: "repeat(4, minmax(0, 1fr))" },
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))" },
             gap: "30px",
             width: "100%",
           }}
@@ -291,6 +291,8 @@ export default function ProjectsPage() {
         onSubmit={handleEdit}
         ownerName={user?.user_metadata?.display_name || "You"}
         ownerEmail={user?.email || ""}
+        projectId={editingProject?.id}
+        userId={user?.id}
         onCancel={() => setEditingProject(null)}
         isPending={updateProject.isPending}
         error={

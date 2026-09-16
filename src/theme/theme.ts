@@ -219,9 +219,9 @@ export const getTheme = (mode: ColorMode): Theme => {
         styleOverrides: {
           root: {
             "& .MuiOutlinedInput-root": {
-              minHeight: 48,
-              borderRadius: 10,
-              backgroundColor: colors.paper,
+              borderRadius: 90,
+              height: "45px",
+              fontSize: "13px",
               transition: "all 180ms ease",
               "&.MuiInputBase-multiline": {
                 minHeight: 112,

@@ -1,5 +1,5 @@
 "use client";
-
+ 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
@@ -137,140 +137,158 @@ export default function RegisterForm() {
             gap: 3,
           }}
         >
-          <TextField
-            fullWidth
-            required
-            label="Display Name"
-            name="displayName"
-            placeholder="Jane Doe"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Box
-                      sx={{
-                        display: "grid",
-                        placeItems: "center",
-                        color: colors.isDark ? "#B5B7C8" : "#6B7280",
-                      }}
-                    >
-                      <PersonOutlineOutlinedIcon fontSize="small" />
-                    </Box>
-                  </InputAdornment>
-                ),
-              },
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "10px",
-                bgcolor: theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF",
-                "& fieldset": {
-                  borderColor: colors.inputBorder,
+          <Box>
+            <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", mb: 0.5 }}>
+              Display Name
+            </Typography>
+            <TextField
+              fullWidth
+              required
+              name="displayName"
+              placeholder="Jane Doe"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Box
+                        sx={{
+                          display: "grid",
+                          placeItems: "center",
+                          color: colors.isDark ? "#B5B7C8" : "#6B7280",
+                        }}
+                      >
+                        <PersonOutlineOutlinedIcon fontSize="small" />
+                      </Box>
+                    </InputAdornment>
+                  ),
                 },
-                "&:hover fieldset": {
-                  borderColor: colors.accent,
+              }}
+              sx={{
+                height: "35px",
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "3px",
+                  fontSize: "13px",
+                  bgcolor: theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF",
+                  "& fieldset": {
+                    borderColor: colors.inputBorder,
+                  },
+                  "&:hover fieldset": {
+                    borderColor: colors.accent,
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: colors.accent,
+                    boxShadow: colors.accentAlpha(0.1),
+                  },
+                  "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
+                    WebkitBoxShadow: `0 0 0px 1000px ${theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF"} inset`,
+                    transition: "background-color 5000s ease-in-out 0s",
+                  },
                 },
-                "&.Mui-focused fieldset": {
-                  borderColor: colors.accent,
-                  boxShadow: colors.accentAlpha(0.1),
-                },
-                "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
-                  WebkitBoxShadow: `0 0 0px 1000px ${theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF"} inset`,
-                  transition: "background-color 5000s ease-in-out 0s",
-                },
-              },
-            }}
-          />
+              }}
+            />
+          </Box>
 
-          <TextField
-            fullWidth
-            required
-            label="Email"
-            name="email"
-            placeholder="you@company.com"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "10px",
-                bgcolor: theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF",
-                "& fieldset": {
-                  borderColor: colors.inputBorder,
+          <Box>
+            <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", mb: 0.5 }}>
+              Email
+            </Typography>
+            <TextField
+              fullWidth
+              required
+              name="email"
+              placeholder="you@company.com"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              sx={{
+                height: "35px",
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "3px",
+                  fontSize: "13px",
+                  bgcolor: theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF",
+                  "& fieldset": {
+                    borderColor: colors.inputBorder,
+                  },
+                  "&:hover fieldset": {
+                    borderColor: colors.accent,
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: colors.accent,
+                    boxShadow: colors.accentAlpha(0.1),
+                  },
+                  "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
+                    WebkitBoxShadow: `0 0 0px 1000px ${theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF"} inset`,
+                    transition: "background-color 5000s ease-in-out 0s",
+                  },
                 },
-                "&:hover fieldset": {
-                  borderColor: colors.accent,
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: colors.accent,
-                  boxShadow: colors.accentAlpha(0.1),
-                },
-                "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
-                  WebkitBoxShadow: `0 0 0px 1000px ${theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF"} inset`,
-                  transition: "background-color 5000s ease-in-out 0s",
-                },
-              },
-            }}
-          />
+              }}
+            />
+          </Box>
 
-          <TextField
-            fullWidth
-            required
-            label="Password"
-            name="password"
-            type={showPassword ? "text" : "password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                      edge="end"
-                      onClick={() => setShowPassword((current) => !current)}
-                      sx={{
-                        borderRadius: 2,
-                        color: colors.isDark ? "#B5B7C8" : "#6B7280",
-                        "&:hover": {
-                          bgcolor: colors.accentAlpha(0.06),
-                          color: colors.accent,
-                        },
-                      }}
-                    >
-                      {showPassword ? (
-                        <VisibilityOffOutlinedIcon fontSize="small" />
-                      ) : (
-                        <VisibilityOutlinedIcon fontSize="small" />
-                      )}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              },
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "10px",
-                bgcolor: theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF",
-                "& fieldset": {
-                  borderColor: colors.inputBorder,
+          <Box>
+            <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", mb: 0.5 }}>
+              Password
+            </Typography>
+            <TextField
+              fullWidth
+              required
+              name="password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        edge="end"
+                        onClick={() => setShowPassword((current) => !current)}
+                        sx={{
+                          borderRadius: 2,
+                          color: colors.isDark ? "#B5B7C8" : "#6B7280",
+                          "&:hover": {
+                            bgcolor: colors.accentAlpha(0.06),
+                            color: colors.accent,
+                          },
+                        }}
+                      >
+                        {showPassword ? (
+                          <VisibilityOffOutlinedIcon fontSize="small" />
+                        ) : (
+                          <VisibilityOutlinedIcon fontSize="small" />
+                        )}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
                 },
-                "&:hover fieldset": {
-                  borderColor: colors.accent,
+              }}
+              sx={{
+                height: "35px",
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "3px",
+                  fontSize: "13px",
+                  bgcolor: theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF",
+                  "& fieldset": {
+                    borderColor: colors.inputBorder,
+                  },
+                  "&:hover fieldset": {
+                    borderColor: colors.accent,
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: colors.accent,
+                    boxShadow: colors.accentAlpha(0.1),
+                  },
+                  "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
+                    WebkitBoxShadow: `0 0 0px 1000px ${theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF"} inset`,
+                    transition: "background-color 5000s ease-in-out 0s",
+                  },
                 },
-                "&.Mui-focused fieldset": {
-                  borderColor: colors.accent,
-                  boxShadow: colors.accentAlpha(0.1),
-                },
-                "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
-                  WebkitBoxShadow: `0 0 0px 1000px ${theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF"} inset`,
-                  transition: "background-color 5000s ease-in-out 0s",
-                },
-              },
-            }}
-          />
+              }}
+            />
+          </Box>
 
           <motion.div
             whileHover={{ scale: 1.01 }}

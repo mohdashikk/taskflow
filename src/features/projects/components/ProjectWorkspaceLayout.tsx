@@ -235,6 +235,8 @@ export default function ProjectWorkspaceLayout({
         onSubmit={handleEditSubmit}
         ownerName={user?.user_metadata?.display_name || "You"}
         ownerEmail={user?.email || ""}
+        projectId={editingProject?.id}
+        userId={user?.id}
         onCancel={handleEditCancel}
         isPending={updateProject.isPending}
         error={

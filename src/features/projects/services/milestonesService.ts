@@ -17,6 +17,7 @@ export interface MilestoneRow extends NewMilestone {
 }
 
 export async function fetchMilestones(projectId: string, userId: string): Promise<MilestoneRow[]> {
+  if (!supabase) throw new Error("Supabase is not configured.");
   const { data, error } = await supabase
     .from("project_milestones")
     .select("id, project_id, user_id, title, description, due_date, status, position, created_at, updated_at")
@@ -28,6 +29,12 @@ export async function fetchMilestones(projectId: string, userId: string): Promis
 }
 
 export async function createMilestones(projectId: string, userId: string, milestones: NewMilestone[]) {
+  if (!supabase) {
+    throw new Error(
+      "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local.",
+    );
+  }
+
   const rows = milestones
     .filter((milestone) => milestone.title.trim())
     .map((milestone, position) => ({
@@ -43,4 +50,17 @@ export async function createMilestones(projectId: string, userId: string, milest
   const { data, error } = await supabase.from("project_milestones").insert(rows).select();
   if (error) throw error;
   return data ?? [];
+}
+
+export async function replaceMilestones(projectId: string, userId: string, milestones: NewMilestone[]) {
+  if (!supabase) throw new Error("Supabase is not configured.");
+
+  const { error } = await supabase
+    .from("project_milestones")
+    .delete()
+    .eq("project_id", projectId)
+    .eq("user_id", userId);
+  if (error) throw error;
+
+  return createMilestones(projectId, userId, milestones);
 }

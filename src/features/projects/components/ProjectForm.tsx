@@ -3,20 +3,24 @@
 import { useEffect, useState } from "react";
 import Drawer from "@mui/material/Drawer";
 import Avatar from "@mui/material/Avatar";
-import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
+import Tooltip from "@mui/material/Tooltip";
 import MuiTypography from "@mui/material/Typography";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import { motion } from "framer-motion";
 import { useTheme, alpha } from "@mui/material/styles";
 import { STATUS_LABELS, type ProjectStatus } from "../data/mockData";
 import type { ProjectStatusRow } from "../data/mockData";
+import { fetchMilestones, replaceMilestones, type NewMilestone } from "../services/milestonesService";
 
 interface ProjectFormProps {
   open: boolean;
@@ -41,6 +45,8 @@ interface ProjectFormProps {
   statuses?: ProjectStatusRow[];
   ownerName?: string;
   ownerEmail?: string;
+  projectId?: string;
+  userId?: string;
 }
 
 const FALLBACK_OPTIONS = Object.keys(STATUS_LABELS) as ProjectStatus[];
@@ -57,6 +63,8 @@ export default function ProjectForm({
   statuses,
   ownerName = "You",
   ownerEmail = "",
+  projectId,
+  userId,
 }: ProjectFormProps) {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
@@ -72,6 +80,9 @@ export default function ProjectForm({
   const [status, setStatus] = useState<ProjectStatus>(initialValues?.status ?? defaultStatus);
   const [dueDate, setDueDate] = useState(initialValues?.due_date ? initialValues.due_date.slice(0, 10) : "");
   const [startDate, setStartDate] = useState(initialValues?.start_date ? initialValues.start_date.slice(0, 10) : "");
+  const [milestones, setMilestones] = useState<NewMilestone[]>([]);
+  const [isMilestonesSaving, setIsMilestonesSaving] = useState(false);
+  const [milestoneError, setMilestoneError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -81,6 +92,13 @@ export default function ProjectForm({
     setStartDate(initialValues?.start_date ? initialValues.start_date.slice(0, 10) : "");
     setDueDate(initialValues?.due_date ? initialValues.due_date.slice(0, 10) : "");
   }, [open, initialValues?.title, initialValues?.description, initialValues?.status, initialValues?.start_date, initialValues?.due_date, defaultStatus]);
+
+  useEffect(() => {
+    if (!open || mode !== "edit" || !projectId || !userId) return;
+    void fetchMilestones(projectId, userId)
+      .then(rows => setMilestones(rows.map(({ title, due_date, status }) => ({ title, due_date, status }))))
+      .catch((loadError: unknown) => setMilestoneError(loadError instanceof Error ? loadError.message : "Could not load milestones."));
+  }, [open, mode, projectId, userId]);
 
   const inputBg = isDark ? "#1A1728" : "#FFFFFF";
   const inputBorder = isDark ? "rgba(255,255,255,0.08)" : "#E6E8EB";
@@ -117,6 +135,19 @@ export default function ProjectForm({
     });
   };
 
+  const saveMilestones = async () => {
+    if (!projectId || !userId) return;
+    setIsMilestonesSaving(true);
+    setMilestoneError(null);
+    try {
+      await replaceMilestones(projectId, userId, milestones);
+    } catch (saveError) {
+      setMilestoneError(saveError instanceof Error ? saveError.message : "Could not save milestones.");
+    } finally {
+      setIsMilestonesSaving(false);
+    }
+  };
+
   return (
     <Drawer
       open={open}
@@ -138,7 +169,6 @@ export default function ProjectForm({
       </Box>
       <Box component="form" onSubmit={handleSubmit} sx={{display:"flex",flexDirection:"column",minHeight:0,flex:1}}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, px:{xs:2.5,sm:4}, py:3.5, overflowY:"auto", flex:1 }}>
-          <Box><Typography fontWeight={700} fontSize={17}>Project details</Typography><Typography color="text.secondary" fontSize={13} mt={0.5}>Name, description, current status, and delivery dates.</Typography></Box>
           <TextField
             label="Project Title"
             value={title}
@@ -157,31 +187,6 @@ export default function ProjectForm({
                   boxShadow: `0 0 0 3px ${inputFocusShadow}`,
                 },
                 "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
-                  WebkitBoxShadow: `0 0 0px 1000px ${inputBg} inset`,
-                  transition: "background-color 5000s ease-in-out 0s",
-                },
-              },
-            }}
-          />
-          <TextField
-            label="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            fullWidth
-            size="small"
-            multiline
-            minRows={2}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "10px",
-                bgcolor: inputBg,
-                "& fieldset": { borderColor: inputBorder },
-                "&:hover fieldset": { borderColor: inputHoverBorder },
-                "&.Mui-focused fieldset": {
-                  borderColor: inputHoverBorder,
-                  boxShadow: `0 0 0 3px ${inputFocusShadow}`,
-                },
-                "& textarea:-webkit-autofill, & textarea:-webkit-autofill:hover, & textarea:-webkit-autofill:focus": {
                   WebkitBoxShadow: `0 0 0px 1000px ${inputBg} inset`,
                   transition: "background-color 5000s ease-in-out 0s",
                 },
@@ -227,16 +232,29 @@ export default function ProjectForm({
           </Box>
 
           <Divider />
-          <Box><Typography fontWeight={700} fontSize={17}>Team access</Typography><Typography color="text.secondary" fontSize={13} mt={0.5} mb={2}>This workspace currently supports one project owner.</Typography>
-            <Box sx={{display:"flex",alignItems:"center",gap:2,p:2,border:"1px solid",borderColor:"primary.main",borderRadius:"10px",bgcolor:"action.selected"}}>
-              <Avatar sx={{bgcolor:"primary.main"}}>{(ownerName || ownerEmail || "Y").charAt(0).toUpperCase()}</Avatar>
-              <Box sx={{flex:1,minWidth:0}}><Typography fontWeight={650}>{ownerName}</Typography><Typography color="text.secondary" fontSize={13} noWrap>{ownerEmail}</Typography></Box>
-              <Chip label="Owner" size="small" color="primary" icon={<CheckRoundedIcon />} />
+          <Box>
+            <Box sx={{display:"flex",alignItems:"center",gap:1.25}}><Box sx={{width:32,height:32,borderRadius:"10px",display:"grid",placeItems:"center",bgcolor:"action.selected",color:"primary.main"}}><GroupOutlinedIcon fontSize="small" /></Box><Box><Typography fontWeight={700} fontSize={17}>Team access</Typography><Typography color="text.secondary" fontSize={12}>Project owner and access level</Typography></Box></Box>
+            <Box sx={{display:"flex",alignItems:"center",gap:1,p:1.25,mt:2,border:"1px solid",borderColor:"divider",borderRadius:"14px",bgcolor:"background.default"}}>
+              <Tooltip title={`${ownerName} · Project owner`} arrow>
+                <Avatar aria-label={`${ownerName}, project owner`} sx={{width:38,height:38,bgcolor:alpha(theme.palette.primary.main,0.12),color:"primary.main",fontSize:14,fontWeight:700,cursor:"default",transition:"transform 160ms ease","&:hover":{transform:"translateY(-2px)",boxShadow:`0 4px 10px ${alpha(theme.palette.primary.main,0.2)}`}}}>{(ownerName || ownerEmail || "Y").charAt(0).toUpperCase()}</Avatar>
+              </Tooltip>
             </Box>
           </Box>
 
           <Divider />
-          <Box><Typography fontWeight={700} fontSize={17}>Milestones</Typography><Typography color="text.secondary" fontSize={13} mt={0.5}>Milestones remain available in the Plan tab, where delivery stages can be reviewed and managed.</Typography></Box>
+          <Box>
+            <Box sx={{display:"flex",alignItems:"center",gap:1.25}}><Box sx={{width:32,height:32,borderRadius:"10px",display:"grid",placeItems:"center",bgcolor:alpha(theme.palette.warning.main,0.1),color:"warning.main"}}><FlagOutlinedIcon fontSize="small" /></Box><Box><Typography fontWeight={700} fontSize={17}>Milestones</Typography><Typography color="text.secondary" fontSize={12}>Delivery stages and target dates</Typography></Box></Box>
+            {mode === "edit" && projectId && userId ? <Box sx={{mt:2,display:"grid",gap:1.5}}>
+              {milestones.map((milestone,index) => <Box key={index} sx={{display:"grid",gridTemplateColumns:{xs:"minmax(0,1fr) 40px",sm:"minmax(0,1fr) 145px 135px 40px"},gap:1,alignItems:"center"}}>
+                <TextField size="small" label={`Milestone ${index + 1}`} value={milestone.title} onChange={event => setMilestones(current => current.map((item,itemIndex) => itemIndex === index ? {...item,title:event.target.value} : item))} />
+                <TextField size="small" type="date" label="Due date" value={milestone.due_date ?? ""} onChange={event => setMilestones(current => current.map((item,itemIndex) => itemIndex === index ? {...item,due_date:event.target.value || null} : item))} slotProps={{inputLabel:{shrink:true}}} sx={{gridColumn:{xs:"1 / -1",sm:"auto"},gridRow:{xs:2,sm:"auto"}}} />
+                <TextField select size="small" label="Status" value={milestone.status} onChange={event => setMilestones(current => current.map((item,itemIndex) => itemIndex === index ? {...item,status:event.target.value as NewMilestone["status"]} : item))} sx={{gridColumn:{xs:"1 / -1",sm:"auto"},gridRow:{xs:3,sm:"auto"}}}><MenuItem value="upcoming">Upcoming</MenuItem><MenuItem value="in_progress">In progress</MenuItem><MenuItem value="completed">Completed</MenuItem></TextField>
+                <IconButton aria-label="Remove milestone" onClick={() => setMilestones(current => current.filter((_,itemIndex) => itemIndex !== index))} sx={{width:40,height:40,border:"1px solid",borderColor:"divider",borderRadius:"10px",gridColumn:{xs:2,sm:"auto"},gridRow:{xs:1,sm:"auto"}}}><DeleteOutlineRoundedIcon fontSize="small" /></IconButton>
+              </Box>)}
+              <Box sx={{display:"flex",alignItems:"center",gap:1.5,pt:.5}}><Button size="small" startIcon={<AddRoundedIcon />} onClick={() => setMilestones(current => [...current,{title:"",due_date:null,status:"upcoming"}])}>Add milestone</Button><Button size="small" variant="outlined" onClick={() => void saveMilestones()} disabled={isMilestonesSaving}>{isMilestonesSaving ? "Saving..." : "Save milestones"}</Button></Box>
+              {milestoneError && <Typography color="error" fontSize={13}>{milestoneError}</Typography>}
+            </Box> : <Box sx={{mt:2,p:2.25,borderRadius:"14px",border:"1px solid",borderColor:"divider",bgcolor:"background.default"}}><Typography color="text.secondary" fontSize={13}>Save the project first to edit milestones.</Typography></Box>}
+          </Box>
 
           <Divider />
           <Box><Typography fontWeight={700} fontSize={17}>Review</Typography><Typography color="text.secondary" fontSize={13} mt={0.5} mb={2}>Confirm the project information before saving.</Typography>
