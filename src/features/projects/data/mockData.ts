@@ -21,6 +21,7 @@ export interface ProjectRow {
   due_date: string | null;
   created_at: string;
   start_date?: string | null;
+  icon?: string | null;
   tasks_total?: number;
   tasks_done?: number;
 }
@@ -37,6 +38,7 @@ export interface Project {
   dueDate: string;
   dueDateRaw: string | null;
   startDate: string | null;
+  icon: string;
   tasksDone: number;
   tasksTotal: number;
   created_at: string;
@@ -81,6 +83,7 @@ export const toProject = (row: ProjectRow): Project => ({
   dueDate: row.due_date ? formatDueDate(row.due_date) : "—",
   dueDateRaw: row.due_date,
   startDate: row.start_date ?? null,
+  icon: row.icon ?? "📁",
   tasksDone: row.tasks_done ?? 0,
   tasksTotal: row.tasks_total ?? 0,
   created_at: row.created_at,

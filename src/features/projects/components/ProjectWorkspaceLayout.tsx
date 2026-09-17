@@ -73,6 +73,7 @@ export default function ProjectWorkspaceLayout({
     status: ProjectStatus;
     due_date: string | null;
     start_date?: string | null;
+    icon: string;
   }) => {
     if (!editingProject) return;
     updateProject.mutate(
@@ -83,6 +84,7 @@ export default function ProjectWorkspaceLayout({
         status: values.status,
         due_date: values.due_date,
         start_date: values.start_date,
+        icon: values.icon,
       },
       {
         onSuccess: () => {
@@ -229,6 +231,7 @@ export default function ProjectWorkspaceLayout({
                 status: normalizeStatus(editingProject.status),
                 due_date: editingProject.due_date,
                 start_date: editingProject.start_date ?? null,
+                icon: editingProject.icon,
               }
             : undefined
         }

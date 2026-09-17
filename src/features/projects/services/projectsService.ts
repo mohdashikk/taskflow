@@ -12,7 +12,7 @@ export const fetchUserProjects = async (
 
   const { data, error } = await supabase
     .from("projects")
-    .select("id, title, description, status, due_date, created_at, start_date")
+    .select("id, title, description, status, due_date, created_at, start_date, icon")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
@@ -44,6 +44,7 @@ export interface CreateProjectInput {
   due_date: string | null;
   user_id: string;
   start_date?: string | null;
+  icon?: string;
 }
 
 export const createProject = async (
@@ -65,11 +66,12 @@ export const createProject = async (
     payload.due_date = input.due_date;
   }
   if (input.start_date) payload.start_date = input.start_date;
+  if (input.icon) payload.icon = input.icon;
 
   const { data, error } = await supabase
     .from("projects")
     .insert(payload)
-    .select("id, title, description, status, due_date, created_at, start_date")
+    .select("id, title, description, status, due_date, created_at, start_date, icon")
     .single();
 
   if (error) {
@@ -90,6 +92,7 @@ export interface UpdateProjectInput {
   status: string;
   due_date: string | null;
   start_date?: string | null;
+  icon?: string;
 }
 
 export const updateProject = async (
@@ -107,13 +110,14 @@ export const updateProject = async (
     status: input.status,
     start_date: input.start_date ?? null,
     due_date: input.due_date ?? null,
+    ...(input.icon ? { icon: input.icon } : {}),
   };
 
   const { data, error } = await supabase
     .from("projects")
     .update(payload)
     .eq("id", input.id)
-    .select("id, title, description, status, due_date, created_at, start_date")
+    .select("id, title, description, status, due_date, created_at, start_date, icon")
     .single();
 
   if (error) {
@@ -139,7 +143,7 @@ export const fetchProject = async (
 
   const { data, error } = await supabase
     .from("projects")
-    .select("id, title, description, status, due_date, created_at, start_date")
+    .select("id, title, description, status, due_date, created_at, start_date, icon")
     .eq("id", id)
     .eq("user_id", userId)
     .single();

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useTheme } from "@mui/material/styles";
+import { alpha, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
@@ -15,7 +15,6 @@ import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import EventOutlinedIcon from "@mui/icons-material/EventOutlined";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
-import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
 import { motion } from "framer-motion";
 import { StatusBadge } from "./StatusBadge";
 import type { Project, ProjectStatusRow } from "../data/mockData";
@@ -104,7 +103,27 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
             gap: 1,
           }}
         >
-          <Box sx={{display:"flex",alignItems:"center",gap:1.25}}><Box sx={{width:38,height:38,borderRadius:1,display:"grid",placeItems:"center",bgcolor:"action.selected",color:"primary.main"}}><FolderRoundedIcon sx={{fontSize:20}}/></Box><StatusBadge status={project.status} statuses={statusMap} /></Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+            <Box
+              aria-hidden="true"
+              sx={{
+                width: 42,
+                height: 42,
+                display: "grid",
+                placeItems: "center",
+                borderRadius: "13px",
+                fontSize: 21,
+                lineHeight: 1,
+                bgcolor: alpha(theme.palette.primary.main, isDark ? 0.2 : 0.1),
+                boxShadow: `inset 0 0 0 1px ${alpha(theme.palette.primary.main, isDark ? 0.3 : 0.12)}, 0 4px 10px ${alpha(theme.palette.primary.main, 0.1)}`,
+                transition: "transform 180ms ease, box-shadow 180ms ease",
+                ".MuiBox-root:hover &": { transform: "rotate(-4deg) scale(1.06)" },
+              }}
+            >
+              {project.icon}
+            </Box>
+            <StatusBadge status={project.status} statuses={statusMap} />
+          </Box>
           <IconButton
             size="small"
             onClick={handleMenu}

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Avatar, Box, Button, CircularProgress, IconButton, MenuItem, Step, StepLabel, Stepper, TextField, Tooltip, Typography as MuiTypography } from "@mui/material";
+import { Avatar, Box, Button, CircularProgress, Drawer, IconButton, MenuItem, Step, StepLabel, Stepper, TextField, Tooltip, Typography as MuiTypography } from "@mui/material";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
@@ -17,6 +17,7 @@ import WorkspaceCard from "@/features/projects/components/WorkspaceCard";
 
 const steps = ["Project details", "Team access", "Milestones", "Review"];
 const Typography = MuiTypography as any;
+const PROJECT_EMOJIS = ["📁", "🚀", "✨", "💻", "📈", "🎨", "🧠", "🛠️", "💡", "📌", "✅", "🌱", "⚡", "🏆", "📝", "📊", "🎯", "📅", "🌍", "👥", "📷", "❤️", "🔒", "📦"];
 export default function CreateProjectPage() {
   const router = useRouter();
   const theme = useTheme();
@@ -24,7 +25,8 @@ export default function CreateProjectPage() {
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [form, setForm] = useState({ title: "", description: "", startDate: "", dueDate: "" });
+  const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
+  const [form, setForm] = useState({ title: "", description: "", startDate: "", dueDate: "", icon: "📁" });
   const [milestones, setMilestones] = useState<NewMilestone[]>([
     { title: "", due_date: "", status: "upcoming" },
   ]);
@@ -59,6 +61,7 @@ export default function CreateProjectPage() {
       const project = await createProject({
         title: form.title.trim(), description: form.description.trim(), status: "planning",
         due_date: form.dueDate || null, start_date: form.startDate || null,
+        icon: form.icon,
         user_id: user.id,
       });
       await createDefaultStatuses(project.id);
@@ -83,6 +86,7 @@ export default function CreateProjectPage() {
           <Box sx={{ minHeight: { md: 430 }, p: { xs: 2.5, sm: 3.5, md: 4 } }}>
           {step === 0 && <Box sx={{ display: "grid", gap: 2.5, width: "100%" }}>
             <TextField label="Project name" required value={form.title} onChange={set("title")} placeholder="e.g. Resume flow" sx={inputSx} />
+            <Box><Typography fontWeight={650} fontSize={14} mb={1}>Project icon</Typography><Button onClick={() => setIsEmojiPickerOpen(true)} startIcon={<Box component="span" sx={{width:30,height:30,display:"grid",placeItems:"center",borderRadius:"9px",fontSize:18,lineHeight:1,bgcolor:alpha(theme.palette.primary.main,0.11),boxShadow:`inset 0 0 0 1px ${alpha(theme.palette.primary.main,0.12)}`}}>{form.icon}</Box>} sx={{height:50,px:1.25,pr:2,borderRadius:"12px",border:"1px solid",borderColor:"divider",bgcolor:"background.paper",boxShadow:"0 3px 10px rgba(15,23,42,.05)",color:"text.primary",textTransform:"none",justifyContent:"flex-start","&:hover":{borderColor:"primary.main",bgcolor:alpha(theme.palette.primary.main,0.04),boxShadow:`0 5px 14px ${alpha(theme.palette.primary.main,0.12)}`}}}>Choose emoji</Button></Box>
             <TextField label="Description" multiline minRows={3} value={form.description} onChange={set("description")} placeholder="What is this project about?" sx={inputSx} />
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
               <TextField label="Start date" type="date" value={form.startDate} onChange={set("startDate")} slotProps={{ inputLabel: { shrink: true } }} sx={inputSx} />
@@ -121,6 +125,11 @@ export default function CreateProjectPage() {
           </Box>
         </WorkspaceCard>
       </Box>
+      <Drawer anchor="bottom" open={isEmojiPickerOpen} onClose={() => setIsEmojiPickerOpen(false)} slotProps={{paper:{sx:{width:"calc(100% - 24px)",maxWidth:420,mx:"auto",mb:1.5,borderRadius:"18px",pb:"env(safe-area-inset-bottom)",bgcolor:"background.paper",boxShadow:"0 16px 40px rgba(15,23,42,.18)"}}}}>
+        <Box sx={{p:1.25}}>
+          <Box sx={{display:"grid",gridTemplateColumns:"repeat(8, minmax(0, 1fr))",gap:0.5}}>{PROJECT_EMOJIS.map(emoji => <IconButton key={emoji} onClick={() => { setForm(old => ({...old,icon:emoji})); setIsEmojiPickerOpen(false); }} aria-label={`Choose ${emoji}`} sx={{width:38,height:38,justifySelf:"center",borderRadius:"11px",fontSize:19,border:"1px solid",borderColor:form.icon===emoji?"primary.main":"transparent",bgcolor:form.icon===emoji?alpha(theme.palette.primary.main,0.13):"action.hover",boxShadow:form.icon===emoji?`0 4px 12px ${alpha(theme.palette.primary.main,0.2)}`:"none",transition:"transform 160ms ease, background-color 160ms ease, box-shadow 160ms ease","&:hover":{bgcolor:alpha(theme.palette.primary.main,0.1),transform:"translateY(-2px)",boxShadow:`0 4px 10px ${alpha(theme.palette.primary.main,0.12)}`}}}>{emoji}</IconButton>)}</Box>
+        </Box>
+      </Drawer>
     </Box>
   );
 }

@@ -66,6 +66,7 @@ export default function ProjectsPage() {
     status: ProjectStatus;
     due_date: string | null;
     start_date?: string | null;
+    icon: string;
   }) => {
     if (!editingProject) return;
     updateProject.mutate(
@@ -76,6 +77,7 @@ export default function ProjectsPage() {
         status: values.status,
         due_date: values.due_date,
         start_date: values.start_date,
+        icon: values.icon,
       },
       {
         onSuccess: () => setEditingProject(null),
@@ -285,6 +287,7 @@ export default function ProjectsPage() {
                 status: editingProject.status,
                 due_date: editingProject.dueDateRaw,
                 start_date: editingProject.startDate,
+                icon: editingProject.icon,
               }
             : undefined
         }

@@ -31,6 +31,7 @@ interface ProjectFormProps {
     status: ProjectStatus;
     due_date: string | null;
     start_date?: string | null;
+    icon?: string | null;
   };
   onSubmit: (values: {
     title: string;
@@ -38,6 +39,7 @@ interface ProjectFormProps {
     status: ProjectStatus;
     due_date: string | null;
     start_date?: string | null;
+    icon: string;
   }) => void;
   onCancel: () => void;
   isPending?: boolean;
@@ -50,6 +52,7 @@ interface ProjectFormProps {
 }
 
 const FALLBACK_OPTIONS = Object.keys(STATUS_LABELS) as ProjectStatus[];
+const PROJECT_EMOJIS = ["📁", "🚀", "✨", "💻", "📈", "🎨", "🧠", "🛠️", "💡", "📌", "✅", "🌱", "⚡", "🏆", "📝", "📊", "🎯", "📅", "🌍", "👥", "📷", "❤️", "🔒", "📦"];
 const Typography = MuiTypography as any;
 
 export default function ProjectForm({
@@ -80,6 +83,7 @@ export default function ProjectForm({
   const [status, setStatus] = useState<ProjectStatus>(initialValues?.status ?? defaultStatus);
   const [dueDate, setDueDate] = useState(initialValues?.due_date ? initialValues.due_date.slice(0, 10) : "");
   const [startDate, setStartDate] = useState(initialValues?.start_date ? initialValues.start_date.slice(0, 10) : "");
+  const [icon, setIcon] = useState(initialValues?.icon ?? "📁");
   const [milestones, setMilestones] = useState<NewMilestone[]>([]);
   const [isMilestonesSaving, setIsMilestonesSaving] = useState(false);
   const [milestoneError, setMilestoneError] = useState<string | null>(null);
@@ -91,7 +95,8 @@ export default function ProjectForm({
     setStatus(initialValues?.status ?? defaultStatus);
     setStartDate(initialValues?.start_date ? initialValues.start_date.slice(0, 10) : "");
     setDueDate(initialValues?.due_date ? initialValues.due_date.slice(0, 10) : "");
-  }, [open, initialValues?.title, initialValues?.description, initialValues?.status, initialValues?.start_date, initialValues?.due_date, defaultStatus]);
+    setIcon(initialValues?.icon ?? "📁");
+  }, [open, initialValues?.title, initialValues?.description, initialValues?.status, initialValues?.start_date, initialValues?.due_date, initialValues?.icon, defaultStatus]);
 
   useEffect(() => {
     if (!open || mode !== "edit" || !projectId || !userId) return;
@@ -116,6 +121,7 @@ export default function ProjectForm({
     setStatus(initialValues?.status ?? defaultStatus);
     setStartDate(initialValues?.start_date ? initialValues.start_date.slice(0, 10) : "");
     setDueDate(initialValues?.due_date ? initialValues.due_date.slice(0, 10) : "");
+    setIcon(initialValues?.icon ?? "📁");
   };
 
   const handleCancel = () => {
@@ -132,6 +138,7 @@ export default function ProjectForm({
       status,
       due_date: dueDate ? new Date(dueDate).toISOString() : null,
       start_date: startDate || null,
+      icon,
     });
   };
 
@@ -192,7 +199,32 @@ export default function ProjectForm({
                 },
               },
             }}
-          />
+           />
+          <Box sx={{ maxWidth: { sm: 260 } }}>
+            <TextField
+              select
+              label="Project icon"
+              value={icon}
+              onChange={(event) => setIcon(event.target.value)}
+              size="small"
+              sx={{
+                minWidth: 190,
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "12px", bgcolor: inputBg,
+                  "& fieldset": { borderColor: inputBorder },
+                  "&:hover fieldset": { borderColor: inputHoverBorder },
+                  "&.Mui-focused fieldset": { borderColor: inputHoverBorder, boxShadow: `0 0 0 3px ${inputFocusShadow}` },
+                },
+                "& .MuiSelect-select": { display: "flex", alignItems: "center", gap: 1, fontSize: 18 },
+              }}
+            >
+              {PROJECT_EMOJIS.map((emoji) => (
+                <MenuItem key={emoji} value={emoji} sx={{ minHeight: 40, fontSize: 19, "&.Mui-selected": { bgcolor: alpha(theme.palette.primary.main, 0.12), fontWeight: 700 }, "&.Mui-selected:hover": { bgcolor: alpha(theme.palette.primary.main, 0.16) } }}>
+                  {emoji}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Box>
           <Box sx={{ maxWidth: { sm: 260 } }}>
             <TextField
               select
@@ -245,20 +277,19 @@ export default function ProjectForm({
           <Box>
             <Box sx={{display:"flex",alignItems:"center",gap:1.25}}><Box sx={{width:32,height:32,borderRadius:"10px",display:"grid",placeItems:"center",bgcolor:alpha(theme.palette.warning.main,0.1),color:"warning.main"}}><FlagOutlinedIcon fontSize="small" /></Box><Box><Typography fontWeight={700} fontSize={17}>Milestones</Typography><Typography color="text.secondary" fontSize={12}>Delivery stages and target dates</Typography></Box></Box>
             {mode === "edit" && projectId && userId ? <Box sx={{mt:2,display:"grid",gap:1.5}}>
-              {milestones.map((milestone,index) => <Box key={index} sx={{display:"grid",gridTemplateColumns:{xs:"minmax(0,1fr) 40px",sm:"minmax(0,1fr) 145px 135px 40px"},gap:1,alignItems:"center"}}>
-                <TextField size="small" label={`Milestone ${index + 1}`} value={milestone.title} onChange={event => setMilestones(current => current.map((item,itemIndex) => itemIndex === index ? {...item,title:event.target.value} : item))} />
-                <TextField size="small" type="date" label="Due date" value={milestone.due_date ?? ""} onChange={event => setMilestones(current => current.map((item,itemIndex) => itemIndex === index ? {...item,due_date:event.target.value || null} : item))} slotProps={{inputLabel:{shrink:true}}} sx={{gridColumn:{xs:"1 / -1",sm:"auto"},gridRow:{xs:2,sm:"auto"}}} />
-                <TextField select size="small" label="Status" value={milestone.status} onChange={event => setMilestones(current => current.map((item,itemIndex) => itemIndex === index ? {...item,status:event.target.value as NewMilestone["status"]} : item))} sx={{gridColumn:{xs:"1 / -1",sm:"auto"},gridRow:{xs:3,sm:"auto"}}}><MenuItem value="upcoming">Upcoming</MenuItem><MenuItem value="in_progress">In progress</MenuItem><MenuItem value="completed">Completed</MenuItem></TextField>
-                <IconButton aria-label="Remove milestone" onClick={() => setMilestones(current => current.filter((_,itemIndex) => itemIndex !== index))} sx={{width:40,height:40,border:"1px solid",borderColor:"divider",borderRadius:"10px",gridColumn:{xs:2,sm:"auto"},gridRow:{xs:1,sm:"auto"}}}><DeleteOutlineRoundedIcon fontSize="small" /></IconButton>
+              {milestones.map((milestone,index) => <Box key={index} sx={{p:1.5,border:"1px solid",borderColor:"divider",borderRadius:"12px",bgcolor:"background.default"}}>
+                <Box sx={{display:"grid",gridTemplateColumns:"minmax(0,1fr) 40px",gap:1,alignItems:"center"}}>
+                  <TextField fullWidth size="small" label={`Milestone ${index + 1}`} value={milestone.title} onChange={event => setMilestones(current => current.map((item,itemIndex) => itemIndex === index ? {...item,title:event.target.value} : item))} />
+                  <IconButton aria-label="Remove milestone" onClick={() => setMilestones(current => current.filter((_,itemIndex) => itemIndex !== index))} sx={{width:40,height:40,border:"1px solid",borderColor:"divider",borderRadius:"10px"}}><DeleteOutlineRoundedIcon fontSize="small" /></IconButton>
+                </Box>
+                <Box sx={{display:"grid",gridTemplateColumns:{xs:"1fr",sm:"1fr 1fr"},gap:1.25,mt:1.25}}>
+                  <TextField fullWidth size="small" type="date" label="Due date" value={milestone.due_date ?? ""} onChange={event => setMilestones(current => current.map((item,itemIndex) => itemIndex === index ? {...item,due_date:event.target.value || null} : item))} slotProps={{inputLabel:{shrink:true}}} />
+                  <TextField fullWidth select size="small" label="Status" value={milestone.status} onChange={event => setMilestones(current => current.map((item,itemIndex) => itemIndex === index ? {...item,status:event.target.value as NewMilestone["status"]} : item))}><MenuItem value="upcoming">Upcoming</MenuItem><MenuItem value="in_progress">In progress</MenuItem><MenuItem value="completed">Completed</MenuItem></TextField>
+                </Box>
               </Box>)}
               <Box sx={{display:"flex",alignItems:"center",gap:1.5,pt:.5}}><Button size="small" startIcon={<AddRoundedIcon />} onClick={() => setMilestones(current => [...current,{title:"",due_date:null,status:"upcoming"}])}>Add milestone</Button><Button size="small" variant="outlined" onClick={() => void saveMilestones()} disabled={isMilestonesSaving}>{isMilestonesSaving ? "Saving..." : "Save milestones"}</Button></Box>
               {milestoneError && <Typography color="error" fontSize={13}>{milestoneError}</Typography>}
             </Box> : <Box sx={{mt:2,p:2.25,borderRadius:"14px",border:"1px solid",borderColor:"divider",bgcolor:"background.default"}}><Typography color="text.secondary" fontSize={13}>Save the project first to edit milestones.</Typography></Box>}
-          </Box>
-
-          <Divider />
-          <Box><Typography fontWeight={700} fontSize={17}>Review</Typography><Typography color="text.secondary" fontSize={13} mt={0.5} mb={2}>Confirm the project information before saving.</Typography>
-            {[["Project",title || "Untitled project"],["Owner",ownerName],["Status",STATUS_LABELS[status] || status],["Timeline",`${startDate || "Not set"} — ${dueDate || "Not set"}`]].map(([label,value])=><Box key={label} sx={{display:"flex",justifyContent:"space-between",gap:3,py:1.25,borderBottom:"1px solid",borderColor:"divider"}}><Typography color="text.secondary" fontSize={13}>{label}</Typography><Typography fontWeight={600} fontSize={13} textAlign="right">{value}</Typography></Box>)}
           </Box>
 
           {error && (
