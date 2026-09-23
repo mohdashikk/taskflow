@@ -13,6 +13,7 @@ import Typography from "@mui/material/Typography";
 import { alpha, useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import type { ProjectStatusRow } from "@/features/projects/data/mockData";
+import AppDatePicker from "@/components/inputs/AppDatePicker";
 
 interface TaskFormProps {
   open: boolean;
@@ -252,11 +253,9 @@ export default function TaskForm({
               <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", mb: 0.5 }}>
                 Start Date
               </Typography>
-              <TextField
-                type="date"
+              <AppDatePicker
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                size="small"
+                onChange={setStartDate}
                 sx={{
                   height: "35px",
                   flexGrow: 1,
@@ -283,11 +282,9 @@ export default function TaskForm({
               <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", mb: 0.5 }}>
                 Due Date
               </Typography>
-              <TextField
-                type="date"
+              <AppDatePicker
                 value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                size="small"
+                onChange={setDueDate}
                 sx={{
                   height: "35px",
                   flexGrow: 1,

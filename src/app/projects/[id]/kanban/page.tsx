@@ -1,5 +1,5 @@
 import ProjectTasksView from "@/features/tasks/components/ProjectTasksView";
 
-export default function ProjectTasksPage() {
+export default function ProjectKanbanPage() {
   return <ProjectTasksView view="board" />;
 }

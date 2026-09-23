@@ -24,6 +24,20 @@ body {
   display: none;
 }
 
+/* Task workspaces also scroll at the document level on smaller screens. */
+html:has([data-task-workspace]),
+body:has([data-task-workspace]),
+body:has([data-task-workspace]) * {
+  scrollbar-width: none !important;
+}
+html:has([data-task-workspace])::-webkit-scrollbar,
+body:has([data-task-workspace])::-webkit-scrollbar,
+body:has([data-task-workspace]) *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 .thin-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;

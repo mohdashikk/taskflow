@@ -14,6 +14,11 @@ import {
 } from "@mui/material";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
+import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
+import ViewListOutlinedIcon from "@mui/icons-material/ViewListOutlined";
+import ViewKanbanOutlinedIcon from "@mui/icons-material/ViewKanbanOutlined";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { StatusBadge } from "./StatusBadge";
 import ProjectForm from "./ProjectForm";
 import { useProject } from "../hooks/useProject";
@@ -21,12 +26,14 @@ import { useUpdateProject } from "../hooks/useProjects";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { normalizeStatus, type ProjectStatus, type ProjectRow } from "../data/mockData";
 import type { UpdateProjectInput } from "../services/projectsService";
+import { getProjectIconColor } from "./ProjectIconPicker";
 
 const TABS = [
-  { label: "Overview", path: "/overview" },
-  { label: "Plan", path: "/plan" },
-  { label: "Tasks", path: "/tasks" },
-  { label: "Docs", path: "/docs" },
+  { label: "Overview", path: "/overview", icon: <DashboardOutlinedIcon /> },
+  { label: "Plan", path: "/plan", icon: <AccountTreeOutlinedIcon /> },
+  { label: "List", path: "/list", icon: <ViewListOutlinedIcon /> },
+  { label: "Kanban", path: "/kanban", icon: <ViewKanbanOutlinedIcon /> },
+  { label: "Docs", path: "/docs", icon: <DescriptionOutlinedIcon /> },
 ] as const;
 
 export default function ProjectWorkspaceLayout({
@@ -54,7 +61,9 @@ export default function ProjectWorkspaceLayout({
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<ProjectRow | null>(null);
 
-  const tabValue = TABS.findIndex((tab) => pathname.includes(tab.path));
+  const tabValue = TABS.findIndex(
+    (tab) => pathname.endsWith(tab.path) || (tab.path === "/kanban" && pathname.endsWith("/tasks")),
+  );
   const currentTab = TABS[tabValue >= 0 ? tabValue : 0];
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
@@ -136,18 +145,40 @@ export default function ProjectWorkspaceLayout({
                 flexWrap: "wrap",
               }}
             >
-              <Typography
-                sx={{
-                  fontWeight: 600,
-                  fontSize: { xs: 24, sm: 28 },
-                  lineHeight: 1.2,
-                  letterSpacing: "normal",
-                  color: theme.palette.text.primary,
-                  flexGrow: 1,
-                }}
-              >
-                {project.title}
-              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, minWidth: 0, flexGrow: 1 }}>
+                <Box
+                  component="span"
+                  aria-hidden="true"
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    display: "grid",
+                    placeItems: "center",
+                    flexShrink: 0,
+                    borderRadius: "11px",
+                    bgcolor: getProjectIconColor(project.icon ?? "📁"),
+                    fontSize: 23,
+                    lineHeight: 1,
+                    boxShadow: "inset 0 0 0 1px rgba(0,0,0,.05), 0 3px 8px rgba(15,23,42,.10)",
+                  }}
+                >
+                  {project.icon ?? "📁"}
+                </Box>
+                <Typography
+                  sx={{
+                    fontWeight: 650,
+                    fontSize: { xs: 24, sm: 28 },
+                    lineHeight: 1.2,
+                    letterSpacing: "normal",
+                    color: theme.palette.text.primary,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {project.title}
+                </Typography>
+              </Box>
 
               <StatusBadge status={normalizeStatus(project.status)} />
 
@@ -170,20 +201,6 @@ export default function ProjectWorkspaceLayout({
                 Edit Project
               </Button>
             </Box>
-
-            {project.description && (
-              <Typography
-                sx={{
-                  color: theme.palette.text.secondary,
-                  fontSize: 14,
-                  lineHeight: 1.6,
-                  mt: 1,
-                  maxWidth: 720,
-                }}
-              >
-                {project.description}
-              </Typography>
-            )}
           </Box>
 
           <Box
@@ -201,11 +218,17 @@ export default function ProjectWorkspaceLayout({
                 <Tab
                   key={tab.path}
                   label={tab.label}
+                  icon={tab.icon}
+                  iconPosition="start"
                   sx={{
                     textTransform: "none",
                     fontWeight: 500,
                     fontSize: 14,
                     minHeight: 52,
+                    minWidth: "auto",
+                    px: { xs: 1.25, sm: 2 },
+                    gap: 0.75,
+                    "& .MuiSvgIcon-root": { fontSize: 19 },
                     "&.Mui-selected": {
                       fontWeight: 600,
                       color: theme.palette.primary.main,

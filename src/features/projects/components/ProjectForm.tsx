@@ -21,6 +21,8 @@ import { useTheme, alpha } from "@mui/material/styles";
 import { STATUS_LABELS, type ProjectStatus } from "../data/mockData";
 import type { ProjectStatusRow } from "../data/mockData";
 import { fetchMilestones, replaceMilestones, type NewMilestone } from "../services/milestonesService";
+import ProjectIconPicker from "./ProjectIconPicker";
+import AppDatePicker from "@/components/inputs/AppDatePicker";
 
 interface ProjectFormProps {
   open: boolean;
@@ -52,7 +54,6 @@ interface ProjectFormProps {
 }
 
 const FALLBACK_OPTIONS = Object.keys(STATUS_LABELS) as ProjectStatus[];
-const PROJECT_EMOJIS = ["📁", "🚀", "✨", "💻", "📈", "🎨", "🧠", "🛠️", "💡", "📌", "✅", "🌱", "⚡", "🏆", "📝", "📊", "🎯", "📅", "🌍", "👥", "📷", "❤️", "🔒", "📦"];
 const Typography = MuiTypography as any;
 
 export default function ProjectForm({
@@ -201,29 +202,8 @@ export default function ProjectForm({
             }}
            />
           <Box sx={{ maxWidth: { sm: 260 } }}>
-            <TextField
-              select
-              label="Project icon"
-              value={icon}
-              onChange={(event) => setIcon(event.target.value)}
-              size="small"
-              sx={{
-                minWidth: 190,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "12px", bgcolor: inputBg,
-                  "& fieldset": { borderColor: inputBorder },
-                  "&:hover fieldset": { borderColor: inputHoverBorder },
-                  "&.Mui-focused fieldset": { borderColor: inputHoverBorder, boxShadow: `0 0 0 3px ${inputFocusShadow}` },
-                },
-                "& .MuiSelect-select": { display: "flex", alignItems: "center", gap: 1, fontSize: 18 },
-              }}
-            >
-              {PROJECT_EMOJIS.map((emoji) => (
-                <MenuItem key={emoji} value={emoji} sx={{ minHeight: 40, fontSize: 19, "&.Mui-selected": { bgcolor: alpha(theme.palette.primary.main, 0.12), fontWeight: 700 }, "&.Mui-selected:hover": { bgcolor: alpha(theme.palette.primary.main, 0.16) } }}>
-                  {emoji}
-                </MenuItem>
-              ))}
-            </TextField>
+            <Typography fontWeight={650} fontSize={13} mb={0.75}>Project icon</Typography>
+            <ProjectIconPicker value={icon} onChange={setIcon} compact />
           </Box>
           <Box sx={{ maxWidth: { sm: 260 } }}>
             <TextField
@@ -259,8 +239,8 @@ export default function ProjectForm({
           </Box>
 
           <Box sx={{ display:"grid", gridTemplateColumns:{xs:"1fr",sm:"1fr 1fr"}, gap:2 }}>
-            <TextField label="Start date" type="date" value={startDate} onChange={(e)=>setStartDate(e.target.value)} slotProps={{inputLabel:{shrink:true}}} />
-            <TextField label="Deadline" type="date" value={dueDate} onChange={(e)=>setDueDate(e.target.value)} slotProps={{inputLabel:{shrink:true}}} />
+            <AppDatePicker label="Start date" value={startDate} onChange={setStartDate} fullWidth />
+            <AppDatePicker label="Deadline" value={dueDate} onChange={setDueDate} fullWidth />
           </Box>
 
           <Divider />
@@ -283,7 +263,7 @@ export default function ProjectForm({
                   <IconButton aria-label="Remove milestone" onClick={() => setMilestones(current => current.filter((_,itemIndex) => itemIndex !== index))} sx={{width:40,height:40,border:"1px solid",borderColor:"divider",borderRadius:"10px"}}><DeleteOutlineRoundedIcon fontSize="small" /></IconButton>
                 </Box>
                 <Box sx={{display:"grid",gridTemplateColumns:{xs:"1fr",sm:"1fr 1fr"},gap:1.25,mt:1.25}}>
-                  <TextField fullWidth size="small" type="date" label="Due date" value={milestone.due_date ?? ""} onChange={event => setMilestones(current => current.map((item,itemIndex) => itemIndex === index ? {...item,due_date:event.target.value || null} : item))} slotProps={{inputLabel:{shrink:true}}} />
+                  <AppDatePicker label="Due date" value={milestone.due_date ?? ""} onChange={due_date => setMilestones(current => current.map((item,itemIndex) => itemIndex === index ? {...item,due_date:due_date || null} : item))} fullWidth />
                   <TextField fullWidth select size="small" label="Status" value={milestone.status} onChange={event => setMilestones(current => current.map((item,itemIndex) => itemIndex === index ? {...item,status:event.target.value as NewMilestone["status"]} : item))}><MenuItem value="upcoming">Upcoming</MenuItem><MenuItem value="in_progress">In progress</MenuItem><MenuItem value="completed">Completed</MenuItem></TextField>
                 </Box>
               </Box>)}

@@ -13,7 +13,7 @@ import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion";     
 import toast from "react-hot-toast";
 import { useRegisterMutation } from "../hooks/useRegisterMutation";
 import { useAuthTheme, AUTH_ACCENT_HOVER } from "../hooks/useAuthTheme";

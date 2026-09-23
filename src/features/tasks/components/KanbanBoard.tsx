@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   DndContext,
@@ -40,22 +40,29 @@ import TaskListView from "./TaskListView";
 interface KanbanBoardProps {
   projectId: string;
   userId: string;
+  assignee: { name: string; avatarUrl?: string };
+  initialView?: "board" | "list";
+  showViewToggle?: boolean;
 }
 
-export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
+export default function KanbanBoard({ projectId, userId, assignee, initialView = "board", showViewToggle = true }: KanbanBoardProps) {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const { data: tasks = [], isLoading: tasksLoading } = useTasks(projectId, userId);
   const { data: statuses = [], isLoading: statusesLoading } = useProjectStatuses(projectId);
   const queryClient = useQueryClient();
 
-  const [viewMode, setViewMode] = useState<"board" | "list">("board");
+  const [viewMode, setViewMode] = useState<"board" | "list">(initialView);
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [dragOverStatusId, setDragOverStatusId] = useState<string | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number>(0);
   const [isPanning, setIsPanning] = useState(false);
   const panState = useRef({ startX: 0, scrollLeft: 0 });
   const boardScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setViewMode(initialView);
+  }, [initialView]);
 
   const createMutation = useMutation({
     mutationFn: (values: { title: string; status_id: string; priority: string; due_date: string | null }) =>
@@ -161,7 +168,12 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
   const columns = statuses.map((status) => {
     const columnTasks = tasks
       .filter((t) => t.status_id === status.id)
-      .sort((a, b) => a.position - b.position);
+      .sort((a, b) => {
+        const positionDifference = a.position - b.position;
+        return positionDifference !== 0
+          ? positionDifference
+          : a.created_at.localeCompare(b.created_at);
+      });
 
     return {
       statusId: status.id,
@@ -369,14 +381,14 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
 
   return (
     <Box
+      data-task-workspace="true"
       sx={{
         display: "flex",
         flexDirection: "column",
-        height: "100%",
-        minHeight: "calc(100vh - 200px)",
+        minWidth: 0,
       }}
     >
-      <Toolbar
+      {showViewToggle && <Toolbar
         sx={{
           gap: 1.5,
           pl: 0,
@@ -409,7 +421,7 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
             <ViewListOutlinedIcon sx={{ fontSize: 18 }} />
           </ToggleButton>
         </ToggleButtonGroup>
-      </Toolbar>
+      </Toolbar>}
 
       {viewMode === "board" ? (
         <DndContext
@@ -428,7 +440,7 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
         >
           <Box
             ref={boardScrollRef}
-            className="thin-scrollbar hide-scrollbar"
+            className="hide-scrollbar"
             onMouseDown={handleBoardMouseDown}
             onMouseMove={handleBoardMouseMove}
             onMouseUp={handleBoardMouseUp}
@@ -437,7 +449,9 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
               display: "flex",
               gap: 4,
               overflowX: "auto",
-              overflowY: "visible",
+              overflowY: "hidden",
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": { display: "none", width: 0, height: 0 },
               pb: 2,
               pt: 1,
               flex: 1,
@@ -503,6 +517,7 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
                     statusId={column.statusId}
                     statusName={column.statusName}
                     tasks={column.tasks}
+                    assignee={assignee}
                     onCreate={handleCreate}
                     createPending={createMutation.isPending}
                     onEditTask={handleEdit}
@@ -531,13 +546,13 @@ export default function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
                   maxWidth: 320,
                 }}
               >
-                <TaskCard task={activeTask} />
+                <TaskCard task={activeTask} assignee={assignee} />
               </Box>
             ) : null}
           </DragOverlay>
         </DndContext>
       ) : (
-        <Box sx={{ flex: 1, overflow: "auto", py: 2 }}>
+        <Box className="hide-scrollbar" sx={{ flex: 1, overflow: "auto", py: 2 }}>
             <TaskListView
               tasks={tasks}
               statuses={statuses}
