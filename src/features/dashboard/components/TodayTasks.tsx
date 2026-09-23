@@ -1,11 +1,8 @@
 "use client";
 
-import { type ReactNode } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -13,7 +10,6 @@ import { useTheme } from "@mui/material/styles";
 import { alpha } from "@mui/material/styles";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import FlagIcon from "@mui/icons-material/Flag";
 
 import WidgetCard from "./WidgetCard";
 
@@ -40,11 +36,7 @@ export default function TodayTasks({ items, delay = 0 }: TodayTasksProps) {
   const isDark = theme.palette.mode === "dark";
   const router = useRouter();
 
-  const todayTasks = items.filter(item => {
-    if (!item.dueDate) return false;
-    const today = new Date().toISOString().split("T")[0];
-    return item.dueDate === today || (!item.completed);
-  }).slice(0, 5);
+  const todayTasks = items.slice(0, 5);
 
   if (todayTasks.length === 0) {
     return (

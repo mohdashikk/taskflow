@@ -1,6 +1,5 @@
 "use client";
 
-import { type ReactNode } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { motion } from "framer-motion";
@@ -36,8 +35,6 @@ export default function ActivityFeed({ items = [], delay = 0 }: ActivityFeedProp
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
-  if (items.length === 0) return null;
-
   return (
     <motion.div
       variants={{
@@ -49,6 +46,13 @@ export default function ActivityFeed({ items = [], delay = 0 }: ActivityFeedProp
       transition={{ delay }}
     >
       <WidgetCard title="Activity Feed" delay={delay} icon={<CreateIcon sx={{ fontSize: 18 }} />}>
+        {items.length === 0 ? (
+          <Box sx={{ textAlign: "center", py: 4 }}>
+            <Typography sx={{ color: theme.palette.text.secondary, fontSize: 14 }}>
+              Your recent task and project activity will appear here.
+            </Typography>
+          </Box>
+        ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           {items.slice(0, 6).map((item) => {
             const config = iconConfig[item.type];
@@ -101,6 +105,7 @@ export default function ActivityFeed({ items = [], delay = 0 }: ActivityFeedProp
             );
           })}
         </Box>
+        )}
       </WidgetCard>
     </motion.div>
   );

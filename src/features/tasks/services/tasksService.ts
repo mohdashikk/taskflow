@@ -147,7 +147,7 @@ export const fetchTasksByProject = async (
     .eq("project_id", projectId)
     .eq("user_id", userId)
     .order("position", { ascending: true })
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: true });
 
   if (error) {
     const message =

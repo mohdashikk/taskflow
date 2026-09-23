@@ -8,7 +8,6 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { motion } from "framer-motion";
 import { useTheme } from "@mui/material/styles";
-import { alpha } from "@mui/material/styles";
 
 interface WelcomeBannerProps {
   userName: string;
@@ -37,27 +36,16 @@ export default function WelcomeBanner({ userName, subtitle, primaryAction, secon
         elevation={0}
         sx={{
           p: { xs: 3, md: 4 },
-          borderRadius: "24px",
+          borderRadius: "12px",
           border: `1px solid ${theme.palette.divider}`,
           bgcolor: theme.palette.background.paper,
           boxShadow: theme.palette.mode === "dark" ? "0 8px 24px rgba(0, 0, 0, 0.18)" : "0 1px 3px rgba(0, 0, 0, 0.04)",
-          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+          background: theme.palette.primary.main,
           color: "#FFFFFF",
           position: "relative",
           overflow: "hidden",
         }}
       >
-        <Box
-          sx={{
-            position: "absolute",
-            top: -30,
-            right: -30,
-            width: 180,
-            height: 180,
-            borderRadius: "50%",
-            bgcolor: alpha("#FFFFFF", 0.08),
-          }}
-        />
         <Box
           sx={{
             display: "flex",

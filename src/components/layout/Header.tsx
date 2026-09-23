@@ -25,8 +25,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 import ThemeSwitcher from "@/features/auth/components/ThemeSwitcher";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 interface HeaderProps {
   onMobileMenuToggle?: () => void;
@@ -38,6 +37,8 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
   const { user } = useAuth();
   const logout = useLogout();
   const router = useRouter();
+  const pathname = usePathname();
+  const pageTitle = pathname.startsWith("/projects") ? "Projects" : pathname === "/dashboard" ? "Dashboard" : pathname.split("/")[1]?.replace(/^./, c => c.toUpperCase()) || "TaskFlow";
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -75,21 +76,24 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] as const }}
       sx={{
-        height: { xs: 64, sm: 72 },
+        minHeight: { xs: 72, md: 88 },
+        flexShrink: 0,
         px: { xs: 1.5, sm: 2.5, md: 3.5, lg: 4 },
-        display: "flex",
+        display: "grid",
+        gridTemplateColumns: { xs: "minmax(0, 1fr) auto", md: "minmax(180px, 1fr) minmax(260px, 360px) auto" },
         alignItems: "center",
-        justifyContent: "space-between",
-        gap: { xs: 1, sm: 0 },
-        borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-        bgcolor: theme.palette.background.paper,
+        gap: { xs: 1, md: 3 },
+        borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,.10)"}`,
+        bgcolor: isDark ? "rgba(20,19,32,.82)" : "rgba(255,255,255,.82)",
+        backdropFilter: "saturate(180%) blur(20px)",
+        WebkitBackdropFilter: "saturate(180%) blur(20px)",
         position: "sticky",
         top: 0,
         zIndex: 10,
       }}
     >
       {/* Page Title */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, sm: 2 }, flex: 1, minWidth: 0 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, sm: 2 }, minWidth: 0 }}>
         {onMobileMenuToggle && (
           <IconButton
             onClick={onMobileMenuToggle}
@@ -113,57 +117,13 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
             <MenuOutlinedIcon fontSize="small" />
           </IconButton>
         )}
-        <Box
-          sx={{
-            flex: 1,
-            minWidth: 0,
-            display: { xs: "none", md: "block" },
-            maxWidth: 280,
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              height: 40,
-              px: 1.5,
-              borderRadius: 3,
-              bgcolor: isDark
-                ? theme.palette.grey[900]
-                : "#F2F4F7",
-              border: `1px solid ${isDark ? theme.palette.divider : "rgba(0,0,0,0.06)"}`,
-              transition: "all 180ms ease",
-              "&:hover": {
-                borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)",
-              },
-              "&:focus-within": {
-                borderColor: theme.palette.primary.main,
-                boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.08)}`,
-              },
-            }}
-          >
-            <SearchOutlinedIcon
-              sx={{
-                color: theme.palette.text.secondary,
-                fontSize: 18,
-                mr: 1,
-                flexShrink: 0,
-              }}
-            />
-            <input
-              placeholder="Search..."
-              aria-label="Search"
-              style={{
-                background: "transparent",
-                border: "none",
-                outline: "none",
-                width: "100%",
-                color: theme.palette.text.primary,
-                fontSize: 14,
-                fontFamily: "inherit",
-              }}
-            />
-          </Box>
+        <Typography component="h1" sx={{ fontSize: { xs: 20, md: 28, xl: 32 }, fontWeight: 750, letterSpacing: "-.025em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pageTitle}</Typography>
+      </Box>
+
+      <Box sx={{ display: { xs: "none", md: "block" }, minWidth: 0 }}>
+        <Box sx={{ display: "flex", alignItems: "center", height: 48, px: 1.5, borderRadius: 2, bgcolor: isDark ? theme.palette.grey[900] : "#F2F4F7", border: `1px solid ${isDark ? theme.palette.divider : "rgba(0,0,0,0.06)"}`, transition: "all 180ms ease", "&:hover": { borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)" }, "&:focus-within": { borderColor: theme.palette.primary.main, boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.08)}` } }}>
+          <SearchOutlinedIcon sx={{ color: theme.palette.text.secondary, fontSize: 18, mr: 1, flexShrink: 0 }} />
+          <input placeholder="Search projects and tasks" aria-label="Search" style={{ background: "transparent", border: "none", outline: "none", width: "100%", color: theme.palette.text.primary, fontSize: 13, fontFamily: "inherit" }} />
         </Box>
       </Box>
 
@@ -182,8 +142,8 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
           <Box sx={{ position: "relative", display: "inline-flex" }}>
             <IconButton
               sx={{
-                width: { xs: 36, sm: 40 },
-                height: { xs: 36, sm: 40 },
+                width: { xs: 36, sm: 48, xl: 58 },
+                height: { xs: 36, sm: 48, xl: 58 },
                 borderRadius: 2,
                 bgcolor: isDark ? theme.palette.grey[900] : "#F2F4F7",
                 border: `1px solid ${isDark ? theme.palette.divider : "rgba(0,0,0,0.06)"}`,
@@ -196,15 +156,15 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
                 },
               }}
             >
-              <NotificationsOutlinedIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
+              <NotificationsOutlinedIcon sx={{ fontSize: { xs: 18, sm: 21, xl: 24 } }} />
             </IconButton>
             <Box
               sx={{
                 position: "absolute",
-                top: { xs: 7, sm: 9 },
-                right: { xs: 7, sm: 9 },
-                width: { xs: 7, sm: 8 },
-                height: { xs: 7, sm: 8 },
+                top: { xs: 7, sm: 10, xl: 13 },
+                right: { xs: 7, sm: 10, xl: 13 },
+                width: { xs: 7, sm: 8, xl: 9 },
+                height: { xs: 7, sm: 8, xl: 9 },
                 borderRadius: "50%",
                 bgcolor: theme.palette.success.main,
                 border: `1.5px solid ${isDark ? "rgba(255,255,255,0.08)" : theme.palette.background.paper}`,
@@ -238,8 +198,9 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
               color: theme.palette.mode === "dark"
                 ? theme.palette.primary.contrastText
                 : theme.palette.primary.main,
-              width: { xs: 32, sm: 36 },
-              height: { xs: 32, sm: 36 },
+              width: { xs: 32, sm: 48, xl: 58 },
+              height: { xs: 32, sm: 48, xl: 58 },
+              borderRadius: "50%",
               fontSize: { xs: 12, sm: 14 },
               fontWeight: 700,
               border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
@@ -252,7 +213,8 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
               sx={{
                 fontWeight: 600,
                 color: theme.palette.text.primary,
-                fontSize: 13,
+              fontSize: { sm: 15, xl: 17 },
+              lineHeight: 1.25,
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
@@ -263,7 +225,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
             <Typography
               sx={{
                 color: theme.palette.text.secondary,
-                fontSize: 11,
+                fontSize: { sm: 11, xl: 12 },
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",

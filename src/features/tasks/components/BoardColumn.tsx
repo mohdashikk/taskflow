@@ -13,21 +13,24 @@ import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
+import Avatar from "@mui/material/Avatar";
+import Tooltip from "@mui/material/Tooltip";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
-import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
-import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme, alpha } from "@mui/material/styles";
 import type { TaskRow } from "../services/tasksService";
+import PriorityBars, { getPriorityOption, PRIORITY_OPTIONS } from "./PriorityBars";
 import TaskCard from "./TaskCard";
+import AppDatePicker from "@/components/inputs/AppDatePicker";
 
 interface BoardColumnProps {
   statusId: string;
   statusName: string;
   tasks: TaskRow[];
+  assignee: { name: string; avatarUrl?: string };
   onCreate: (values: { title: string; status_id: string; priority: string; due_date: string | null }) => void;
   createPending?: boolean;
   onEditTask?: (task: TaskRow) => void;
@@ -40,18 +43,13 @@ interface BoardColumnProps {
   dragOverIndex?: number;
 }
 
-const PRIORITY_OPTIONS = [
-  { value: "high", label: "High", color: "#EF4444" },
-  { value: "medium", label: "Medium", color: "#F59E0B" },
-  { value: "low", label: "Low", color: "#64748B" },
-] as const;
-
 const COLUMN_GAP = 2;
 
 export default function BoardColumn({
   statusId,
   statusName,
   tasks,
+  assignee,
   onCreate,
   createPending,
   onEditTask,
@@ -75,7 +73,7 @@ export default function BoardColumn({
   const { setNodeRef: setDroppableRef, isOver } = useDroppable({ id: statusId });
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const currentPriority = PRIORITY_OPTIONS.find((p) => p.value === priority) ?? PRIORITY_OPTIONS[1];
+  const currentPriority = getPriorityOption(priority);
 
   useEffect(() => {
     if (isQuickAdding && inputRef.current) {
@@ -141,7 +139,6 @@ export default function BoardColumn({
         flex: "0 0 auto",
         display: "flex",
         flexDirection: "column",
-        maxHeight: "calc(100vh - 200px)",
         minWidth: { xs: 300, sm: 320 },
         borderRadius: "14px",
         transition: "box-shadow 150ms ease, background-color 150ms ease, border-color 150ms ease",
@@ -252,13 +249,14 @@ export default function BoardColumn({
         </Menu>
       </Box>
 
-      {/* Tasks - scrollable area */}
+      {/* Columns grow with their cards; the page handles vertical scrolling. */}
       <Box
-        className="thin-scrollbar hide-scrollbar"
+        className="hide-scrollbar"
         sx={{
           flex: 1,
-          overflowY: "auto",
-          overflowX: "hidden",
+          overflow: "visible",
+          scrollbarWidth: "none",
+          "&::-webkit-scrollbar": { display: "none", width: 0, height: 0 },
           display: "flex",
           flexDirection: "column",
           gap: `${COLUMN_GAP * 4}px`,
@@ -360,18 +358,7 @@ export default function BoardColumn({
                         "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)" },
                       }}
                     >
-                      <FlagOutlinedIcon sx={{ fontSize: 15, color: currentPriority.color }} />
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          bottom: -2,
-                          right: -2,
-                          width: 7,
-                          height: 7,
-                          borderRadius: "50%",
-                          bgcolor: currentPriority.color,
-                        }}
-                      />
+                      <PriorityBars priority={priority} color={currentPriority.color} size={15} />
                     </Box>
 
                     <Menu
@@ -398,14 +385,7 @@ export default function BoardColumn({
                           onClick={() => handlePrioritySelect(option.value)}
                           sx={{ gap: 1.5, py: 1, px: 2, borderRadius: 1, mx: 0.5, color: "text.primary" }}
                         >
-                          <Box
-                            sx={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: "50%",
-                              bgcolor: option.color,
-                            }}
-                          />
+                            <PriorityBars priority={option.value} color={option.color} size={16} />
                           <Typography sx={{ fontSize: 13, fontWeight: 600, textTransform: "capitalize" }}>
                             {option.label}
                           </Typography>
@@ -430,21 +410,24 @@ export default function BoardColumn({
                         "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
                       }}
                     >
-                      <CalendarTodayOutlinedIcon sx={{ fontSize: 15 }} />
-                      <input
-                        type="date"
+                      <AppDatePicker
                         value={dueDate}
-                        onChange={(e) => setDueDate(e.target.value)}
-                        style={{
-                          position: "absolute",
-                          inset: 0,
-                          opacity: 0,
-                          cursor: "pointer",
-                          width: "100%",
-                          height: "100%",
-                        }}
+                        onChange={setDueDate}
+                        label="Due date"
+                        compact
+                        compactSize={32}
                       />
                     </Box>
+
+                    <Tooltip title={`Assigned to ${assignee.name} by default`} arrow>
+                      <Avatar
+                        src={assignee.avatarUrl}
+                        alt={assignee.name}
+                        sx={{ width: 28, height: 28, bgcolor: alpha(theme.palette.primary.main, 0.14), color: "primary.main", fontSize: 11, fontWeight: 700 }}
+                      >
+                        {assignee.name.charAt(0).toUpperCase()}
+                      </Avatar>
+                    </Tooltip>
 
                     <Box sx={{ flex: 1 }} />
 
@@ -540,6 +523,7 @@ export default function BoardColumn({
                       >
                         <TaskCard
                           task={task}
+                          assignee={assignee}
                           onEdit={onEditTask}
                           onDelete={onDeleteTask}
                           onUpdate={onUpdateTask}
@@ -639,18 +623,7 @@ export default function BoardColumn({
                             "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)" },
                           }}
                         >
-                          <FlagOutlinedIcon sx={{ fontSize: 15, color: currentPriority.color }} />
-                          <Box
-                            sx={{
-                              position: "absolute",
-                              bottom: -2,
-                              right: -2,
-                              width: 7,
-                              height: 7,
-                              borderRadius: "50%",
-                              bgcolor: currentPriority.color,
-                            }}
-                          />
+                          <PriorityBars priority={priority} color={currentPriority.color} size={15} />
                         </Box>
 
                         <Menu
@@ -677,14 +650,7 @@ export default function BoardColumn({
                               onClick={() => handlePrioritySelect(option.value)}
                               sx={{ gap: 1.5, py: 1, px: 2, borderRadius: 1, mx: 0.5, color: "text.primary" }}
                             >
-                              <Box
-                                sx={{
-                                  width: 8,
-                                  height: 8,
-                                  borderRadius: "50%",
-                                  bgcolor: option.color,
-                                }}
-                              />
+                                <PriorityBars priority={option.value} color={option.color} size={16} />
                               <Typography sx={{ fontSize: 13, fontWeight: 600, textTransform: "capitalize" }}>
                                 {option.label}
                               </Typography>
@@ -709,21 +675,24 @@ export default function BoardColumn({
                             "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
                           }}
                         >
-                          <CalendarTodayOutlinedIcon sx={{ fontSize: 15 }} />
-                          <input
-                            type="date"
+                          <AppDatePicker
                             value={dueDate}
-                            onChange={(e) => setDueDate(e.target.value)}
-                            style={{
-                              position: "absolute",
-                              inset: 0,
-                              opacity: 0,
-                              cursor: "pointer",
-                              width: "100%",
-                              height: "100%",
-                            }}
+                            onChange={setDueDate}
+                            label="Due date"
+                            compact
+                            compactSize={32}
                           />
                         </Box>
+
+                        <Tooltip title={`Assigned to ${assignee.name} by default`} arrow>
+                          <Avatar
+                            src={assignee.avatarUrl}
+                            alt={assignee.name}
+                            sx={{ width: 28, height: 28, bgcolor: alpha(theme.palette.primary.main, 0.14), color: "primary.main", fontSize: 11, fontWeight: 700 }}
+                          >
+                            {assignee.name.charAt(0).toUpperCase()}
+                          </Avatar>
+                        </Tooltip>
 
                         <Box sx={{ flex: 1 }} />
 

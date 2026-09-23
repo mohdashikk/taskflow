@@ -162,44 +162,56 @@ export default function SettingsPage() {
               noValidate
               sx={{ display: "flex", flexDirection: "column", gap: 3 }}
             >
-              <TextField
-                fullWidth
-                label="Display Name"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "14px",
-                    bgcolor: theme.inputBg,
-                    "& fieldset": { borderColor: theme.inputBorder },
-                    "&:hover fieldset": { borderColor: theme.accent },
-                    "&.Mui-focused fieldset": {
-                      borderColor: theme.accent,
-                      boxShadow: theme.accentAlpha(0.1),
+              <Box>
+                <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", mb: 0.5 }}>
+                  Display Name
+                </Typography>
+                <TextField
+                  fullWidth
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  sx={{
+                    height: "35px",
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "3px",
+                      fontSize: "13px",
+                      bgcolor: theme.inputBg,
+                      "& fieldset": { borderColor: theme.inputBorder },
+                      "&:hover fieldset": { borderColor: theme.accent },
+                      "&.Mui-focused fieldset": {
+                        borderColor: theme.accent,
+                        boxShadow: theme.accentAlpha(0.1),
+                      },
                     },
-                  },
-                }}
-              />
+                  }}
+                />
+              </Box>
 
-              <TextField
-                fullWidth
-                label="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "14px",
-                    bgcolor: theme.inputBg,
-                    "& fieldset": { borderColor: theme.inputBorder },
-                    "&:hover fieldset": { borderColor: theme.accent },
-                    "&.Mui-focused fieldset": {
-                      borderColor: theme.accent,
-                      boxShadow: theme.accentAlpha(0.1),
+              <Box>
+                <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", mb: 0.5 }}>
+                  Email
+                </Typography>
+                <TextField
+                  fullWidth
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  sx={{
+                    height: "35px",
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "3px",
+                      fontSize: "13px",
+                      bgcolor: theme.inputBg,
+                      "& fieldset": { borderColor: theme.inputBorder },
+                      "&:hover fieldset": { borderColor: theme.accent },
+                      "&.Mui-focused fieldset": {
+                        borderColor: theme.accent,
+                        boxShadow: theme.accentAlpha(0.1),
+                      },
                     },
-                  },
-                }}
-              />
+                  }}
+                />
+              </Box>
 
               <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
                 <Button
@@ -208,8 +220,8 @@ export default function SettingsPage() {
                   variant="contained"
                   disabled={isSubmitting}
                   sx={{
-                    height: 52,
-                    borderRadius: "14px",
+                    height: 48,
+                    borderRadius: "10px",
                     bgcolor: theme.accent,
                     boxShadow: theme.accentAlpha(0.25),
                     fontSize: 16,
@@ -254,65 +266,83 @@ export default function SettingsPage() {
               noValidate
               sx={{ display: "flex", flexDirection: "column", gap: 3 }}
             >
-              <TextField
-                fullWidth
-                label="Current Password"
-                type={showPasswords ? "text" : "password"}
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "14px",
-                    bgcolor: theme.inputBg,
-                    "& fieldset": { borderColor: theme.inputBorder },
-                    "&:hover fieldset": { borderColor: theme.accent },
-                    "&.Mui-focused fieldset": {
-                      borderColor: theme.accent,
-                      boxShadow: theme.accentAlpha(0.1),
+              <Box>
+                <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", mb: 0.5 }}>
+                  Current Password
+                </Typography>
+                <TextField
+                  fullWidth
+                  type={showPasswords ? "text" : "password"}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  sx={{
+                    height: "35px",
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "3px",
+                      fontSize: "13px",
+                      bgcolor: theme.inputBg,
+                      "& fieldset": { borderColor: theme.inputBorder },
+                      "&:hover fieldset": { borderColor: theme.accent },
+                      "&.Mui-focused fieldset": {
+                        borderColor: theme.accent,
+                        boxShadow: theme.accentAlpha(0.1),
+                      },
                     },
-                  },
-                }}
-              />
+                  }}
+                />
+              </Box>
 
-              <TextField
-                fullWidth
-                label="New Password"
-                type={showPasswords ? "text" : "password"}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "14px",
-                    bgcolor: theme.inputBg,
-                    "& fieldset": { borderColor: theme.inputBorder },
-                    "&:hover fieldset": { borderColor: theme.accent },
-                    "&.Mui-focused fieldset": {
-                      borderColor: theme.accent,
-                      boxShadow: theme.accentAlpha(0.1),
+              <Box>
+                <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", mb: 0.5 }}>
+                  New Password
+                </Typography>
+                <TextField
+                  fullWidth
+                  type={showPasswords ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  sx={{
+                    height: "35px",
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "3px",
+                      fontSize: "13px",
+                      bgcolor: theme.inputBg,
+                      "& fieldset": { borderColor: theme.inputBorder },
+                      "&:hover fieldset": { borderColor: theme.accent },
+                      "&.Mui-focused fieldset": {
+                        borderColor: theme.accent,
+                        boxShadow: theme.accentAlpha(0.1),
+                      },
                     },
-                  },
-                }}
-              />
+                  }}
+                />
+              </Box>
 
-              <TextField
-                fullWidth
-                label="Confirm New Password"
-                type={showPasswords ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "14px",
-                    bgcolor: theme.inputBg,
-                    "& fieldset": { borderColor: theme.inputBorder },
-                    "&:hover fieldset": { borderColor: theme.accent },
-                    "&.Mui-focused fieldset": {
-                      borderColor: theme.accent,
-                      boxShadow: theme.accentAlpha(0.1),
+              <Box>
+                <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", mb: 0.5 }}>
+                  Confirm New Password
+                </Typography>
+                <TextField
+                  fullWidth
+                  type={showPasswords ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  sx={{
+                    height: "35px",
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "3px",
+                      fontSize: "13px",
+                      bgcolor: theme.inputBg,
+                      "& fieldset": { borderColor: theme.inputBorder },
+                      "&:hover fieldset": { borderColor: theme.accent },
+                      "&.Mui-focused fieldset": {
+                        borderColor: theme.accent,
+                        boxShadow: theme.accentAlpha(0.1),
+                      },
                     },
-                  },
-                }}
-              />
+                  }}
+                />
+              </Box>
 
               <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
                 <Button
@@ -321,8 +351,8 @@ export default function SettingsPage() {
                   variant="contained"
                   disabled={isSubmitting}
                   sx={{
-                    height: 52,
-                    borderRadius: "14px",
+                    height: 48,
+                    borderRadius: "10px",
                     bgcolor: theme.accent,
                     boxShadow: theme.accentAlpha(0.25),
                     fontSize: 16,

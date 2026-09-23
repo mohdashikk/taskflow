@@ -14,12 +14,15 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import Avatar from "@mui/material/Avatar";
+import Tooltip from "@mui/material/Tooltip";
 import { alpha, useTheme } from "@mui/material/styles";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
-import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import { motion, AnimatePresence } from "framer-motion";
 import type { TaskRow } from "../services/tasksService";
+import PriorityBars, { getPriorityOption, PRIORITY_OPTIONS } from "./PriorityBars";
+import AppDatePicker from "@/components/inputs/AppDatePicker";
 
 interface TaskCardProps {
   task: TaskRow;
@@ -29,18 +32,6 @@ interface TaskCardProps {
   tags?: Array<{ label: string; color?: string }>;
   assignee?: { name: string; avatarUrl?: string } | null;
 }
-
-const PRIORITY_OPTIONS = [
-  { value: "high", label: "High", color: "#EF4444" },
-  { value: "medium", label: "Medium", color: "#F59E0B" },
-  { value: "low", label: "Low", color: "#64748B" },
-] as const;
-
-const PRIORITY_COLORS: Record<string, string> = {
-  high: "#EF4444",
-  medium: "#F59E0B",
-  low: "#64748B",
-};
 
 export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, tags: _tags, assignee }: TaskCardProps) {
   const theme = useTheme();
@@ -58,7 +49,6 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
     transition,
   };
 
-  const priorityColor = PRIORITY_COLORS[task.priority] ?? "#64748B";
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -67,7 +57,8 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
   const [editDueDate, setEditDueDate] = useState(task.due_date || "");
   const [priorityAnchor, setPriorityAnchor] = useState<null | HTMLElement>(null);
 
-  const currentPriority = PRIORITY_OPTIONS.find((p) => p.value === editPriority) ?? PRIORITY_OPTIONS[1];
+  const currentPriority = getPriorityOption(editPriority);
+  const displayedPriority = getPriorityOption(task.priority);
 
   const startEditing = () => {
     setEditTitle(task.title);
@@ -110,7 +101,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
 
   const cardBg = isDark ? "#12101e" : "#FFFFFF";
   const cardBorder = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
-  const cardShadow = isDark ? "0 8px 24px rgba(0,0,0,.18)" : "0 8px 24px rgba(0,0,0,0.04)";
+  const cardShadow = isDark ? "0 2px 8px rgba(0,0,0,.18)" : "0 2px 6px rgba(15,23,42,.04)";
   const hoverBorder = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)";
   const cardHoverShadow = isDark ? "0 8px 24px rgba(0,0,0,.18)" : "0 8px 24px rgba(0,0,0,0.08)";
 
@@ -136,6 +127,16 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
           border: `1px solid ${cardBorder}`,
           boxShadow: cardShadow,
           position: "relative",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 16,
+            left: 0,
+            width: 3,
+            height: 24,
+            borderRadius: "0 3px 3px 0",
+            bgcolor: displayedPriority.color,
+          },
           cursor: "grab",
           transition: "box-shadow 200ms ease-in-out, border-color 200ms ease-in-out, transform 200ms ease-in-out",
           "&:active": {
@@ -144,11 +145,10 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
           "&:hover": {
             boxShadow: cardHoverShadow,
             borderColor: hoverBorder,
-            transform: "translateY(-2px)",
           },
         }}
       >
-        <Box sx={{ p: 1.5, position: "relative" }}>
+        <Box sx={{ p: 2, position: "relative" }}>
           <Box
             sx={{
               position: "absolute",
@@ -324,18 +324,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                       "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
                     }}
                   >
-                    <FlagOutlinedIcon sx={{ fontSize: 18, color: currentPriority.color }} />
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        bottom: -2,
-                        right: -2,
-                        width: 9,
-                        height: 9,
-                        borderRadius: "50%",
-                        bgcolor: currentPriority.color,
-                      }}
-                    />
+                    <PriorityBars priority={editPriority} color={currentPriority.color} size={18} />
                   </Box>
 
                   <Menu
@@ -362,14 +351,7 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                         onClick={() => handlePrioritySelect(option.value)}
                         sx={{ gap: 1.5, py: 1, px: 2, borderRadius: 1, mx: 0.5 }}
                       >
-                        <Box
-                          sx={{
-                            width: 9,
-                            height: 9,
-                            borderRadius: "50%",
-                            bgcolor: option.color,
-                          }}
-                        />
+                        <PriorityBars priority={option.value} color={option.color} size={18} />
                         <Typography sx={{ fontSize: 14, fontWeight: 600, textTransform: "capitalize" }}>
                           {option.label}
                         </Typography>
@@ -379,7 +361,6 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
 
                   <Box
                     sx={{
-                      position: "relative",
                       width: 40,
                       height: 40,
                       borderRadius: "10px",
@@ -394,19 +375,12 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                       "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
                     }}
                   >
-                    <CalendarTodayOutlinedIcon sx={{ fontSize: 18 }} />
-                    <input
-                      type="date"
+                    <AppDatePicker
                       value={editDueDate}
-                      onChange={(e) => setEditDueDate(e.target.value)}
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        opacity: 0,
-                        cursor: "pointer",
-                        width: "100%",
-                        height: "100%",
-                      }}
+                      onChange={setEditDueDate}
+                      label="Due date"
+                      compact
+                      compactSize={40}
                     />
                   </Box>
 
@@ -456,55 +430,65 @@ export default function TaskCard({ task, onEdit: _onEdit, onDelete, onUpdate, ta
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
               >
-                <Box sx={{ pr: 5 }}>
+                <Box sx={{ minWidth: 0 }}>
                   <Typography
                     sx={{
                       fontWeight: 600,
-                      fontSize: 16,
+                      fontSize: 14,
+                      pr: 4,
                       lineHeight: 1.5,
                       color: "text.primary",
                       overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflowWrap: "anywhere",
+                      minHeight: 42,
                     }}
                   >
                     {task.title}
                   </Typography>
 
-                  <Box sx={{ mt: 1.5 }}>
-                    <Typography
-                      sx={{
-                        fontSize: 13,
-                        color: "text.secondary",
-                        fontWeight: 500,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {assignee?.name || "Unassigned"}
-                    </Typography>
-                  </Box>
-
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 3, mt: 2 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                      <CalendarTodayOutlinedIcon sx={{ fontSize: 14, color: theme.palette.text.secondary }} />
-                      <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.secondary", lineHeight: 1.4 }}>
+                  <Box sx={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto auto", alignItems: "center", columnGap: 1, mt: 1.5, pt: 1.25, borderTop: "1px solid", borderColor: "divider", minHeight: 28 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, minWidth: 0 }}>
+                      <CalendarTodayOutlinedIcon sx={{ fontSize: 14, flexShrink: 0, color: theme.palette.text.secondary }} />
+                      <Typography sx={{ fontSize: 12, fontWeight: 500, color: "text.secondary", lineHeight: 1.4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {task.due_date
                           ? new Date(task.due_date + "T00:00:00").toLocaleDateString("en-US", {
                               month: "short",
                               day: "numeric",
                               year: "numeric",
                             })
-                          : ""}
+                          : "No date"}
                       </Typography>
                     </Box>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                      <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: priorityColor }} />
-                      <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.secondary", lineHeight: 1.4, textTransform: "capitalize" }}>
-                        {currentPriority.label}
+                    <Box aria-label={`${displayedPriority.label} priority`} sx={{ display: "flex", alignItems: "center", gap: 0.625, whiteSpace: "nowrap", px: 0.75, py: 0.375, borderRadius: "6px", bgcolor: alpha(displayedPriority.color, 0.08) }}>
+                      <PriorityBars priority={task.priority} color={displayedPriority.color} size={14} />
+                      <Typography sx={{ fontSize: 12, fontWeight: 500, color: "text.secondary", lineHeight: 1.4, textTransform: "capitalize" }}>
+                        {displayedPriority.label}
                       </Typography>
                     </Box>
+                    {assignee && (
+                      <Tooltip title={`Assigned to ${assignee.name}`} arrow>
+                        <Avatar
+                          src={assignee.avatarUrl}
+                          alt={assignee.name}
+                          sx={{
+                            width: 26,
+                            height: 26,
+                            flexShrink: 0,
+                            bgcolor: alpha(theme.palette.primary.main, 0.14),
+                            color: "primary.main",
+                            fontSize: 11,
+                            fontWeight: 700,
+                            border: "2px solid",
+                            borderColor: "background.paper",
+                          }}
+                        >
+                          {assignee.name.charAt(0).toUpperCase()}
+                        </Avatar>
+                      </Tooltip>
+                    )}
                   </Box>
                 </Box>
               </motion.div>

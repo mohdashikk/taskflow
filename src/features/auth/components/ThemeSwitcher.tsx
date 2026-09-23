@@ -22,9 +22,9 @@ export default function ThemeSwitcher() {
       <IconButton
         onClick={() => dispatch(toggleTheme())}
         sx={{
-          width: 40,
-          height: 40,
-          borderRadius: 3,
+          width: { xs: 36, sm: 48, xl: 58 },
+          height: { xs: 36, sm: 48, xl: 58 },
+          borderRadius: 2,
           color: theme.palette.text.primary,
           bgcolor: theme.palette.mode === "dark"
             ? alpha("#FFFFFF", 0.04)
@@ -39,9 +39,9 @@ export default function ThemeSwitcher() {
         }}
       >
         {mode === "light" ? (
-          <DarkModeOutlinedIcon fontSize="small" />
+          <DarkModeOutlinedIcon sx={{ fontSize: { xs: 18, sm: 21, xl: 24 } }} />
         ) : (
-          <LightModeOutlinedIcon fontSize="small" />
+          <LightModeOutlinedIcon sx={{ fontSize: { xs: 18, sm: 21, xl: 24 } }} />
         )}
       </IconButton>
     </Tooltip>
