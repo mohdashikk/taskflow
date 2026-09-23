@@ -5,6 +5,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useTheme } from "@mui/material/styles";
+import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useLogout } from "@/features/auth/hooks/useLogout";
@@ -15,16 +16,23 @@ import RecentProjects from "@/features/dashboard/components/RecentProjects";
 import UpcomingDeadlines from "@/features/dashboard/components/UpcomingDeadlines";
 import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData";
 import StatCard from "@/features/dashboard/components/QuickStats";
+import GoalsProgress from "@/features/dashboard/components/GoalsProgress";
+import ActivityFeed from "@/features/dashboard/components/ActivityFeed";
 
 export default function DashboardPage() {
   const theme = useTheme();
+  const router = useRouter();
   const { user, isLoading, isAuthenticated } = useAuth();
   const logout = useLogout();
   const {
     stats,
+    projects,
     continueWorking,
+    todayTasks,
     upcomingDeadlines,
     recentProjects,
+    goals,
+    activity,
   } = useDashboardData();
 
   if (isLoading) {
@@ -66,6 +74,7 @@ export default function DashboardPage() {
 
   const taskCount = stats.openTasks + stats.completedTasks;
   const todayCount = stats.dueToday;
+  const taskProject = projects.find(project => project.status === "active") ?? projects.find(project => project.status === "planning");
 
   return (
     <Box
@@ -85,6 +94,7 @@ export default function DashboardPage() {
           primaryAction={
             <Button
               variant="contained"
+              onClick={() => router.push(taskProject ? `/projects/${taskProject.id}/tasks` : "/projects/new")}
               sx={{
                 bgcolor: "rgba(255, 255, 255, 0.2)",
                 color: "#FFFFFF",
@@ -201,9 +211,7 @@ export default function DashboardPage() {
           display: "grid",
           gridTemplateColumns: {
             xs: "1fr",
-            sm: "repeat(2, 1fr)",
-            lg: "repeat(3, 1fr)",
-            xl: "repeat(4, 1fr)",
+            md: "repeat(2, minmax(0, 1fr))",
           },
           gap: 3,
           width: "100%",
@@ -211,21 +219,30 @@ export default function DashboardPage() {
         }}
       >
         <AnimatePresence>
-          <Box key="continue-working" sx={{ gridColumn: { xs: "1", sm: "span 2", lg: "span 3", xl: "span 3" } }}>
+          <Box key="continue-working" sx={{ minWidth: 0 }}>
             <ContinueWorking items={continueWorking} delay={0.1} />
           </Box>
 
-          <Box key="today-tasks" sx={{ gridColumn: { xs: "1", sm: "span 2", lg: "span 1", xl: "span 1" } }}>
-            <TodayTasks items={continueWorking.map(i => ({ ...i, completed: false }))} delay={0.2} />
+          <Box key="today-tasks" sx={{ minWidth: 0 }}>
+            <TodayTasks items={todayTasks} delay={0.2} />
           </Box>
 
-          <Box key="upcoming-deadlines" sx={{ gridColumn: { xs: "1", sm: "span 2", lg: "span 1", xl: "span 2" } }}>
+          <Box key="upcoming-deadlines" sx={{ minWidth: 0 }}>
             <UpcomingDeadlines items={upcomingDeadlines} delay={0.15} />
           </Box>
 
-          <Box key="recent-projects" sx={{ gridColumn: { xs: "1", sm: "span 2", lg: "span 1", xl: "span 2" } }}>
+          <Box key="recent-projects" sx={{ minWidth: 0 }}>
             <RecentProjects projects={recentProjects} delay={0.25} />
           </Box>
+
+          <Box key="goals-progress" sx={{ minWidth: 0 }}>
+            <GoalsProgress goals={goals} delay={0.3} />
+          </Box>
+
+          <Box key="activity-feed" sx={{ minWidth: 0 }}>
+            <ActivityFeed items={activity} delay={0.35} />
+          </Box>
+
         </AnimatePresence>
       </Box>
     </Box>

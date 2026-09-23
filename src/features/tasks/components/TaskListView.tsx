@@ -23,24 +23,13 @@ import {
 import { alpha, useTheme } from "@mui/material/styles";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
-import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import { motion, AnimatePresence } from "framer-motion";
 import type { TaskRow } from "../services/tasksService";
 import type { ProjectStatusRow } from "@/features/projects/data/mockData";
-
-const PRIORITY_OPTIONS = [
-  { value: "high", label: "High", color: "#EF4444" },
-  { value: "medium", label: "Medium", color: "#F59E0B" },
-  { value: "low", label: "Low", color: "#64748B" },
-] as const;
-
-const PRIORITY_COLORS: Record<string, string> = {
-  high: "#EF4444",
-  medium: "#F59E0B",
-  low: "#64748B",
-};
+import PriorityBars, { getPriorityOption, PRIORITY_OPTIONS } from "./PriorityBars";
+import AppDatePicker from "@/components/inputs/AppDatePicker";
 
 interface TaskListViewProps {
   tasks: TaskRow[];
@@ -88,8 +77,8 @@ export default function TaskListView({
 
   const statusMap = new Map(statuses.map((s) => [s.id, s]));
 
-  const currentPriority = PRIORITY_OPTIONS.find((p) => p.value === newPriority) ?? PRIORITY_OPTIONS[1];
-  const editingPriorityOption = PRIORITY_OPTIONS.find((p) => p.value === editPriority) ?? PRIORITY_OPTIONS[1];
+  const currentPriority = getPriorityOption(newPriority);
+  const editingPriorityOption = getPriorityOption(editPriority);
 
   const handleAddClick = () => {
     setIsAdding(true);
@@ -181,7 +170,10 @@ export default function TaskListView({
   const rowHoverBg = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)";
   const borderColor = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
 
-  const sortedTasks = [...tasks].sort((a, b) => a.position - b.position);
+  const sortedTasks = [...tasks].sort((a, b) => {
+    const positionDifference = a.position - b.position;
+    return positionDifference !== 0 ? positionDifference : a.created_at.localeCompare(b.created_at);
+  });
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -284,7 +276,7 @@ export default function TaskListView({
                       "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
                     }}
                   >
-                    <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: currentPriority.color }} />
+                    <PriorityBars priority={newPriority} color={currentPriority.color} size={16} />
                     <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", textTransform: "capitalize" }}>
                       {currentPriority.label}
                     </Typography>
@@ -316,7 +308,7 @@ export default function TaskListView({
                         }}
                         sx={{ gap: 1.5, py: 1, px: 2, borderRadius: 1, mx: 0.5 }}
                       >
-                        <Box sx={{ width: 9, height: 9, borderRadius: "50%", bgcolor: option.color }} />
+                        <PriorityBars priority={option.value} color={option.color} size={17} />
                         <Typography sx={{ fontSize: 14, fontWeight: 600, textTransform: "capitalize" }}>
                           {option.label}
                         </Typography>
@@ -424,8 +416,7 @@ export default function TaskListView({
                 const statusRow = statusMap.get(task.status_id);
                 const statusName = statusRow?.name ?? "—";
                 const statusColor = statusRow?.color ?? "#6B7280";
-                const priorityColor = PRIORITY_COLORS[task.priority] ?? "#64748B";
-                const priorityLabel = PRIORITY_OPTIONS.find((p) => p.value === task.priority)?.label ?? "Medium";
+                const priorityOption = getPriorityOption(task.priority);
 
                 if (isEditing) {
                   return (
@@ -488,7 +479,7 @@ export default function TaskListView({
                             "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
                           }}
                         >
-                          <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: editingPriorityOption.color }} />
+                          <PriorityBars priority={editPriority} color={editingPriorityOption.color} size={16} />
                           <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", textTransform: "capitalize" }}>
                             {editingPriorityOption.label}
                           </Typography>
@@ -520,7 +511,7 @@ export default function TaskListView({
                               }}
                               sx={{ gap: 1.5, py: 1, px: 2, borderRadius: 1, mx: 0.5 }}
                             >
-                              <Box sx={{ width: 9, height: 9, borderRadius: "50%", bgcolor: option.color }} />
+                              <PriorityBars priority={option.value} color={option.color} size={17} />
                               <Typography sx={{ fontSize: 14, fontWeight: 600, textTransform: "capitalize" }}>
                                 {option.label}
                               </Typography>
@@ -529,42 +520,12 @@ export default function TaskListView({
                         </Menu>
                       </TableCell>
                       <TableCell sx={{ py: 1.5 }}>
-                        <Box
-                          sx={{
-                            position: "relative",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 0.5,
-                            px: 1,
-                            py: 0.5,
-                            borderRadius: "8px",
-                            bgcolor: isDark ? "rgba(0,0,0,0.2)" : "#F7F8FA",
-                            border: `1px solid ${cardBorder}`,
-                            cursor: "pointer",
-                            transition: "all 120ms ease",
-                            "&:hover": { bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
-                          }}
-                        >
-                          <CalendarTodayOutlinedIcon sx={{ fontSize: 16, color: editDueDate ? "text.primary" : "text.secondary" }} />
-                          <input
-                            type="date"
-                            value={editDueDate}
-                            onChange={(e) => setEditDueDate(e.target.value)}
-                            style={{
-                              position: "absolute",
-                              inset: 0,
-                              opacity: 0,
-                              cursor: "pointer",
-                              width: "100%",
-                              height: "100%",
-                            }}
-                          />
-                          {editDueDate && (
-                            <Typography sx={{ fontSize: 13, color: "text.primary", fontWeight: 500 }}>
-                              {formatDate(editDueDate)}
-                            </Typography>
-                          )}
-                        </Box>
+                        <AppDatePicker
+                          label="Due date"
+                          value={editDueDate}
+                          onChange={setEditDueDate}
+                          sx={{ minWidth: 150 }}
+                        />
                         </TableCell>
                         <TableCell sx={{ py: 1.5 }}>
                           <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
@@ -656,9 +617,9 @@ export default function TaskListView({
                     </TableCell>
                      <TableCell sx={{ py: 1.5 }}>
                        <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
-                         <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: priorityColor }} />
+                         <PriorityBars priority={task.priority} color={priorityOption.color} size={16} />
                          <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.secondary", textTransform: "capitalize" }}>
-                           {priorityLabel}
+                           {priorityOption.label}
                          </Typography>
                        </Box>
                      </TableCell>

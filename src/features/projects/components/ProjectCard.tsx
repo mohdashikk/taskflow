@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useTheme } from "@mui/material/styles";
+import { alpha, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
@@ -56,7 +56,7 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -2 }}
       transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] as const }}
     >
       <Box
@@ -70,11 +70,12 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
           }
         }}
         sx={{
-          bgcolor: isDark ? "#12101e" : "#FFFFFF",
-          borderRadius: "16px",
-          border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-          boxShadow: isDark ? "0 8px 24px rgba(0,0,0,.18)" : "0 8px 24px rgba(0,0,0,0.04)",
-          p: 3,
+          bgcolor: "background.paper",
+          borderRadius: "20px",
+          border: "2px solid transparent",
+          boxShadow: "0 5px 5px rgba(82,63,105,.05)",
+          p: { xs: "20px", sm: "30px" },
+          minHeight: 340,
           cursor: "pointer",
           display: "flex",
           flexDirection: "column",
@@ -83,8 +84,8 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
           position: "relative",
           overflow: "hidden",
           "&:hover": {
-            boxShadow: isDark ? "0 8px 24px rgba(0,0,0,.18)" : "0 12px 24px rgba(0,0,0,0.08)",
-            borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+            boxShadow: "0 7px 29px rgba(136,108,192,.20)",
+            borderColor: "primary.main",
           },
           "&:focus-visible": {
             outline: "2px solid",
@@ -102,7 +103,27 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
             gap: 1,
           }}
         >
-          <StatusBadge status={project.status} statuses={statusMap} />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+            <Box
+              aria-hidden="true"
+              sx={{
+                width: 42,
+                height: 42,
+                display: "grid",
+                placeItems: "center",
+                borderRadius: "13px",
+                fontSize: 21,
+                lineHeight: 1,
+                bgcolor: alpha(theme.palette.primary.main, isDark ? 0.2 : 0.1),
+                boxShadow: `inset 0 0 0 1px ${alpha(theme.palette.primary.main, isDark ? 0.3 : 0.12)}, 0 4px 10px ${alpha(theme.palette.primary.main, 0.1)}`,
+                transition: "transform 180ms ease, box-shadow 180ms ease",
+                ".MuiBox-root:hover &": { transform: "rotate(-4deg) scale(1.06)" },
+              }}
+            >
+              {project.icon}
+            </Box>
+            <StatusBadge status={project.status} statuses={statusMap} />
+          </Box>
           <IconButton
             size="small"
             onClick={handleMenu}
@@ -123,10 +144,10 @@ export default function ProjectCard({ project, onEdit, onDelete, statuses }: Pro
         <Typography
           component="h3"
           sx={{
-            fontSize: 17,
+            fontSize: 18,
             fontWeight: 600,
             lineHeight: 1.4,
-            letterSpacing: "-0.01em",
+            letterSpacing: "normal",
             color: theme.palette.text.primary,
           }}
         >

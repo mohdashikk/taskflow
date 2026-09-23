@@ -149,7 +149,7 @@ export default function LoginForm() {
             type="email"
             sx={{
               "& .MuiOutlinedInput-root": {
-                borderRadius: "14px",
+                borderRadius: "10px",
                 bgcolor: theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF",
                 "& fieldset": {
                   borderColor: colors.inputBorder,
@@ -211,7 +211,7 @@ export default function LoginForm() {
             }}
             sx={{
               "& .MuiOutlinedInput-root": {
-                borderRadius: "14px",
+                borderRadius: "10px",
                 bgcolor: theme.palette.mode === "dark" ? "#1A1728" : "#FFFFFF",
                 "& fieldset": {
                   borderColor: colors.inputBorder,
@@ -290,8 +290,8 @@ export default function LoginForm() {
               variant="contained"
               disabled={isSubmitting}
               sx={{
-                height: 52,
-                borderRadius: "14px",
+                height: 48,
+                borderRadius: "10px",
                 bgcolor: colors.accent,
                 boxShadow: colors.accentAlpha(0.25),
                 fontSize: 16,

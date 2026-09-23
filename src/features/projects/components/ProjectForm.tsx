@@ -1,19 +1,28 @@
 "use client";
 
-import { useState } from "react";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
+import { useEffect, useState } from "react";
+import Drawer from "@mui/material/Drawer";
+import Avatar from "@mui/material/Avatar";
+import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
-import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
+import MuiTypography from "@mui/material/Typography";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import { motion } from "framer-motion";
 import { useTheme, alpha } from "@mui/material/styles";
 import { STATUS_LABELS, type ProjectStatus } from "../data/mockData";
 import type { ProjectStatusRow } from "../data/mockData";
+import { fetchMilestones, replaceMilestones, type NewMilestone } from "../services/milestonesService";
+import ProjectIconPicker from "./ProjectIconPicker";
+import AppDatePicker from "@/components/inputs/AppDatePicker";
 
 interface ProjectFormProps {
   open: boolean;
@@ -23,20 +32,29 @@ interface ProjectFormProps {
     description: string;
     status: ProjectStatus;
     due_date: string | null;
+    start_date?: string | null;
+    icon?: string | null;
   };
   onSubmit: (values: {
     title: string;
     description: string;
     status: ProjectStatus;
     due_date: string | null;
+    start_date?: string | null;
+    icon: string;
   }) => void;
   onCancel: () => void;
   isPending?: boolean;
   error?: string | null;
   statuses?: ProjectStatusRow[];
+  ownerName?: string;
+  ownerEmail?: string;
+  projectId?: string;
+  userId?: string;
 }
 
 const FALLBACK_OPTIONS = Object.keys(STATUS_LABELS) as ProjectStatus[];
+const Typography = MuiTypography as any;
 
 export default function ProjectForm({
   open,
@@ -47,6 +65,10 @@ export default function ProjectForm({
   isPending,
   error,
   statuses,
+  ownerName = "You",
+  ownerEmail = "",
+  projectId,
+  userId,
 }: ProjectFormProps) {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
@@ -61,11 +83,33 @@ export default function ProjectForm({
   const [description, setDescription] = useState(initialValues?.description ?? "");
   const [status, setStatus] = useState<ProjectStatus>(initialValues?.status ?? defaultStatus);
   const [dueDate, setDueDate] = useState(initialValues?.due_date ? initialValues.due_date.slice(0, 10) : "");
+  const [startDate, setStartDate] = useState(initialValues?.start_date ? initialValues.start_date.slice(0, 10) : "");
+  const [icon, setIcon] = useState(initialValues?.icon ?? "📁");
+  const [milestones, setMilestones] = useState<NewMilestone[]>([]);
+  const [isMilestonesSaving, setIsMilestonesSaving] = useState(false);
+  const [milestoneError, setMilestoneError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    setTitle(initialValues?.title ?? "");
+    setDescription(initialValues?.description ?? "");
+    setStatus(initialValues?.status ?? defaultStatus);
+    setStartDate(initialValues?.start_date ? initialValues.start_date.slice(0, 10) : "");
+    setDueDate(initialValues?.due_date ? initialValues.due_date.slice(0, 10) : "");
+    setIcon(initialValues?.icon ?? "📁");
+  }, [open, initialValues?.title, initialValues?.description, initialValues?.status, initialValues?.start_date, initialValues?.due_date, initialValues?.icon, defaultStatus]);
+
+  useEffect(() => {
+    if (!open || mode !== "edit" || !projectId || !userId) return;
+    void fetchMilestones(projectId, userId)
+      .then(rows => setMilestones(rows.map(({ title, due_date, status }) => ({ title, due_date, status }))))
+      .catch((loadError: unknown) => setMilestoneError(loadError instanceof Error ? loadError.message : "Could not load milestones."));
+  }, [open, mode, projectId, userId]);
 
   const inputBg = isDark ? "#1A1728" : "#FFFFFF";
   const inputBorder = isDark ? "rgba(255,255,255,0.08)" : "#E6E8EB";
-  const inputHoverBorder = "#006F99";
-  const inputFocusShadow = isDark ? alpha("#006F99", 0.12) : "rgba(0, 111, 153, 0.08)";
+  const inputHoverBorder = theme.palette.primary.main;
+  const inputFocusShadow = alpha(theme.palette.primary.main, 0.1);
   const titleColor = isDark ? "#FFFFFF" : "#111827";
   const dialogBorder = isDark ? "rgba(255,255,255,0.08)" : "#E6E8EB";
   const dialogShadow = isDark ? "0 24px 64px rgba(0, 0, 0, 0.4)" : "0 24px 64px rgba(15, 23, 42, 0.1)";
@@ -76,7 +120,9 @@ export default function ProjectForm({
     setTitle(initialValues?.title ?? "");
     setDescription(initialValues?.description ?? "");
     setStatus(initialValues?.status ?? defaultStatus);
+    setStartDate(initialValues?.start_date ? initialValues.start_date.slice(0, 10) : "");
     setDueDate(initialValues?.due_date ? initialValues.due_date.slice(0, 10) : "");
+    setIcon(initialValues?.icon ?? "📁");
   };
 
   const handleCancel = () => {
@@ -92,28 +138,45 @@ export default function ProjectForm({
       description: description.trim(),
       status,
       due_date: dueDate ? new Date(dueDate).toISOString() : null,
+      start_date: startDate || null,
+      icon,
     });
   };
 
+  const saveMilestones = async () => {
+    if (!projectId || !userId) return;
+    setIsMilestonesSaving(true);
+    setMilestoneError(null);
+    try {
+      await replaceMilestones(projectId, userId, milestones);
+    } catch (saveError) {
+      setMilestoneError(saveError instanceof Error ? saveError.message : "Could not save milestones.");
+    } finally {
+      setIsMilestonesSaving(false);
+    }
+  };
+
   return (
-    <Dialog
+    <Drawer
       open={open}
-      onClose={onCancel}
-      fullWidth
-      maxWidth="sm"
+      onClose={handleCancel}
+      anchor="right"
       sx={{
-        "& .MuiDialog-paper": {
-          borderRadius: "24px",
-          border: `1px solid ${dialogBorder}`,
+        "& .MuiDrawer-paper": {
+          width: { xs: "100%", sm: 560, md: 620 },
+          maxWidth: "100vw",
+          borderLeft: `1px solid ${dialogBorder}`,
           boxShadow: dialogShadow,
+          bgcolor: "background.paper",
         },
       }}
     >
-      <DialogTitle sx={{ fontWeight: 700, fontSize: 22, color: titleColor, letterSpacing: "-0.01em" }}>
-        {mode === "edit" ? "Edit Project" : "Add Project"}
-      </DialogTitle>
-      <Box component="form" onSubmit={handleSubmit} key={open ? "form-open" : "form-closed"}>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+      <Box sx={{ display:"flex", alignItems:"center", gap:2, px:{xs:2.5,sm:4}, py:2.5, borderBottom:"1px solid", borderColor:"divider" }}>
+        <Box sx={{flex:1}}><Typography sx={{ fontWeight: 700, fontSize: 22, color: titleColor }}>Edit project</Typography><Typography color="text.secondary" fontSize={13} mt={0.25}>Update every part of this project in one place.</Typography></Box>
+        <IconButton onClick={handleCancel} aria-label="Close edit project" sx={{border:"1px solid",borderColor:"divider",borderRadius:"10px"}}><CloseRoundedIcon /></IconButton>
+      </Box>
+      <Box component="form" onSubmit={handleSubmit} sx={{display:"flex",flexDirection:"column",minHeight:0,flex:1}}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, px:{xs:2.5,sm:4}, py:3.5, overflowY:"auto", flex:1 }}>
           <TextField
             label="Project Title"
             value={title}
@@ -123,7 +186,7 @@ export default function ProjectForm({
             size="small"
             sx={{
               "& .MuiOutlinedInput-root": {
-                borderRadius: "14px",
+                borderRadius: "10px",
                 bgcolor: inputBg,
                 "& fieldset": { borderColor: inputBorder },
                 "&:hover fieldset": { borderColor: inputHoverBorder },
@@ -137,33 +200,12 @@ export default function ProjectForm({
                 },
               },
             }}
-          />
-          <TextField
-            label="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            fullWidth
-            size="small"
-            multiline
-            minRows={2}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "14px",
-                bgcolor: inputBg,
-                "& fieldset": { borderColor: inputBorder },
-                "&:hover fieldset": { borderColor: inputHoverBorder },
-                "&.Mui-focused fieldset": {
-                  borderColor: inputHoverBorder,
-                  boxShadow: `0 0 0 3px ${inputFocusShadow}`,
-                },
-                "& textarea:-webkit-autofill, & textarea:-webkit-autofill:hover, & textarea:-webkit-autofill:focus": {
-                  WebkitBoxShadow: `0 0 0px 1000px ${inputBg} inset`,
-                  transition: "background-color 5000s ease-in-out 0s",
-                },
-              },
-            }}
-          />
-          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+           />
+          <Box sx={{ maxWidth: { sm: 260 } }}>
+            <Typography fontWeight={650} fontSize={13} mb={0.75}>Project icon</Typography>
+            <ProjectIconPicker value={icon} onChange={setIcon} compact />
+          </Box>
+          <Box sx={{ maxWidth: { sm: 260 } }}>
             <TextField
               select
               label="Status"
@@ -173,7 +215,7 @@ export default function ProjectForm({
               sx={{
                 minWidth: 150,
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: "14px",
+                  borderRadius: "10px",
                   bgcolor: inputBg,
                   "& fieldset": { borderColor: inputBorder },
                   "&:hover fieldset": { borderColor: inputHoverBorder },
@@ -194,32 +236,40 @@ export default function ProjectForm({
                 </MenuItem>
               ))}
             </TextField>
-            <TextField
-              label="Due Date"
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              size="small"
-              slotProps={{ inputLabel: { shrink: true } }}
-              sx={{
-                flexGrow: 1,
-                minWidth: 160,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "14px",
-                  bgcolor: inputBg,
-                  "& fieldset": { borderColor: inputBorder },
-                  "&:hover fieldset": { borderColor: inputHoverBorder },
-                  "&.Mui-focused fieldset": {
-                    borderColor: inputHoverBorder,
-                    boxShadow: `0 0 0 3px ${inputFocusShadow}`,
-                  },
-                  "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
-                    WebkitBoxShadow: `0 0 0px 1000px ${inputBg} inset`,
-                    transition: "background-color 5000s ease-in-out 0s",
-                  },
-                },
-              }}
-            />
+          </Box>
+
+          <Box sx={{ display:"grid", gridTemplateColumns:{xs:"1fr",sm:"1fr 1fr"}, gap:2 }}>
+            <AppDatePicker label="Start date" value={startDate} onChange={setStartDate} fullWidth />
+            <AppDatePicker label="Deadline" value={dueDate} onChange={setDueDate} fullWidth />
+          </Box>
+
+          <Divider />
+          <Box>
+            <Box sx={{display:"flex",alignItems:"center",gap:1.25}}><Box sx={{width:32,height:32,borderRadius:"10px",display:"grid",placeItems:"center",bgcolor:"action.selected",color:"primary.main"}}><GroupOutlinedIcon fontSize="small" /></Box><Box><Typography fontWeight={700} fontSize={17}>Team access</Typography><Typography color="text.secondary" fontSize={12}>Project owner and access level</Typography></Box></Box>
+            <Box sx={{display:"flex",alignItems:"center",gap:1,p:1.25,mt:2,border:"1px solid",borderColor:"divider",borderRadius:"14px",bgcolor:"background.default"}}>
+              <Tooltip title={`${ownerName} · Project owner`} arrow>
+                <Avatar aria-label={`${ownerName}, project owner`} sx={{width:38,height:38,bgcolor:alpha(theme.palette.primary.main,0.12),color:"primary.main",fontSize:14,fontWeight:700,cursor:"default",transition:"transform 160ms ease","&:hover":{transform:"translateY(-2px)",boxShadow:`0 4px 10px ${alpha(theme.palette.primary.main,0.2)}`}}}>{(ownerName || ownerEmail || "Y").charAt(0).toUpperCase()}</Avatar>
+              </Tooltip>
+            </Box>
+          </Box>
+
+          <Divider />
+          <Box>
+            <Box sx={{display:"flex",alignItems:"center",gap:1.25}}><Box sx={{width:32,height:32,borderRadius:"10px",display:"grid",placeItems:"center",bgcolor:alpha(theme.palette.warning.main,0.1),color:"warning.main"}}><FlagOutlinedIcon fontSize="small" /></Box><Box><Typography fontWeight={700} fontSize={17}>Milestones</Typography><Typography color="text.secondary" fontSize={12}>Delivery stages and target dates</Typography></Box></Box>
+            {mode === "edit" && projectId && userId ? <Box sx={{mt:2,display:"grid",gap:1.5}}>
+              {milestones.map((milestone,index) => <Box key={index} sx={{p:1.5,border:"1px solid",borderColor:"divider",borderRadius:"12px",bgcolor:"background.default"}}>
+                <Box sx={{display:"grid",gridTemplateColumns:"minmax(0,1fr) 40px",gap:1,alignItems:"center"}}>
+                  <TextField fullWidth size="small" label={`Milestone ${index + 1}`} value={milestone.title} onChange={event => setMilestones(current => current.map((item,itemIndex) => itemIndex === index ? {...item,title:event.target.value} : item))} />
+                  <IconButton aria-label="Remove milestone" onClick={() => setMilestones(current => current.filter((_,itemIndex) => itemIndex !== index))} sx={{width:40,height:40,border:"1px solid",borderColor:"divider",borderRadius:"10px"}}><DeleteOutlineRoundedIcon fontSize="small" /></IconButton>
+                </Box>
+                <Box sx={{display:"grid",gridTemplateColumns:{xs:"1fr",sm:"1fr 1fr"},gap:1.25,mt:1.25}}>
+                  <AppDatePicker label="Due date" value={milestone.due_date ?? ""} onChange={due_date => setMilestones(current => current.map((item,itemIndex) => itemIndex === index ? {...item,due_date:due_date || null} : item))} fullWidth />
+                  <TextField fullWidth select size="small" label="Status" value={milestone.status} onChange={event => setMilestones(current => current.map((item,itemIndex) => itemIndex === index ? {...item,status:event.target.value as NewMilestone["status"]} : item))}><MenuItem value="upcoming">Upcoming</MenuItem><MenuItem value="in_progress">In progress</MenuItem><MenuItem value="completed">Completed</MenuItem></TextField>
+                </Box>
+              </Box>)}
+              <Box sx={{display:"flex",alignItems:"center",gap:1.5,pt:.5}}><Button size="small" startIcon={<AddRoundedIcon />} onClick={() => setMilestones(current => [...current,{title:"",due_date:null,status:"upcoming"}])}>Add milestone</Button><Button size="small" variant="outlined" onClick={() => void saveMilestones()} disabled={isMilestonesSaving}>{isMilestonesSaving ? "Saving..." : "Save milestones"}</Button></Box>
+              {milestoneError && <Typography color="error" fontSize={13}>{milestoneError}</Typography>}
+            </Box> : <Box sx={{mt:2,p:2.25,borderRadius:"14px",border:"1px solid",borderColor:"divider",bgcolor:"background.default"}}><Typography color="text.secondary" fontSize={13}>Save the project first to edit milestones.</Typography></Box>}
           </Box>
 
           {error && (
@@ -227,20 +277,20 @@ export default function ProjectForm({
               {error}
             </Typography>
           )}
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2.5, justifyContent: "flex-end", gap: 1 }}>
+        </Box>
+        <Box sx={{ px:{xs:2.5,sm:4}, py:2.5, display:"flex", justifyContent:"flex-end", gap:1.5, borderTop:"1px solid", borderColor:"divider", bgcolor:"background.paper" }}>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
             <Button
               variant="outlined"
               onClick={handleCancel}
               disabled={isPending}
               sx={{
-                borderRadius: "14px",
+                borderRadius: "10px",
                 textTransform: "none",
                 fontWeight: 600,
                 borderColor: cancelBorder,
                 color: cancelColor,
-                "&:hover": { borderColor: "#006F99", color: "#006F99" },
+                "&:hover": { borderColor: theme.palette.primary.main, color: theme.palette.primary.main },
               }}
             >
               Cancel
@@ -252,19 +302,19 @@ export default function ProjectForm({
               variant="contained"
               disabled={isPending || !title.trim()}
               sx={{
-                borderRadius: "14px",
+                borderRadius: "10px",
                 textTransform: "none",
                 fontWeight: 600,
-                bgcolor: "#006F99",
-                boxShadow: "0 4px 12px rgba(0, 111, 153, 0.2)",
-                "&:hover": { boxShadow: "none", bgcolor: "#005670" },
+                bgcolor: theme.palette.primary.main,
+                boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
+                "&:hover": { boxShadow: "none", bgcolor: theme.palette.primary.dark },
               }}
             >
               {isPending ? "Saving..." : "Save Project"}
             </Button>
           </motion.div>
-        </DialogActions>
+        </Box>
       </Box>
-    </Dialog>
+    </Drawer>
   );
 }

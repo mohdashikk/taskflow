@@ -10,8 +10,10 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
+import { alpha, useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import type { ProjectStatusRow } from "@/features/projects/data/mockData";
+import AppDatePicker from "@/components/inputs/AppDatePicker";
 
 interface TaskFormProps {
   open: boolean;
@@ -43,6 +45,7 @@ export default function TaskForm({
   isPending,
   error,
 }: TaskFormProps) {
+  const theme = useTheme();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("medium");
@@ -99,184 +102,211 @@ export default function TaskForm({
       <Box component="form" onSubmit={handleSubmit}>
         <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
           {statuses.length > 0 ? (
-            <TextField
-              select
-              label="Status"
-              value={statusId || defaultStatusId}
-              onChange={(e) => setStatusId(e.target.value)}
-              size="small"
-              sx={{
-                minWidth: 160,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "14px",
-                  bgcolor: "#F7F8FA",
-                  "& fieldset": {
-                    borderColor: "#E6E8EB",
+            <Box>
+              <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", mb: 0.5 }}>
+                Status
+              </Typography>
+              <TextField
+                select
+                value={statusId || defaultStatusId}
+                onChange={(e) => setStatusId(e.target.value)}
+                size="small"
+                sx={{
+                  minWidth: 160,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "3px",
+                    fontSize: "13px",
+                    bgcolor: "#F7F8FA",
+                    "& fieldset": {
+                      borderColor: "#E6E8EB",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#006F99",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#006F99",
+                      boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                    },
                   },
-                  "&:hover fieldset": {
-                    borderColor: "#006F99",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#006F99",
-                    boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
-                  },
-                },
-              }}
-            >
-              {statuses.map((status) => (
-                <MenuItem key={status.id} value={status.id}>
-                  <Box
-                    sx={{
-                      width: 12,
-                      height: 12,
-                      borderRadius: "50%",
-                      bgcolor: status.color,
-                      mr: 1.5,
-                      display: "inline-block",
-                      flexShrink: 0,
-                    }}
-                  />
-                  {status.name}
-                </MenuItem>
-              ))}
-            </TextField>
+                }}
+              >
+                {statuses.map((status) => (
+                  <MenuItem key={status.id} value={status.id}>
+                    <Box
+                      sx={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: "50%",
+                        bgcolor: status.color,
+                        mr: 1.5,
+                        display: "inline-block",
+                        flexShrink: 0,
+                      }}
+                    />
+                    {status.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Box>
           ) : (
             <Typography variant="body2" sx={{ color: "#F59E0B", fontWeight: 500, fontSize: 14 }}>
               No statuses configured for this project. Tasks will use the first available status.
             </Typography>
           )}
-          <TextField
-            label="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            fullWidth
-            size="small"
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "14px",
-                bgcolor: "#F7F8FA",
-                "& fieldset": {
-                  borderColor: "#E6E8EB",
+          <Box>
+            <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", mb: 0.5 }}>
+              Title
+            </Typography>
+            <TextField
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              fullWidth
+              size="small"
+              sx={{
+                height: "35px",
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "3px",
+                  fontSize: "13px",
+                  bgcolor: "#F7F8FA",
+                  "& fieldset": {
+                    borderColor: "#E6E8EB",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: theme.palette.primary.main,
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: theme.palette.primary.main,
+                    boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                  },
                 },
-                "&:hover fieldset": {
-                  borderColor: "#006F99",
+              }}
+            />
+          </Box>
+          <Box>
+            <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", mb: 0.5 }}>
+              Description
+            </Typography>
+            <TextField
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              fullWidth
+              size="small"
+              multiline
+              minRows={2}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "3px",
+                  fontSize: "13px",
+                  bgcolor: "#F7F8FA",
+                  "& fieldset": {
+                    borderColor: "#E6E8EB",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: theme.palette.primary.main,
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: theme.palette.primary.main,
+                    boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                  },
                 },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#006F99",
-                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+              }}
+            />
+          </Box>
+          <Box>
+            <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", mb: 0.5 }}>
+              Priority
+            </Typography>
+            <TextField
+              select
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+              size="small"
+              sx={{
+                minWidth: 140,
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "3px",
+                  fontSize: "13px",
+                  bgcolor: "#F7F8FA",
+                  "& fieldset": {
+                    borderColor: "#E6E8EB",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: theme.palette.primary.main,
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: theme.palette.primary.main,
+                    boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                  },
                 },
-              },
-            }}
-          />
-          <TextField
-            label="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            fullWidth
-            size="small"
-            multiline
-            minRows={2}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "14px",
-                bgcolor: "#F7F8FA",
-                "& fieldset": {
-                  borderColor: "#E6E8EB",
-                },
-                "&:hover fieldset": {
-                  borderColor: "#006F99",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#006F99",
-                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
-                },
-              },
-            }}
-          />
-          <TextField
-            select
-            label="Priority"
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-            size="small"
-            sx={{
-              minWidth: 140,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "14px",
-                bgcolor: "#F7F8FA",
-                "& fieldset": {
-                  borderColor: "#E6E8EB",
-                },
-                "&:hover fieldset": {
-                  borderColor: "#006F99",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#006F99",
-                  boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
-                },
-              },
-            }}
-          >
-            {PRIORITY_OPTIONS.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </TextField>
+              }}
+            >
+              {PRIORITY_OPTIONS.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Box>
           <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-            <TextField
-              label="Start Date"
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              size="small"
-              slotProps={{ inputLabel: { shrink: true } }}
-              sx={{
-                flexGrow: 1,
-                minWidth: 160,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "14px",
-                  bgcolor: "#F7F8FA",
-                  "& fieldset": {
-                    borderColor: "#E6E8EB",
+            <Box>
+              <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", mb: 0.5 }}>
+                Start Date
+              </Typography>
+              <AppDatePicker
+                value={startDate}
+                onChange={setStartDate}
+                sx={{
+                  height: "35px",
+                  flexGrow: 1,
+                  minWidth: 160,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "3px",
+                    fontSize: "13px",
+                    bgcolor: "#F7F8FA",
+                    "& fieldset": {
+                      borderColor: "#E6E8EB",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#006F99",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#006F99",
+                      boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                    },
                   },
-                  "&:hover fieldset": {
-                    borderColor: "#006F99",
+                }}
+              />
+            </Box>
+            <Box>
+              <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary", mb: 0.5 }}>
+                Due Date
+              </Typography>
+              <AppDatePicker
+                value={dueDate}
+                onChange={setDueDate}
+                sx={{
+                  height: "35px",
+                  flexGrow: 1,
+                  minWidth: 160,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "3px",
+                    fontSize: "13px",
+                    bgcolor: "#F7F8FA",
+                    "& fieldset": {
+                      borderColor: "#E6E8EB",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#006F99",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#006F99",
+                      boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
+                    },
                   },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#006F99",
-                    boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
-                  },
-                },
-              }}
-            />
-            <TextField
-              label="Due Date"
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              size="small"
-              slotProps={{ inputLabel: { shrink: true } }}
-              sx={{
-                flexGrow: 1,
-                minWidth: 160,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "14px",
-                  bgcolor: "#F7F8FA",
-                  "& fieldset": {
-                    borderColor: "#E6E8EB",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#006F99",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#006F99",
-                    boxShadow: "0 0 0 3px rgba(0, 111, 153, 0.08)",
-                  },
-                },
-              }}
-            />
+                }}
+              />
+            </Box>
           </Box>
 
           {error && (
@@ -292,14 +322,14 @@ export default function TaskForm({
               onClick={handleCancel}
               disabled={isPending}
               sx={{
-                borderRadius: "14px",
+                borderRadius: "10px",
                 textTransform: "none",
                 fontWeight: 600,
                 borderColor: "#E6E8EB",
                 color: "#6B7280",
                 "&:hover": {
-                  borderColor: "#006F99",
-                  color: "#006F99",
+                  borderColor: theme.palette.primary.main,
+                  color: theme.palette.primary.main,
                   bgcolor: "transparent",
                 },
               }}
@@ -313,12 +343,12 @@ export default function TaskForm({
               variant="contained"
               disabled={isPending || !title.trim()}
               sx={{
-                borderRadius: "14px",
+                borderRadius: "10px",
                 textTransform: "none",
                 fontWeight: 600,
-                bgcolor: "#006F99",
-                boxShadow: "0 4px 12px rgba(0, 111, 153, 0.2)",
-                "&:hover": { boxShadow: "none", bgcolor: "#005670" },
+                bgcolor: theme.palette.primary.main,
+                boxShadow: `0 8px 18px ${alpha(theme.palette.primary.main, 0.18)}`,
+                "&:hover": { boxShadow: "none", bgcolor: theme.palette.primary.dark },
               }}
             >
               {isPending ? "Saving..." : "Save Task"}
